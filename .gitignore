@@ -200,6 +200,9 @@ cython_debug/
 #  you could uncomment the following to ignore the entire vscode folder
 # .vscode/
 
+# Rust build artifacts
+tools/schema_exporter/target/
+
 # Ruff stuff:
 .ruff_cache/
 

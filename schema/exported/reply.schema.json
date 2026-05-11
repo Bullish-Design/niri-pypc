@@ -1,0 +1,859 @@
+{
+  "$defs": {
+    "KeyboardLayouts": {
+      "description": "Configured keyboard layouts.",
+      "properties": {
+        "current_idx": {
+          "description": "Index of the currently active layout in `names`.",
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "names": {
+          "description": "XKB names of the configured layouts.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "names",
+        "current_idx"
+      ],
+      "type": "object"
+    },
+    "Layer": {
+      "description": "A layer-shell layer.",
+      "oneOf": [
+        {
+          "const": "Background",
+          "description": "The background layer.",
+          "type": "string"
+        },
+        {
+          "const": "Bottom",
+          "description": "The bottom layer.",
+          "type": "string"
+        },
+        {
+          "const": "Top",
+          "description": "The top layer.",
+          "type": "string"
+        },
+        {
+          "const": "Overlay",
+          "description": "The overlay layer.",
+          "type": "string"
+        }
+      ]
+    },
+    "LayerSurface": {
+      "description": "A layer-shell surface.",
+      "properties": {
+        "keyboard_interactivity": {
+          "$ref": "#/$defs/LayerSurfaceKeyboardInteractivity",
+          "description": "The surface's keyboard interactivity mode."
+        },
+        "layer": {
+          "$ref": "#/$defs/Layer",
+          "description": "Layer that the surface is on."
+        },
+        "namespace": {
+          "description": "Namespace provided by the layer-shell client.",
+          "type": "string"
+        },
+        "output": {
+          "description": "Name of the output the surface is on.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "namespace",
+        "output",
+        "layer",
+        "keyboard_interactivity"
+      ],
+      "type": "object"
+    },
+    "LayerSurfaceKeyboardInteractivity": {
+      "description": "Keyboard interactivity modes for a layer-shell surface.",
+      "oneOf": [
+        {
+          "const": "None",
+          "description": "Surface cannot receive keyboard focus.",
+          "type": "string"
+        },
+        {
+          "const": "Exclusive",
+          "description": "Surface receives keyboard focus whenever possible.",
+          "type": "string"
+        },
+        {
+          "const": "OnDemand",
+          "description": "Surface receives keyboard focus on demand, e.g. when clicked.",
+          "type": "string"
+        }
+      ]
+    },
+    "LogicalOutput": {
+      "description": "Logical output in the compositor's coordinate space.",
+      "properties": {
+        "height": {
+          "description": "Height in logical pixels.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "scale": {
+          "description": "Scale factor.",
+          "format": "double",
+          "type": "number"
+        },
+        "transform": {
+          "$ref": "#/$defs/Transform",
+          "description": "Transform."
+        },
+        "width": {
+          "description": "Width in logical pixels.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "x": {
+          "description": "Logical X position.",
+          "format": "int32",
+          "type": "integer"
+        },
+        "y": {
+          "description": "Logical Y position.",
+          "format": "int32",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "width",
+        "height",
+        "scale",
+        "transform"
+      ],
+      "type": "object"
+    },
+    "Mode": {
+      "description": "Output mode.",
+      "properties": {
+        "height": {
+          "description": "Height in physical pixels.",
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "is_preferred": {
+          "description": "Whether this mode is preferred by the monitor.",
+          "type": "boolean"
+        },
+        "refresh_rate": {
+          "description": "Refresh rate in millihertz.",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "width": {
+          "description": "Width in physical pixels.",
+          "format": "uint16",
+          "maximum": 65535,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "width",
+        "height",
+        "refresh_rate",
+        "is_preferred"
+      ],
+      "type": "object"
+    },
+    "Output": {
+      "description": "Connected output.",
+      "properties": {
+        "current_mode": {
+          "description": "Index of the current mode in [`Self::modes`].\n\n`None` if the output is disabled.",
+          "format": "uint",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "is_custom_mode": {
+          "description": "Whether the current_mode is a custom mode.",
+          "type": "boolean"
+        },
+        "logical": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LogicalOutput"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Logical output information.\n\n`None` if the output is not mapped to any logical output (for example, if it is disabled)."
+        },
+        "make": {
+          "description": "Textual description of the manufacturer.",
+          "type": "string"
+        },
+        "model": {
+          "description": "Textual description of the model.",
+          "type": "string"
+        },
+        "modes": {
+          "description": "Available modes for the output.",
+          "items": {
+            "$ref": "#/$defs/Mode"
+          },
+          "type": "array"
+        },
+        "name": {
+          "description": "Name of the output.",
+          "type": "string"
+        },
+        "physical_size": {
+          "description": "Physical width and height of the output in millimeters, if known.",
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          ],
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "serial": {
+          "description": "Serial of the output, if known.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "vrr_enabled": {
+          "description": "Whether variable refresh rate is enabled on the output.",
+          "type": "boolean"
+        },
+        "vrr_supported": {
+          "description": "Whether the output supports variable refresh rate.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "make",
+        "model",
+        "modes",
+        "is_custom_mode",
+        "vrr_supported",
+        "vrr_enabled"
+      ],
+      "type": "object"
+    },
+    "OutputConfigChanged": {
+      "description": "Output configuration change result.",
+      "oneOf": [
+        {
+          "const": "Applied",
+          "description": "The target output was connected and the change was applied.",
+          "type": "string"
+        },
+        {
+          "const": "OutputWasMissing",
+          "description": "The target output was not found, the change will be applied when it is connected.",
+          "type": "string"
+        }
+      ]
+    },
+    "Overview": {
+      "description": "Overview information.",
+      "properties": {
+        "is_open": {
+          "description": "Whether the overview is currently open.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "is_open"
+      ],
+      "type": "object"
+    },
+    "PickedColor": {
+      "description": "Color picked from the screen.",
+      "properties": {
+        "rgb": {
+          "description": "Color values as red, green, blue, each ranging from 0.0 to 1.0.",
+          "items": {
+            "format": "double",
+            "type": "number"
+          },
+          "maxItems": 3,
+          "minItems": 3,
+          "type": "array"
+        }
+      },
+      "required": [
+        "rgb"
+      ],
+      "type": "object"
+    },
+    "Response": {
+      "description": "Successful response from niri to client.",
+      "oneOf": [
+        {
+          "const": "Handled",
+          "description": "A request that does not need a response was handled successfully.",
+          "type": "string"
+        },
+        {
+          "additionalProperties": false,
+          "description": "The version string for the running niri instance.",
+          "properties": {
+            "Version": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "Version"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Information about connected outputs.\n\nMap from output name to output info.",
+          "properties": {
+            "Outputs": {
+              "additionalProperties": {
+                "$ref": "#/$defs/Output"
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "Outputs"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Information about workspaces.",
+          "properties": {
+            "Workspaces": {
+              "items": {
+                "$ref": "#/$defs/Workspace"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "Workspaces"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Information about open windows.",
+          "properties": {
+            "Windows": {
+              "items": {
+                "$ref": "#/$defs/Window"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "Windows"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Information about layer-shell surfaces.",
+          "properties": {
+            "Layers": {
+              "items": {
+                "$ref": "#/$defs/LayerSurface"
+              },
+              "type": "array"
+            }
+          },
+          "required": [
+            "Layers"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Information about the keyboard layout.",
+          "properties": {
+            "KeyboardLayouts": {
+              "$ref": "#/$defs/KeyboardLayouts"
+            }
+          },
+          "required": [
+            "KeyboardLayouts"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Information about the focused output.",
+          "properties": {
+            "FocusedOutput": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Output"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "FocusedOutput"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Information about the focused window.",
+          "properties": {
+            "FocusedWindow": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Window"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "FocusedWindow"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Information about the picked window.",
+          "properties": {
+            "PickedWindow": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Window"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "PickedWindow"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Information about the picked color.",
+          "properties": {
+            "PickedColor": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/PickedColor"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "PickedColor"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Output configuration change result.",
+          "properties": {
+            "OutputConfigChanged": {
+              "$ref": "#/$defs/OutputConfigChanged"
+            }
+          },
+          "required": [
+            "OutputConfigChanged"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Information about the overview.",
+          "properties": {
+            "OverviewState": {
+              "$ref": "#/$defs/Overview"
+            }
+          },
+          "required": [
+            "OverviewState"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "Timestamp": {
+      "description": "A moment in time.",
+      "properties": {
+        "nanos": {
+          "description": "Fractional part of the timestamp in nanoseconds (10<sup>-9</sup> seconds).",
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "secs": {
+          "description": "Number of whole seconds.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "secs",
+        "nanos"
+      ],
+      "type": "object"
+    },
+    "Transform": {
+      "description": "Output transform, which goes counter-clockwise.",
+      "oneOf": [
+        {
+          "const": "Normal",
+          "description": "Untransformed.",
+          "type": "string"
+        },
+        {
+          "const": "90",
+          "description": "Rotated by 90°.",
+          "type": "string"
+        },
+        {
+          "const": "180",
+          "description": "Rotated by 180°.",
+          "type": "string"
+        },
+        {
+          "const": "270",
+          "description": "Rotated by 270°.",
+          "type": "string"
+        },
+        {
+          "const": "Flipped",
+          "description": "Flipped horizontally.",
+          "type": "string"
+        },
+        {
+          "const": "Flipped90",
+          "description": "Rotated by 90° and flipped horizontally.",
+          "type": "string"
+        },
+        {
+          "const": "Flipped180",
+          "description": "Flipped vertically.",
+          "type": "string"
+        },
+        {
+          "const": "Flipped270",
+          "description": "Rotated by 270° and flipped horizontally.",
+          "type": "string"
+        }
+      ]
+    },
+    "Window": {
+      "description": "Toplevel window.",
+      "properties": {
+        "app_id": {
+          "description": "Application ID, if set.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "focus_timestamp": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Timestamp when the window was most recently focused.\n\nThis timestamp is intended for most-recently-used window switchers, i.e. Alt-Tab. It only\nupdates after some debounce time so that quick window switching doesn't mark intermediate\nwindows as recently focused.\n\nThe timestamp comes from the monotonic clock."
+        },
+        "id": {
+          "description": "Unique id of this window.\n\nThis id remains constant while this window is open.\n\nDo not assume that window ids will always increase without wrapping, or start at 1. That is\nan implementation detail subject to change. For example, ids may change to be randomly\ngenerated for each new window.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "is_floating": {
+          "description": "Whether this window is currently floating.\n\nIf the window isn't floating then it is in the tiling layout.",
+          "type": "boolean"
+        },
+        "is_focused": {
+          "description": "Whether this window is currently focused.\n\nThere can be either one focused window or zero (e.g. when a layer-shell surface has focus).",
+          "type": "boolean"
+        },
+        "is_urgent": {
+          "description": "Whether this window requests your attention.",
+          "type": "boolean"
+        },
+        "layout": {
+          "$ref": "#/$defs/WindowLayout",
+          "description": "Position- and size-related properties of the window."
+        },
+        "pid": {
+          "description": "Process ID that created the Wayland connection for this window, if known.\n\nCurrently, windows created by xdg-desktop-portal-gnome will have a `None` PID, but this may\nchange in the future.",
+          "format": "int32",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "title": {
+          "description": "Title, if set.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "workspace_id": {
+          "description": "Id of the workspace this window is on, if any.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "is_focused",
+        "is_floating",
+        "is_urgent",
+        "layout"
+      ],
+      "type": "object"
+    },
+    "WindowLayout": {
+      "description": "Position- and size-related properties of a [`Window`].\n\nOptional properties will be unset for some windows, do not rely on them being present. Whether\nsome optional properties are present or absent for certain window types may change across niri\nreleases.\n\nAll sizes and positions are in *logical pixels* unless stated otherwise. Logical sizes may be\nfractional. For example, at 1.25 monitor scale, a 2-physical-pixel-wide window border is 1.6\nlogical pixels wide.\n\nThis struct contains positions and sizes both for full tiles ([`Self::tile_size`],\n[`Self::tile_pos_in_workspace_view`]) and the window geometry ([`Self::window_size`],\n[`Self::window_offset_in_tile`]). For visual displays, use the tile properties, as they\ncorrespond to what the user visually considers \"window\". The window properties on the other\nhand are mainly useful when you need to know the underlying Wayland window sizes, e.g. for\napplication debugging.",
+      "properties": {
+        "pos_in_scrolling_layout": {
+          "description": "Location of a tiled window within a workspace: (column index, tile index in column).\n\nThe indices are 1-based, i.e. the leftmost column is at index 1 and the topmost tile in a\ncolumn is at index 1. This is consistent with [`Action::FocusColumn`] and\n[`Action::FocusWindowInColumn`].",
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "format": "uint",
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "format": "uint",
+              "minimum": 0,
+              "type": "integer"
+            }
+          ],
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "tile_pos_in_workspace_view": {
+          "description": "Tile position within the current view of the workspace.\n\nThis is the same \"workspace view\" as in gradients' `relative-to` in the niri config.",
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "format": "double",
+              "type": "number"
+            },
+            {
+              "format": "double",
+              "type": "number"
+            }
+          ],
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "tile_size": {
+          "description": "Size of the tile this window is in, including decorations like borders.",
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "format": "double",
+              "type": "number"
+            },
+            {
+              "format": "double",
+              "type": "number"
+            }
+          ],
+          "type": "array"
+        },
+        "window_offset_in_tile": {
+          "description": "Location of the window's visual geometry within its tile.\n\nThis includes things like border sizes. For fullscreened fixed-size windows this includes\nthe distance from the corner of the black backdrop to the corner of the (centered) window\ncontents.",
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "format": "double",
+              "type": "number"
+            },
+            {
+              "format": "double",
+              "type": "number"
+            }
+          ],
+          "type": "array"
+        },
+        "window_size": {
+          "description": "Size of the window's visual geometry itself.\n\nDoes not include niri decorations like borders.\n\nCurrently, Wayland toplevel windows can only be integer-sized in logical pixels, even\nthough it doesn't necessarily align to physical pixels.",
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "format": "int32",
+              "type": "integer"
+            },
+            {
+              "format": "int32",
+              "type": "integer"
+            }
+          ],
+          "type": "array"
+        }
+      },
+      "required": [
+        "tile_size",
+        "window_size",
+        "window_offset_in_tile"
+      ],
+      "type": "object"
+    },
+    "Workspace": {
+      "description": "A workspace.",
+      "properties": {
+        "active_window_id": {
+          "description": "Id of the active window on this workspace, if any.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "id": {
+          "description": "Unique id of this workspace.\n\nThis id remains constant regardless of the workspace moving around and across monitors.\n\nDo not assume that workspace ids will always increase without wrapping, or start at 1. That\nis an implementation detail subject to change. For example, ids may change to be randomly\ngenerated for each new workspace.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "idx": {
+          "description": "Index of the workspace on its monitor.\n\nThis is the same index you can use for requests like `niri msg action focus-workspace`.\n\nThis index *will change* as you move and re-order workspace. It is merely the workspace's\ncurrent position on its monitor. Workspaces on different monitors can have the same index.\n\nIf you need a unique workspace id that doesn't change, see [`Self::id`].",
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "is_active": {
+          "description": "Whether the workspace is currently active on its output.\n\nEvery output has one active workspace, the one that is currently visible on that output.",
+          "type": "boolean"
+        },
+        "is_focused": {
+          "description": "Whether the workspace is currently focused.\n\nThere's only one focused workspace across all outputs.",
+          "type": "boolean"
+        },
+        "is_urgent": {
+          "description": "Whether the workspace currently has an urgent window in its output.",
+          "type": "boolean"
+        },
+        "name": {
+          "description": "Optional name of the workspace.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "output": {
+          "description": "Name of the output that the workspace is on.\n\nCan be `None` if no outputs are currently connected.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "idx",
+        "is_urgent",
+        "is_active",
+        "is_focused"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {
+      "properties": {
+        "Ok": {
+          "$ref": "#/$defs/Response"
+        }
+      },
+      "required": [
+        "Ok"
+      ],
+      "type": "object"
+    },
+    {
+      "properties": {
+        "Err": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Err"
+      ],
+      "type": "object"
+    }
+  ],
+  "title": "Result_of_Response_or_string"
+}
