@@ -121,4 +121,4 @@ class TestNiriClient:
             result = await client.request(VersionRequest())
             assert result.variant.payload == "0.1.0"
         # After context manager exit, client should be closed
-        assert client._lifecycle.is_terminal
+        assert client.is_closed

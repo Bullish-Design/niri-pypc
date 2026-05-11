@@ -158,3 +158,38 @@ class TestNiriEventStream:
         assert e2.id == 3
 
         await stream.close()
+
+
+class TestEventStreamEdgeCases:
+    async def test_close_with_full_queue_does_not_raise(self, event_server):
+        """close() must not raise QueueFull."""
+        socket_path, ctrl = event_server
+        ctrl["events"] = [{"WorkspaceActivated": {"id": i, "focused": i % 2 == 0}} for i in range(1, 50)]
+        config = NiriConfig(
+            socket_path=socket_path,
+            event_queue_capacity=1,
+        )
+        stream = await NiriEventStream.connect(config)
+        await asyncio.sleep(0.1)
+        await stream.close()
+
+    async def test_async_for_stops_on_close(self, event_server):
+        """async for should end cleanly when stream is closed."""
+        socket_path, ctrl = event_server
+        ctrl["events"] = [
+            {"WorkspaceActivated": {"id": i, "focused": i % 2 == 0}}
+            for i in range(1, 50)
+        ]
+
+        config = NiriConfig(socket_path=socket_path)
+        stream = await NiriEventStream.connect(config)
+        events = []
+
+        async def collect():
+            async for event in stream:
+                events.append(event)
+
+        task = asyncio.create_task(collect())
+        await asyncio.sleep(0.02)
+        await stream.close()
+        await task

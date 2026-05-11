@@ -7,35 +7,22 @@ from typing import Any
 from niri_pypc.api.client import NiriClient
 from niri_pypc.api.event_stream import NiriEventStream
 from niri_pypc.config import NiriConfig
-from niri_pypc.runtime.lifecycle import LifecycleManager, LifecycleState
 
 
 class NiriConnectionBundle:
-    """Convenience wrapper holding both a command client and event stream.
-
-    Lifetime semantics:
-    - Closing the bundle closes both members.
-    - Members have independent error isolation: one failing does not
-      force-close the other.
-    - Access members via .client and .events properties.
-    """
+    """Convenience wrapper holding both a command client and event stream."""
 
     def __init__(self, client: NiriClient, events: NiriEventStream) -> None:
         self._client = client
         self._events = events
-        self._lifecycle = LifecycleManager()
-        self._lifecycle._state = LifecycleState.READY  # skip to ready
+        self._closed = False
 
     @classmethod
     async def open(
         cls,
         config: NiriConfig | None = None,
     ) -> NiriConnectionBundle:
-        """Open both command and event connections.
-
-        If event stream connection fails after client succeeds,
-        the client is closed before raising.
-        """
+        """Open both command and event connections."""
         if config is None:
             config = NiriConfig()
 
@@ -57,29 +44,24 @@ class NiriConnectionBundle:
         return self._events
 
     async def close(self) -> None:
-        """Close both connections. Idempotent.
-
-        Closes both members, suppressing secondary close errors.
-        """
-        if self._lifecycle.is_terminal:
+        """Close both connections. Idempotent."""
+        if self._closed:
             return
-        await self._lifecycle.transition_to(LifecycleState.CLOSING)
+        self._closed = True
 
-        exc_caught = None
+        first_exc = None
         try:
             await self._client.close()
         except Exception as exc:
-            exc_caught = exc
+            first_exc = exc
         try:
             await self._events.close()
         except Exception as exc:
-            if exc_caught is None:
-                exc_caught = exc
+            if first_exc is None:
+                first_exc = exc
 
-        await self._lifecycle.transition_to(LifecycleState.CLOSED)
-
-        if exc_caught is not None:
-            raise exc_caught  # noqa: TRY201
+        if first_exc is not None:
+            raise first_exc
 
     async def __aenter__(self) -> NiriConnectionBundle:
         return self

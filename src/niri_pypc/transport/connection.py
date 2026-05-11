@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
+from typing import Any
 
 from niri_pypc.errors import NiriTimeoutError, ProtocolError, TransportError
 
@@ -32,12 +33,7 @@ class UnixConnection:
         *,
         timeout: float = 5.0,
     ) -> UnixConnection:
-        """Open a Unix domain socket connection.
-
-        Raises:
-            TransportError: If the socket cannot be reached.
-            NiriTimeoutError: If connection exceeds timeout.
-        """
+        """Open a Unix domain socket connection."""
         try:
             reader, writer = await asyncio.wait_for(
                 asyncio.open_unix_connection(str(socket_path)),
@@ -49,6 +45,7 @@ class UnixConnection:
                 operation="connect",
                 socket_path=str(socket_path),
                 retryable=True,
+                cause=exc,
             ) from exc
         except OSError as exc:
             raise TransportError(
@@ -56,16 +53,13 @@ class UnixConnection:
                 operation="connect",
                 socket_path=str(socket_path),
                 retryable=True,
+                cause=exc,
             ) from exc
 
         return cls(reader, writer, socket_path)
 
     async def write_frame(self, data: bytes) -> None:
-        """Write bytes to the socket.
-
-        Raises:
-            TransportError: On write failure.
-        """
+        """Write bytes to the socket."""
         if self._closed:
             raise TransportError(
                 "Cannot write to closed connection",
@@ -82,6 +76,7 @@ class UnixConnection:
                 operation="write_frame",
                 socket_path=str(self._socket_path),
                 retryable=True,
+                cause=exc,
             ) from exc
 
     async def read_frame(
@@ -90,21 +85,7 @@ class UnixConnection:
         max_size: int = 4 * 1024 * 1024,
         timeout: float | None = None,
     ) -> bytes:
-        """Read a newline-terminated frame.
-
-        Args:
-            max_size: Maximum frame size in bytes. Frames exceeding this
-                       raise ProtocolError.
-            timeout: Read timeout in seconds. None = no timeout.
-
-        Returns:
-            Raw frame bytes (without trailing newline).
-
-        Raises:
-            TransportError: On read failure or unexpected EOF.
-            NiriTimeoutError: On timeout.
-            ProtocolError: If frame exceeds max_size.
-        """
+        """Read a newline-terminated frame."""
         if self._closed:
             raise TransportError(
                 "Cannot read from closed connection",
@@ -122,6 +103,7 @@ class UnixConnection:
                 operation="read_frame",
                 socket_path=str(self._socket_path),
                 retryable=True,
+                cause=exc,
             ) from exc
         except asyncio.IncompleteReadError as exc:
             self._closed = True
@@ -130,11 +112,13 @@ class UnixConnection:
                     f"Unexpected EOF after {len(exc.partial)} bytes",
                     operation="read_frame",
                     socket_path=str(self._socket_path),
+                    cause=exc,
                 ) from exc
             raise TransportError(
                 "Connection closed by remote",
                 operation="read_frame",
                 socket_path=str(self._socket_path),
+                cause=exc,
             ) from exc
         except OSError as exc:
             self._closed = True
@@ -143,9 +127,9 @@ class UnixConnection:
                 operation="read_frame",
                 socket_path=str(self._socket_path),
                 retryable=True,
+                cause=exc,
             ) from exc
 
-        # Strip trailing newline
         frame = raw[:-1]
 
         if len(frame) > max_size:
@@ -157,16 +141,20 @@ class UnixConnection:
 
         return frame
 
+    async def __aenter__(self) -> UnixConnection:
+        return self
+
+    async def __aexit__(self, *exc: Any) -> None:
+        await self.close()
+
     async def close(self) -> None:
         """Close the connection. Idempotent."""
         if self._closed:
             return
         self._closed = True
         try:
-            if hasattr(self._writer, "close"):
-                self._writer.close()
-                if hasattr(self._writer, "wait_closed"):
-                    await self._writer.wait_closed()
+            self._writer.close()
+            await self._writer.wait_closed()
         except OSError:
             pass
 
