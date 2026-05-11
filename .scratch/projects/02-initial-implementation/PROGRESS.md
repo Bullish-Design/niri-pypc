@@ -10,7 +10,7 @@
 - [x] Step 7: Type Codec Layer
 - [x] Step 8: Error Taxonomy
 - [x] Step 9: Configuration Layer
-- [ ] Step 10: Framing Module
+- [x] Step 10: Framing Module
 - [ ] Step 11: Unix Connection Transport
 - [ ] Step 12: Lifecycle Runtime State Machine
 - [ ] Step 13: Command Client API (`NiriClient`)
