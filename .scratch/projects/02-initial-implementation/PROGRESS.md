@@ -15,7 +15,7 @@
 - [x] Step 12: Lifecycle Runtime State Machine
 - [x] Step 13: Command Client API (`NiriClient`)
 - [x] Step 14: Event Stream API (`NiriEventStream`)
-- [ ] Step 15: Bundle API (`NiriConnectionBundle`)
+- [x] Step 15: Bundle API (`NiriConnectionBundle`)
 - [ ] Step 16: Public API Exports and Package Surface
 - [ ] Step 17: Test Fixtures and Mock Server Infrastructure
 - [ ] Step 18: Type Tests
