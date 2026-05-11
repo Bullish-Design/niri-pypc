@@ -1,0 +1,27 @@
+# PROGRESS
+
+- [ ] Step 0: Bootstrap and Repository Orientation
+- [ ] Step 1: Package Skeleton and Tooling Baseline
+- [ ] Step 2: Upstream Pin Manifest and Schema Directories
+- [ ] Step 3: Rust Schema Exporter
+- [ ] Step 4: IR Normalization Tool
+- [ ] Step 5: Type Generator
+- [ ] Step 6: Generated Verification Tool
+- [ ] Step 7: Type Codec Layer
+- [ ] Step 8: Error Taxonomy
+- [ ] Step 9: Configuration Layer
+- [ ] Step 10: Framing Module
+- [ ] Step 11: Unix Connection Transport
+- [ ] Step 12: Lifecycle Runtime State Machine
+- [ ] Step 13: Command Client API (`NiriClient`)
+- [ ] Step 14: Event Stream API (`NiriEventStream`)
+- [ ] Step 15: Bundle API (`NiriConnectionBundle`)
+- [ ] Step 16: Public API Exports and Package Surface
+- [ ] Step 17: Test Fixtures and Mock Server Infrastructure
+- [ ] Step 18: Type Tests
+- [ ] Step 19: Transport and Runtime Tests
+- [ ] Step 20: API and Integration Tests
+- [ ] Step 21: Live Tests (Optional/Gated)
+- [ ] Step 22: Devenv Scripts and CI Gates
+- [ ] Step 23: Documentation and Release Readiness
+- [ ] Step 24: Final End-to-End Verification Checklist
