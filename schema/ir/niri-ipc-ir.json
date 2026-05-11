@@ -927,7 +927,7 @@
           "fields": [
             {
               "name": "command",
-              "type": "array<ref:Unknown>",
+              "type": "array<string>",
               "required": true
             }
           ]
@@ -1215,7 +1215,7 @@
           "fields": [
             {
               "name": "changes",
-              "type": "array<ref:Unknown>",
+              "type": "array<tuple<integer,ref:WindowLayout>>",
               "required": true
             }
           ]
@@ -1253,7 +1253,7 @@
           "fields": [
             {
               "name": "windows",
-              "type": "array<ref:Unknown>",
+              "type": "array<ref:Window>",
               "required": true
             }
           ]
@@ -1312,7 +1312,7 @@
           "fields": [
             {
               "name": "workspaces",
-              "type": "array<ref:Unknown>",
+              "type": "array<ref:Workspace>",
               "required": true
             }
           ]
@@ -1731,13 +1731,13 @@
       "variants": [
         {
           "name": "FocusedOutput",
-          "kind": "struct",
-          "fields": []
+          "kind": "newtype",
+          "inner_type": "option<ref:Output>"
         },
         {
           "name": "FocusedWindow",
-          "kind": "struct",
-          "fields": []
+          "kind": "newtype",
+          "inner_type": "option<ref:Window>"
         },
         {
           "name": "Handled",
@@ -1751,7 +1751,7 @@
         {
           "name": "Layers",
           "kind": "newtype",
-          "inner_type": "array<ref:Unknown>"
+          "inner_type": "array<ref:LayerSurface>"
         },
         {
           "name": "OutputConfigChanged",
@@ -1760,8 +1760,8 @@
         },
         {
           "name": "Outputs",
-          "kind": "struct",
-          "fields": []
+          "kind": "newtype",
+          "inner_type": "map<string,ref:Output>"
         },
         {
           "name": "OverviewState",
@@ -1770,13 +1770,13 @@
         },
         {
           "name": "PickedColor",
-          "kind": "struct",
-          "fields": []
+          "kind": "newtype",
+          "inner_type": "option<ref:PickedColor>"
         },
         {
           "name": "PickedWindow",
-          "kind": "struct",
-          "fields": []
+          "kind": "newtype",
+          "inner_type": "option<ref:Window>"
         },
         {
           "name": "Version",
@@ -1786,12 +1786,12 @@
         {
           "name": "Windows",
           "kind": "newtype",
-          "inner_type": "array<ref:Unknown>"
+          "inner_type": "array<ref:Window>"
         },
         {
           "name": "Workspaces",
           "kind": "newtype",
-          "inner_type": "array<ref:Unknown>"
+          "inner_type": "array<ref:Workspace>"
         }
       ]
     },
@@ -1962,7 +1962,7 @@
         },
         {
           "name": "names",
-          "type": "array<ref:Unknown>",
+          "type": "array<string>",
           "required": true
         }
       ]
@@ -2086,7 +2086,7 @@
         },
         {
           "name": "modes",
-          "type": "array<ref:Unknown>",
+          "type": "array<ref:Mode>",
           "required": true
         },
         {
@@ -2096,7 +2096,7 @@
         },
         {
           "name": "physical_size",
-          "type": "option<array<ref:Unknown>>",
+          "type": "option<array<integer>>",
           "required": false
         },
         {
@@ -2133,7 +2133,7 @@
       "fields": [
         {
           "name": "rgb",
-          "type": "array<ref:Unknown>",
+          "type": "array<float>",
           "required": true
         }
       ]
@@ -2232,27 +2232,27 @@
       "fields": [
         {
           "name": "pos_in_scrolling_layout",
-          "type": "option<array<ref:Unknown>>",
+          "type": "option<array<integer>>",
           "required": false
         },
         {
           "name": "tile_pos_in_workspace_view",
-          "type": "option<array<ref:Unknown>>",
+          "type": "option<array<float>>",
           "required": false
         },
         {
           "name": "tile_size",
-          "type": "array<ref:Unknown>",
+          "type": "array<float>",
           "required": true
         },
         {
           "name": "window_offset_in_tile",
-          "type": "array<ref:Unknown>",
+          "type": "array<float>",
           "required": true
         },
         {
           "name": "window_size",
-          "type": "array<ref:Unknown>",
+          "type": "array<integer>",
           "required": true
         }
       ]
