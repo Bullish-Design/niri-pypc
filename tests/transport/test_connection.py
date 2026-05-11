@@ -85,7 +85,6 @@ class TestUnixConnectionWriteRead:
 
     async def test_oversize_frame_rejected(self, socket_path):
         """Frames exceeding max_size raise ProtocolError."""
-        server_ready = asyncio.Event()
 
         async def handler(reader, writer):
             # Send an oversized frame

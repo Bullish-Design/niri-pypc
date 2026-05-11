@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from niri_pypc.types.generated.request import EventStreamRequest, Request, VersionRequest
-from niri_pypc.types.generated.reply import Reply
 from niri_pypc.types.generated.event import Event
+from niri_pypc.types.generated.reply import Reply
+from niri_pypc.types.generated.request import EventStreamRequest, Request, VersionRequest
 
 
 class TestRequestRoundtrip:

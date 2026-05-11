@@ -17,6 +17,7 @@ from niri_pypc.types.generated.models import (
 class ErrReply(BaseModel):
     payload: str
 
+
 class OkReply(BaseModel):
     payload: Response
 
@@ -38,6 +39,7 @@ _REPLY_VARIANT_NAMES: dict[type[BaseModel], str] = {
     OkReply: "Ok",
 }
 
+
 class Reply(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
     variant: ErrReply | OkReply | UnknownReply
@@ -46,57 +48,76 @@ class Reply(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+
         # If variant is already a decoded model instance, pass through
         if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
             return data
-        return {"variant": decode_externally_tagged(
-            data, _REPLY_VARIANTS,
-            unknown_sentinel=UnknownReply,
-        )}
+        return {
+            "variant": decode_externally_tagged(
+                data,
+                _REPLY_VARIANTS,
+                unknown_sentinel=UnknownReply,
+            )
+        }
 
     @model_serializer
     def _encode_external_tag(self) -> Any:
         from niri_pypc.types.codec import encode_externally_tagged
+
         return encode_externally_tagged(self.variant, _REPLY_VARIANT_NAMES)
+
 
 class FocusedOutputResponse(BaseModel):
     pass
 
+
 class FocusedWindowResponse(BaseModel):
     pass
+
 
 class HandledResponse(BaseModel):
     pass
 
+
 class KeyboardLayoutsResponse(BaseModel):
     payload: KeyboardLayouts
+
 
 class LayersResponse(BaseModel):
     payload: list[Any]
 
+
 class OutputConfigChangedResponse(BaseModel):
     payload: OutputConfigChanged
+
 
 class OutputsResponse(BaseModel):
     pass
 
+
 class OverviewStateResponse(BaseModel):
     payload: Overview
+
 
 class PickedColorResponse(BaseModel):
     pass
 
+
 class PickedWindowResponse(BaseModel):
     pass
+
 
 class VersionResponse(BaseModel):
     payload: str
 
+
 class WindowsResponse(BaseModel):
     payload: list[Any]
 
+
 class WorkspacesResponse(BaseModel):
     payload: list[Any]
+
 
 # Wire-name to variant class mapping
 _RESPONSE_VARIANTS: dict[str, type[BaseModel]] = {
@@ -132,14 +153,30 @@ _RESPONSE_VARIANT_NAMES: dict[type[BaseModel], str] = {
     WorkspacesResponse: "Workspaces",
 }
 
+
 class Response(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
-    variant: FocusedOutputResponse | FocusedWindowResponse | HandledResponse | KeyboardLayoutsResponse | LayersResponse | OutputConfigChangedResponse | OutputsResponse | OverviewStateResponse | PickedColorResponse | PickedWindowResponse | VersionResponse | WindowsResponse | WorkspacesResponse
+    variant: (
+        FocusedOutputResponse
+        | FocusedWindowResponse
+        | HandledResponse
+        | KeyboardLayoutsResponse
+        | LayersResponse
+        | OutputConfigChangedResponse
+        | OutputsResponse
+        | OverviewStateResponse
+        | PickedColorResponse
+        | PickedWindowResponse
+        | VersionResponse
+        | WindowsResponse
+        | WorkspacesResponse
+    )
 
     @model_validator(mode="before")
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+
         # If variant is already a decoded model instance, pass through
         if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
             return data
@@ -148,4 +185,5 @@ class Response(BaseModel):
     @model_serializer
     def _encode_external_tag(self) -> Any:
         from niri_pypc.types.codec import encode_externally_tagged
+
         return encode_externally_tagged(self.variant, _RESPONSE_VARIANT_NAMES)

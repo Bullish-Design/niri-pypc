@@ -12,8 +12,10 @@ from pydantic import BaseModel, ConfigDict, model_validator, model_serializer
 class NormalColumnDisplay(BaseModel):
     pass
 
+
 class TabbedColumnDisplay(BaseModel):
     pass
+
 
 # Wire-name to variant class mapping
 _COLUMNDISPLAY_VARIANTS: dict[str, type[BaseModel]] = {
@@ -27,6 +29,7 @@ _COLUMNDISPLAY_VARIANT_NAMES: dict[type[BaseModel], str] = {
     TabbedColumnDisplay: "Tabbed",
 }
 
+
 class ColumnDisplay(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
     variant: NormalColumnDisplay | TabbedColumnDisplay
@@ -35,6 +38,7 @@ class ColumnDisplay(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+
         # If variant is already a decoded model instance, pass through
         if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
             return data
@@ -43,13 +47,17 @@ class ColumnDisplay(BaseModel):
     @model_serializer
     def _encode_external_tag(self) -> Any:
         from niri_pypc.types.codec import encode_externally_tagged
+
         return encode_externally_tagged(self.variant, _COLUMNDISPLAY_VARIANT_NAMES)
+
 
 class NHSyncHSyncPolarity(BaseModel):
     pass
 
+
 class PHSyncHSyncPolarity(BaseModel):
     pass
+
 
 # Wire-name to variant class mapping
 _HSYNCPOLARITY_VARIANTS: dict[str, type[BaseModel]] = {
@@ -63,6 +71,7 @@ _HSYNCPOLARITY_VARIANT_NAMES: dict[type[BaseModel], str] = {
     PHSyncHSyncPolarity: "PHSync",
 }
 
+
 class HSyncPolarity(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
     variant: NHSyncHSyncPolarity | PHSyncHSyncPolarity
@@ -71,6 +80,7 @@ class HSyncPolarity(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+
         # If variant is already a decoded model instance, pass through
         if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
             return data
@@ -79,19 +89,25 @@ class HSyncPolarity(BaseModel):
     @model_serializer
     def _encode_external_tag(self) -> Any:
         from niri_pypc.types.codec import encode_externally_tagged
+
         return encode_externally_tagged(self.variant, _HSYNCPOLARITY_VARIANT_NAMES)
+
 
 class BackgroundLayer(BaseModel):
     pass
 
+
 class BottomLayer(BaseModel):
     pass
+
 
 class OverlayLayer(BaseModel):
     pass
 
+
 class TopLayer(BaseModel):
     pass
+
 
 # Wire-name to variant class mapping
 _LAYER_VARIANTS: dict[str, type[BaseModel]] = {
@@ -109,6 +125,7 @@ _LAYER_VARIANT_NAMES: dict[type[BaseModel], str] = {
     TopLayer: "Top",
 }
 
+
 class Layer(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
     variant: BackgroundLayer | BottomLayer | OverlayLayer | TopLayer
@@ -117,6 +134,7 @@ class Layer(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+
         # If variant is already a decoded model instance, pass through
         if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
             return data
@@ -125,16 +143,21 @@ class Layer(BaseModel):
     @model_serializer
     def _encode_external_tag(self) -> Any:
         from niri_pypc.types.codec import encode_externally_tagged
+
         return encode_externally_tagged(self.variant, _LAYER_VARIANT_NAMES)
+
 
 class ExclusiveLayerSurfaceKeyboardInteractivity(BaseModel):
     pass
 
+
 class NoneLayerSurfaceKeyboardInteractivity(BaseModel):
     pass
 
+
 class OnDemandLayerSurfaceKeyboardInteractivity(BaseModel):
     pass
+
 
 # Wire-name to variant class mapping
 _LAYERSURFACEKEYBOARDINTERACTIVITY_VARIANTS: dict[str, type[BaseModel]] = {
@@ -150,14 +173,20 @@ _LAYERSURFACEKEYBOARDINTERACTIVITY_VARIANT_NAMES: dict[type[BaseModel], str] = {
     OnDemandLayerSurfaceKeyboardInteractivity: "OnDemand",
 }
 
+
 class LayerSurfaceKeyboardInteractivity(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
-    variant: ExclusiveLayerSurfaceKeyboardInteractivity | NoneLayerSurfaceKeyboardInteractivity | OnDemandLayerSurfaceKeyboardInteractivity
+    variant: (
+        ExclusiveLayerSurfaceKeyboardInteractivity
+        | NoneLayerSurfaceKeyboardInteractivity
+        | OnDemandLayerSurfaceKeyboardInteractivity
+    )
 
     @model_validator(mode="before")
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+
         # If variant is already a decoded model instance, pass through
         if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
             return data
@@ -166,16 +195,21 @@ class LayerSurfaceKeyboardInteractivity(BaseModel):
     @model_serializer
     def _encode_external_tag(self) -> Any:
         from niri_pypc.types.codec import encode_externally_tagged
+
         return encode_externally_tagged(self.variant, _LAYERSURFACEKEYBOARDINTERACTIVITY_VARIANT_NAMES)
+
 
 class IndexLayoutSwitchTarget(BaseModel):
     payload: int
 
+
 class NextLayoutSwitchTarget(BaseModel):
     pass
 
+
 class PrevLayoutSwitchTarget(BaseModel):
     pass
+
 
 # Wire-name to variant class mapping
 _LAYOUTSWITCHTARGET_VARIANTS: dict[str, type[BaseModel]] = {
@@ -191,6 +225,7 @@ _LAYOUTSWITCHTARGET_VARIANT_NAMES: dict[type[BaseModel], str] = {
     PrevLayoutSwitchTarget: "Prev",
 }
 
+
 class LayoutSwitchTarget(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
     variant: IndexLayoutSwitchTarget | NextLayoutSwitchTarget | PrevLayoutSwitchTarget
@@ -199,6 +234,7 @@ class LayoutSwitchTarget(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+
         # If variant is already a decoded model instance, pass through
         if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
             return data
@@ -207,13 +243,17 @@ class LayoutSwitchTarget(BaseModel):
     @model_serializer
     def _encode_external_tag(self) -> Any:
         from niri_pypc.types.codec import encode_externally_tagged
+
         return encode_externally_tagged(self.variant, _LAYOUTSWITCHTARGET_VARIANT_NAMES)
+
 
 class AutomaticModeToSet(BaseModel):
     pass
 
+
 class SpecificModeToSet(BaseModel):
     payload: ConfiguredMode
+
 
 # Wire-name to variant class mapping
 _MODETOSET_VARIANTS: dict[str, type[BaseModel]] = {
@@ -227,6 +267,7 @@ _MODETOSET_VARIANT_NAMES: dict[type[BaseModel], str] = {
     SpecificModeToSet: "Specific",
 }
 
+
 class ModeToSet(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
     variant: AutomaticModeToSet | SpecificModeToSet
@@ -235,6 +276,7 @@ class ModeToSet(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+
         # If variant is already a decoded model instance, pass through
         if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
             return data
@@ -243,13 +285,17 @@ class ModeToSet(BaseModel):
     @model_serializer
     def _encode_external_tag(self) -> Any:
         from niri_pypc.types.codec import encode_externally_tagged
+
         return encode_externally_tagged(self.variant, _MODETOSET_VARIANT_NAMES)
+
 
 class CustomModeOutputAction(BaseModel):
     mode: ConfiguredMode
 
+
 class ModeOutputAction(BaseModel):
     mode: ModeToSet
+
 
 class ModelineOutputAction(BaseModel):
     clock: float
@@ -264,23 +310,30 @@ class ModelineOutputAction(BaseModel):
     vsync_start: int
     vtotal: int
 
+
 class OffOutputAction(BaseModel):
     pass
+
 
 class OnOutputAction(BaseModel):
     pass
 
+
 class PositionOutputAction(BaseModel):
     position: PositionToSet
+
 
 class ScaleOutputAction(BaseModel):
     scale: ScaleToSet
 
+
 class TransformOutputAction(BaseModel):
     transform: Transform
 
+
 class VrrOutputAction(BaseModel):
     vrr: VrrToSet
+
 
 # Wire-name to variant class mapping
 _OUTPUTACTION_VARIANTS: dict[str, type[BaseModel]] = {
@@ -308,14 +361,26 @@ _OUTPUTACTION_VARIANT_NAMES: dict[type[BaseModel], str] = {
     VrrOutputAction: "Vrr",
 }
 
+
 class OutputAction(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
-    variant: CustomModeOutputAction | ModeOutputAction | ModelineOutputAction | OffOutputAction | OnOutputAction | PositionOutputAction | ScaleOutputAction | TransformOutputAction | VrrOutputAction
+    variant: (
+        CustomModeOutputAction
+        | ModeOutputAction
+        | ModelineOutputAction
+        | OffOutputAction
+        | OnOutputAction
+        | PositionOutputAction
+        | ScaleOutputAction
+        | TransformOutputAction
+        | VrrOutputAction
+    )
 
     @model_validator(mode="before")
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+
         # If variant is already a decoded model instance, pass through
         if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
             return data
@@ -324,13 +389,17 @@ class OutputAction(BaseModel):
     @model_serializer
     def _encode_external_tag(self) -> Any:
         from niri_pypc.types.codec import encode_externally_tagged
+
         return encode_externally_tagged(self.variant, _OUTPUTACTION_VARIANT_NAMES)
+
 
 class AppliedOutputConfigChanged(BaseModel):
     pass
 
+
 class OutputWasMissingOutputConfigChanged(BaseModel):
     pass
+
 
 # Wire-name to variant class mapping
 _OUTPUTCONFIGCHANGED_VARIANTS: dict[str, type[BaseModel]] = {
@@ -344,6 +413,7 @@ _OUTPUTCONFIGCHANGED_VARIANT_NAMES: dict[type[BaseModel], str] = {
     OutputWasMissingOutputConfigChanged: "OutputWasMissing",
 }
 
+
 class OutputConfigChanged(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
     variant: AppliedOutputConfigChanged | OutputWasMissingOutputConfigChanged
@@ -352,6 +422,7 @@ class OutputConfigChanged(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+
         # If variant is already a decoded model instance, pass through
         if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
             return data
@@ -360,19 +431,25 @@ class OutputConfigChanged(BaseModel):
     @model_serializer
     def _encode_external_tag(self) -> Any:
         from niri_pypc.types.codec import encode_externally_tagged
+
         return encode_externally_tagged(self.variant, _OUTPUTCONFIGCHANGED_VARIANT_NAMES)
+
 
 class AdjustFixedPositionChange(BaseModel):
     payload: float
 
+
 class AdjustProportionPositionChange(BaseModel):
     payload: float
+
 
 class SetFixedPositionChange(BaseModel):
     payload: float
 
+
 class SetProportionPositionChange(BaseModel):
     payload: float
+
 
 # Wire-name to variant class mapping
 _POSITIONCHANGE_VARIANTS: dict[str, type[BaseModel]] = {
@@ -390,14 +467,21 @@ _POSITIONCHANGE_VARIANT_NAMES: dict[type[BaseModel], str] = {
     SetProportionPositionChange: "SetProportion",
 }
 
+
 class PositionChange(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
-    variant: AdjustFixedPositionChange | AdjustProportionPositionChange | SetFixedPositionChange | SetProportionPositionChange
+    variant: (
+        AdjustFixedPositionChange
+        | AdjustProportionPositionChange
+        | SetFixedPositionChange
+        | SetProportionPositionChange
+    )
 
     @model_validator(mode="before")
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+
         # If variant is already a decoded model instance, pass through
         if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
             return data
@@ -406,13 +490,17 @@ class PositionChange(BaseModel):
     @model_serializer
     def _encode_external_tag(self) -> Any:
         from niri_pypc.types.codec import encode_externally_tagged
+
         return encode_externally_tagged(self.variant, _POSITIONCHANGE_VARIANT_NAMES)
+
 
 class AutomaticPositionToSet(BaseModel):
     pass
 
+
 class SpecificPositionToSet(BaseModel):
     payload: ConfiguredPosition
+
 
 # Wire-name to variant class mapping
 _POSITIONTOSET_VARIANTS: dict[str, type[BaseModel]] = {
@@ -426,6 +514,7 @@ _POSITIONTOSET_VARIANT_NAMES: dict[type[BaseModel], str] = {
     SpecificPositionToSet: "Specific",
 }
 
+
 class PositionToSet(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
     variant: AutomaticPositionToSet | SpecificPositionToSet
@@ -434,6 +523,7 @@ class PositionToSet(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+
         # If variant is already a decoded model instance, pass through
         if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
             return data
@@ -442,13 +532,17 @@ class PositionToSet(BaseModel):
     @model_serializer
     def _encode_external_tag(self) -> Any:
         from niri_pypc.types.codec import encode_externally_tagged
+
         return encode_externally_tagged(self.variant, _POSITIONTOSET_VARIANT_NAMES)
+
 
 class AutomaticScaleToSet(BaseModel):
     pass
 
+
 class SpecificScaleToSet(BaseModel):
     payload: float
+
 
 # Wire-name to variant class mapping
 _SCALETOSET_VARIANTS: dict[str, type[BaseModel]] = {
@@ -462,6 +556,7 @@ _SCALETOSET_VARIANT_NAMES: dict[type[BaseModel], str] = {
     SpecificScaleToSet: "Specific",
 }
 
+
 class ScaleToSet(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
     variant: AutomaticScaleToSet | SpecificScaleToSet
@@ -470,6 +565,7 @@ class ScaleToSet(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+
         # If variant is already a decoded model instance, pass through
         if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
             return data
@@ -478,19 +574,25 @@ class ScaleToSet(BaseModel):
     @model_serializer
     def _encode_external_tag(self) -> Any:
         from niri_pypc.types.codec import encode_externally_tagged
+
         return encode_externally_tagged(self.variant, _SCALETOSET_VARIANT_NAMES)
+
 
 class AdjustFixedSizeChange(BaseModel):
     payload: int
 
+
 class AdjustProportionSizeChange(BaseModel):
     payload: float
+
 
 class SetFixedSizeChange(BaseModel):
     payload: int
 
+
 class SetProportionSizeChange(BaseModel):
     payload: float
+
 
 # Wire-name to variant class mapping
 _SIZECHANGE_VARIANTS: dict[str, type[BaseModel]] = {
@@ -508,6 +610,7 @@ _SIZECHANGE_VARIANT_NAMES: dict[type[BaseModel], str] = {
     SetProportionSizeChange: "SetProportion",
 }
 
+
 class SizeChange(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
     variant: AdjustFixedSizeChange | AdjustProportionSizeChange | SetFixedSizeChange | SetProportionSizeChange
@@ -516,6 +619,7 @@ class SizeChange(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+
         # If variant is already a decoded model instance, pass through
         if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
             return data
@@ -524,31 +628,41 @@ class SizeChange(BaseModel):
     @model_serializer
     def _encode_external_tag(self) -> Any:
         from niri_pypc.types.codec import encode_externally_tagged
+
         return encode_externally_tagged(self.variant, _SIZECHANGE_VARIANT_NAMES)
+
 
 class _180Transform(BaseModel):
     pass
 
+
 class _270Transform(BaseModel):
     pass
+
 
 class _90Transform(BaseModel):
     pass
 
+
 class FlippedTransform(BaseModel):
     pass
+
 
 class Flipped180Transform(BaseModel):
     pass
 
+
 class Flipped270Transform(BaseModel):
     pass
+
 
 class Flipped90Transform(BaseModel):
     pass
 
+
 class NormalTransform(BaseModel):
     pass
+
 
 # Wire-name to variant class mapping
 _TRANSFORM_VARIANTS: dict[str, type[BaseModel]] = {
@@ -574,14 +688,25 @@ _TRANSFORM_VARIANT_NAMES: dict[type[BaseModel], str] = {
     NormalTransform: "Normal",
 }
 
+
 class Transform(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
-    variant: _180Transform | _270Transform | _90Transform | FlippedTransform | Flipped180Transform | Flipped270Transform | Flipped90Transform | NormalTransform
+    variant: (
+        _180Transform
+        | _270Transform
+        | _90Transform
+        | FlippedTransform
+        | Flipped180Transform
+        | Flipped270Transform
+        | Flipped90Transform
+        | NormalTransform
+    )
 
     @model_validator(mode="before")
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+
         # If variant is already a decoded model instance, pass through
         if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
             return data
@@ -590,13 +715,17 @@ class Transform(BaseModel):
     @model_serializer
     def _encode_external_tag(self) -> Any:
         from niri_pypc.types.codec import encode_externally_tagged
+
         return encode_externally_tagged(self.variant, _TRANSFORM_VARIANT_NAMES)
+
 
 class NVSyncVSyncPolarity(BaseModel):
     pass
 
+
 class PVSyncVSyncPolarity(BaseModel):
     pass
+
 
 # Wire-name to variant class mapping
 _VSYNCPOLARITY_VARIANTS: dict[str, type[BaseModel]] = {
@@ -610,6 +739,7 @@ _VSYNCPOLARITY_VARIANT_NAMES: dict[type[BaseModel], str] = {
     PVSyncVSyncPolarity: "PVSync",
 }
 
+
 class VSyncPolarity(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
     variant: NVSyncVSyncPolarity | PVSyncVSyncPolarity
@@ -618,6 +748,7 @@ class VSyncPolarity(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+
         # If variant is already a decoded model instance, pass through
         if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
             return data
@@ -626,16 +757,21 @@ class VSyncPolarity(BaseModel):
     @model_serializer
     def _encode_external_tag(self) -> Any:
         from niri_pypc.types.codec import encode_externally_tagged
+
         return encode_externally_tagged(self.variant, _VSYNCPOLARITY_VARIANT_NAMES)
+
 
 class IdWorkspaceReferenceArg(BaseModel):
     payload: int
 
+
 class IndexWorkspaceReferenceArg(BaseModel):
     payload: int
 
+
 class NameWorkspaceReferenceArg(BaseModel):
     payload: str
+
 
 # Wire-name to variant class mapping
 _WORKSPACEREFERENCEARG_VARIANTS: dict[str, type[BaseModel]] = {
@@ -651,6 +787,7 @@ _WORKSPACEREFERENCEARG_VARIANT_NAMES: dict[type[BaseModel], str] = {
     NameWorkspaceReferenceArg: "Name",
 }
 
+
 class WorkspaceReferenceArg(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
     variant: IdWorkspaceReferenceArg | IndexWorkspaceReferenceArg | NameWorkspaceReferenceArg
@@ -659,6 +796,7 @@ class WorkspaceReferenceArg(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+
         # If variant is already a decoded model instance, pass through
         if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
             return data
@@ -667,7 +805,9 @@ class WorkspaceReferenceArg(BaseModel):
     @model_serializer
     def _encode_external_tag(self) -> Any:
         from niri_pypc.types.codec import encode_externally_tagged
+
         return encode_externally_tagged(self.variant, _WORKSPACEREFERENCEARG_VARIANT_NAMES)
+
 
 class ConfiguredMode(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
@@ -675,15 +815,18 @@ class ConfiguredMode(BaseModel):
     refresh: float | None = None
     width: int
 
+
 class ConfiguredPosition(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
     x: int
     y: int
 
+
 class KeyboardLayouts(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
     current_idx: int
     names: list[Any]
+
 
 class LayerSurface(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
@@ -691,6 +834,7 @@ class LayerSurface(BaseModel):
     layer: Layer
     namespace: str
     output: str
+
 
 class LogicalOutput(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
@@ -701,12 +845,14 @@ class LogicalOutput(BaseModel):
     x: int
     y: int
 
+
 class Mode(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
     height: int
     is_preferred: bool
     refresh_rate: int
     width: int
+
 
 class Output(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
@@ -722,23 +868,28 @@ class Output(BaseModel):
     vrr_enabled: bool
     vrr_supported: bool
 
+
 class Overview(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
     is_open: bool
 
+
 class PickedColor(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
     rgb: list[Any]
+
 
 class Timestamp(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
     nanos: int
     secs: int
 
+
 class VrrToSet(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
     on_demand: bool
     vrr: bool
+
 
 class Window(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
@@ -753,6 +904,7 @@ class Window(BaseModel):
     title: str | None = None
     workspace_id: int | None = None
 
+
 class WindowLayout(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
     pos_in_scrolling_layout: list[Any] | None = None
@@ -760,6 +912,7 @@ class WindowLayout(BaseModel):
     tile_size: list[Any]
     window_offset_in_tile: list[Any]
     window_size: list[Any]
+
 
 class Workspace(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)

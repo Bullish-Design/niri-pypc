@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 from pydantic import BaseModel
 
@@ -85,7 +85,7 @@ class NiriClient:
         try:
             from niri_pypc.types.generated.request import Request as RequestModel
 
-            request_root = RequestModel(variant=req)
+            request_root = RequestModel(variant=cast(Any, req))
             payload = request_root.model_dump(mode="json")
             frame = encode_frame(payload)
             await conn.write_frame(frame)

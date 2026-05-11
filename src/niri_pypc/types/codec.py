@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 from pydantic import BaseModel
 
@@ -51,7 +51,7 @@ def decode_externally_tagged(
                 raw_payload=str(data)[:1024],
             )
 
-        variant_name = next(iter(data.keys()))
+        variant_name = cast(str, next(iter(data.keys())))
         payload = data[variant_name]
         cls = variants.get(variant_name)
 
@@ -109,7 +109,7 @@ def encode_externally_tagged(
 
     # Check if it's a newtype variant (single 'payload' field)
     if list(model_fields.keys()) == ["payload"]:
-        payload = variant.payload
+        payload = getattr(variant, "payload")
         if isinstance(payload, BaseModel):
             return {wire_name: payload.model_dump(mode="json", by_alias=True)}
         return {wire_name: payload}

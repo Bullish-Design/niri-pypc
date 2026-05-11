@@ -43,7 +43,7 @@ class UnixConnection:
                 asyncio.open_unix_connection(str(socket_path)),
                 timeout=timeout,
             )
-        except asyncio.TimeoutError as exc:
+        except TimeoutError as exc:
             raise NiriTimeoutError(
                 f"Connection timed out after {timeout}s",
                 operation="connect",
@@ -116,7 +116,7 @@ class UnixConnection:
                 self._reader.readuntil(b"\n"),
                 timeout=timeout,
             )
-        except asyncio.TimeoutError as exc:
+        except TimeoutError as exc:
             raise NiriTimeoutError(
                 "Read timed out",
                 operation="read_frame",

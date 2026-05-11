@@ -7,7 +7,6 @@ from typing import Any
 from niri_pypc.api.client import NiriClient
 from niri_pypc.api.event_stream import NiriEventStream
 from niri_pypc.config import NiriConfig
-from niri_pypc.errors import LifecycleError
 from niri_pypc.runtime.lifecycle import LifecycleManager, LifecycleState
 
 

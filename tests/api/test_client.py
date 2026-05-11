@@ -9,8 +9,8 @@ from pathlib import Path
 
 import pytest
 
-from niri_pypc.config import NiriConfig
 from niri_pypc.api.client import NiriClient
+from niri_pypc.config import NiriConfig
 from niri_pypc.errors import RemoteError, TransportError
 
 
@@ -89,8 +89,8 @@ class TestNiriClient:
 
         client = NiriClient.connect(config)
         await client.close()
-        from niri_pypc.types.generated.request import VersionRequest
         from niri_pypc.errors import LifecycleError
+        from niri_pypc.types.generated.request import VersionRequest
 
         with pytest.raises(LifecycleError, match="Client is closed"):
             await client.request(VersionRequest())

@@ -31,7 +31,7 @@ async def mock_command_server():
     async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
         try:
             data = await asyncio.wait_for(reader.readuntil(b"\n"), timeout=10.0)
-        except (asyncio.IncompleteReadError, asyncio.TimeoutError):
+        except (TimeoutError, asyncio.IncompleteReadError):
             writer.close()
             return
         ctrl["received_requests"].append(data)
@@ -63,7 +63,7 @@ async def mock_event_server():
     async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
         try:
             data = await asyncio.wait_for(reader.readuntil(b"\n"), timeout=10.0)
-        except (asyncio.IncompleteReadError, asyncio.TimeoutError):
+        except (TimeoutError, asyncio.IncompleteReadError):
             writer.close()
             return
         ctrl["received_request"] = data
@@ -101,7 +101,7 @@ async def mock_unified_server():
 
         try:
             data = await asyncio.wait_for(reader.readuntil(b"\n"), timeout=10.0)
-        except (asyncio.IncompleteReadError, asyncio.TimeoutError):
+        except (TimeoutError, asyncio.IncompleteReadError):
             writer.close()
             return
 

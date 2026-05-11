@@ -9,8 +9,8 @@ from pathlib import Path
 
 import pytest
 
-from niri_pypc.config import BackpressureMode, NiriConfig
 from niri_pypc.api.event_stream import NiriEventStream
+from niri_pypc.config import NiriConfig
 from niri_pypc.errors import LifecycleError
 
 
@@ -26,7 +26,7 @@ async def event_server():
     async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
         try:
             data = await asyncio.wait_for(reader.readuntil(b"\n"), timeout=5.0)
-        except (asyncio.IncompleteReadError, asyncio.TimeoutError):
+        except (TimeoutError, asyncio.IncompleteReadError):
             writer.close()
             return
         server_control["received_request"] = data

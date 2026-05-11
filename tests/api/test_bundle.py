@@ -27,7 +27,6 @@ async def unified_server():
     async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
         nonlocal connection_count
         connection_count += 1
-        conn_num = connection_count
 
         data = await reader.readuntil(b"\n")
 

@@ -68,7 +68,7 @@ def main():
             diff_found = True
 
         if only_fresh:
-            print(f"Files only in fresh generation:")
+            print("Files only in fresh generation:")
             for name in sorted(only_fresh):
                 print(f"  + {name}")
             diff_found = True

@@ -19,9 +19,9 @@
 - [x] Step 16: Public API Exports and Package Surface
 - [x] Step 17: Test Fixtures and Mock Server Infrastructure
 - [x] Step 18: Type Tests
-- [ ] Step 19: Transport and Runtime Tests
-- [ ] Step 20: API and Integration Tests
-- [ ] Step 21: Live Tests (Optional/Gated)
-- [ ] Step 22: Devenv Scripts and CI Gates
-- [ ] Step 23: Documentation and Release Readiness
-- [ ] Step 24: Final End-to-End Verification Checklist
+- [x] Step 19: Transport and Runtime Tests
+- [x] Step 20: API and Integration Tests
+- [x] Step 21: Live Tests (Optional/Gated)
+- [x] Step 22: Devenv Scripts and CI Gates
+- [x] Step 23: Documentation and Release Readiness
+- [x] Step 24: Final End-to-End Verification Checklist

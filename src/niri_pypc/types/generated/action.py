@@ -19,438 +19,578 @@ from niri_pypc.types.generated.models import (
 class CenterColumnAction(BaseModel):
     pass
 
+
 class CenterVisibleColumnsAction(BaseModel):
     pass
+
 
 class CenterWindowAction(BaseModel):
     id: int | None = None
 
+
 class ClearDynamicCastTargetAction(BaseModel):
     pass
+
 
 class CloseOverviewAction(BaseModel):
     pass
 
+
 class CloseWindowAction(BaseModel):
     id: int | None = None
+
 
 class ConsumeOrExpelWindowLeftAction(BaseModel):
     id: int | None = None
 
+
 class ConsumeOrExpelWindowRightAction(BaseModel):
     id: int | None = None
+
 
 class ConsumeWindowIntoColumnAction(BaseModel):
     pass
 
+
 class DebugToggleDamageAction(BaseModel):
     pass
+
 
 class DebugToggleOpaqueRegionsAction(BaseModel):
     pass
 
+
 class DoScreenTransitionAction(BaseModel):
     delay_ms: int | None = None
+
 
 class ExpandColumnToAvailableWidthAction(BaseModel):
     pass
 
+
 class ExpelWindowFromColumnAction(BaseModel):
     pass
+
 
 class FocusColumnAction(BaseModel):
     index: int
 
+
 class FocusColumnFirstAction(BaseModel):
     pass
+
 
 class FocusColumnLastAction(BaseModel):
     pass
 
+
 class FocusColumnLeftAction(BaseModel):
     pass
+
 
 class FocusColumnLeftOrLastAction(BaseModel):
     pass
 
+
 class FocusColumnOrMonitorLeftAction(BaseModel):
     pass
+
 
 class FocusColumnOrMonitorRightAction(BaseModel):
     pass
 
+
 class FocusColumnRightAction(BaseModel):
     pass
+
 
 class FocusColumnRightOrFirstAction(BaseModel):
     pass
 
+
 class FocusFloatingAction(BaseModel):
     pass
+
 
 class FocusMonitorAction(BaseModel):
     output: str
 
+
 class FocusMonitorDownAction(BaseModel):
     pass
+
 
 class FocusMonitorLeftAction(BaseModel):
     pass
 
+
 class FocusMonitorNextAction(BaseModel):
     pass
+
 
 class FocusMonitorPreviousAction(BaseModel):
     pass
 
+
 class FocusMonitorRightAction(BaseModel):
     pass
+
 
 class FocusMonitorUpAction(BaseModel):
     pass
 
+
 class FocusTilingAction(BaseModel):
     pass
+
 
 class FocusWindowAction(BaseModel):
     id: int
 
+
 class FocusWindowBottomAction(BaseModel):
     pass
+
 
 class FocusWindowDownAction(BaseModel):
     pass
 
+
 class FocusWindowDownOrColumnLeftAction(BaseModel):
     pass
+
 
 class FocusWindowDownOrColumnRightAction(BaseModel):
     pass
 
+
 class FocusWindowDownOrTopAction(BaseModel):
     pass
+
 
 class FocusWindowInColumnAction(BaseModel):
     index: int
 
+
 class FocusWindowOrMonitorDownAction(BaseModel):
     pass
+
 
 class FocusWindowOrMonitorUpAction(BaseModel):
     pass
 
+
 class FocusWindowOrWorkspaceDownAction(BaseModel):
     pass
+
 
 class FocusWindowOrWorkspaceUpAction(BaseModel):
     pass
 
+
 class FocusWindowPreviousAction(BaseModel):
     pass
+
 
 class FocusWindowTopAction(BaseModel):
     pass
 
+
 class FocusWindowUpAction(BaseModel):
     pass
+
 
 class FocusWindowUpOrBottomAction(BaseModel):
     pass
 
+
 class FocusWindowUpOrColumnLeftAction(BaseModel):
     pass
+
 
 class FocusWindowUpOrColumnRightAction(BaseModel):
     pass
 
+
 class FocusWorkspaceAction(BaseModel):
     reference: WorkspaceReferenceArg
+
 
 class FocusWorkspaceDownAction(BaseModel):
     pass
 
+
 class FocusWorkspacePreviousAction(BaseModel):
     pass
+
 
 class FocusWorkspaceUpAction(BaseModel):
     pass
 
+
 class FullscreenWindowAction(BaseModel):
     id: int | None = None
+
 
 class LoadConfigFileAction(BaseModel):
     pass
 
+
 class MaximizeColumnAction(BaseModel):
     pass
+
 
 class MaximizeWindowToEdgesAction(BaseModel):
     id: int | None = None
 
+
 class MoveColumnLeftAction(BaseModel):
     pass
+
 
 class MoveColumnLeftOrToMonitorLeftAction(BaseModel):
     pass
 
+
 class MoveColumnRightAction(BaseModel):
     pass
+
 
 class MoveColumnRightOrToMonitorRightAction(BaseModel):
     pass
 
+
 class MoveColumnToFirstAction(BaseModel):
     pass
+
 
 class MoveColumnToIndexAction(BaseModel):
     index: int
 
+
 class MoveColumnToLastAction(BaseModel):
     pass
+
 
 class MoveColumnToMonitorAction(BaseModel):
     output: str
 
+
 class MoveColumnToMonitorDownAction(BaseModel):
     pass
+
 
 class MoveColumnToMonitorLeftAction(BaseModel):
     pass
 
+
 class MoveColumnToMonitorNextAction(BaseModel):
     pass
+
 
 class MoveColumnToMonitorPreviousAction(BaseModel):
     pass
 
+
 class MoveColumnToMonitorRightAction(BaseModel):
     pass
 
+
 class MoveColumnToMonitorUpAction(BaseModel):
     pass
+
 
 class MoveColumnToWorkspaceAction(BaseModel):
     focus: bool
     reference: WorkspaceReferenceArg
 
+
 class MoveColumnToWorkspaceDownAction(BaseModel):
     focus: bool
 
+
 class MoveColumnToWorkspaceUpAction(BaseModel):
     focus: bool
+
 
 class MoveFloatingWindowAction(BaseModel):
     id: int | None = None
     x: PositionChange
     y: PositionChange
 
+
 class MoveWindowDownAction(BaseModel):
     pass
+
 
 class MoveWindowDownOrToWorkspaceDownAction(BaseModel):
     pass
 
+
 class MoveWindowToFloatingAction(BaseModel):
     id: int | None = None
+
 
 class MoveWindowToMonitorAction(BaseModel):
     id: int | None = None
     output: str
 
+
 class MoveWindowToMonitorDownAction(BaseModel):
     pass
+
 
 class MoveWindowToMonitorLeftAction(BaseModel):
     pass
 
+
 class MoveWindowToMonitorNextAction(BaseModel):
     pass
+
 
 class MoveWindowToMonitorPreviousAction(BaseModel):
     pass
 
+
 class MoveWindowToMonitorRightAction(BaseModel):
     pass
+
 
 class MoveWindowToMonitorUpAction(BaseModel):
     pass
 
+
 class MoveWindowToTilingAction(BaseModel):
     id: int | None = None
+
 
 class MoveWindowToWorkspaceAction(BaseModel):
     focus: bool
     reference: WorkspaceReferenceArg
     window_id: int | None = None
 
+
 class MoveWindowToWorkspaceDownAction(BaseModel):
     focus: bool
+
 
 class MoveWindowToWorkspaceUpAction(BaseModel):
     focus: bool
 
+
 class MoveWindowUpAction(BaseModel):
     pass
+
 
 class MoveWindowUpOrToWorkspaceUpAction(BaseModel):
     pass
 
+
 class MoveWorkspaceDownAction(BaseModel):
     pass
+
 
 class MoveWorkspaceToIndexAction(BaseModel):
     index: int
     reference: WorkspaceReferenceArg | None = None
 
+
 class MoveWorkspaceToMonitorAction(BaseModel):
     output: str
     reference: WorkspaceReferenceArg | None = None
 
+
 class MoveWorkspaceToMonitorDownAction(BaseModel):
     pass
+
 
 class MoveWorkspaceToMonitorLeftAction(BaseModel):
     pass
 
+
 class MoveWorkspaceToMonitorNextAction(BaseModel):
     pass
+
 
 class MoveWorkspaceToMonitorPreviousAction(BaseModel):
     pass
 
+
 class MoveWorkspaceToMonitorRightAction(BaseModel):
     pass
+
 
 class MoveWorkspaceToMonitorUpAction(BaseModel):
     pass
 
+
 class MoveWorkspaceUpAction(BaseModel):
     pass
+
 
 class OpenOverviewAction(BaseModel):
     pass
 
+
 class PowerOffMonitorsAction(BaseModel):
     pass
+
 
 class PowerOnMonitorsAction(BaseModel):
     pass
 
+
 class QuitAction(BaseModel):
     skip_confirmation: bool
+
 
 class ResetWindowHeightAction(BaseModel):
     id: int | None = None
 
+
 class ScreenshotAction(BaseModel):
     path: str | None = None
     show_pointer: bool
+
 
 class ScreenshotScreenAction(BaseModel):
     path: str | None = None
     show_pointer: bool
     write_to_disk: bool
 
+
 class ScreenshotWindowAction(BaseModel):
     id: int | None = None
     path: str | None = None
     write_to_disk: bool
 
+
 class SetColumnDisplayAction(BaseModel):
     display: ColumnDisplay
+
 
 class SetColumnWidthAction(BaseModel):
     change: SizeChange
 
+
 class SetDynamicCastMonitorAction(BaseModel):
     output: str | None = None
 
+
 class SetDynamicCastWindowAction(BaseModel):
     id: int | None = None
+
 
 class SetWindowHeightAction(BaseModel):
     change: SizeChange
     id: int | None = None
 
+
 class SetWindowUrgentAction(BaseModel):
     id: int
+
 
 class SetWindowWidthAction(BaseModel):
     change: SizeChange
     id: int | None = None
 
+
 class SetWorkspaceNameAction(BaseModel):
     name: str
     workspace: WorkspaceReferenceArg | None = None
 
+
 class ShowHotkeyOverlayAction(BaseModel):
     pass
+
 
 class SpawnAction(BaseModel):
     command: list[Any]
 
+
 class SpawnShAction(BaseModel):
     command: str
+
 
 class SwapWindowLeftAction(BaseModel):
     pass
 
+
 class SwapWindowRightAction(BaseModel):
     pass
+
 
 class SwitchFocusBetweenFloatingAndTilingAction(BaseModel):
     pass
 
+
 class SwitchLayoutAction(BaseModel):
     layout: LayoutSwitchTarget
+
 
 class SwitchPresetColumnWidthAction(BaseModel):
     pass
 
+
 class SwitchPresetColumnWidthBackAction(BaseModel):
     pass
+
 
 class SwitchPresetWindowHeightAction(BaseModel):
     id: int | None = None
 
+
 class SwitchPresetWindowHeightBackAction(BaseModel):
     id: int | None = None
+
 
 class SwitchPresetWindowWidthAction(BaseModel):
     id: int | None = None
 
+
 class SwitchPresetWindowWidthBackAction(BaseModel):
     id: int | None = None
+
 
 class ToggleColumnTabbedDisplayAction(BaseModel):
     pass
 
+
 class ToggleDebugTintAction(BaseModel):
     pass
+
 
 class ToggleKeyboardShortcutsInhibitAction(BaseModel):
     pass
 
+
 class ToggleOverviewAction(BaseModel):
     pass
+
 
 class ToggleWindowFloatingAction(BaseModel):
     id: int | None = None
 
+
 class ToggleWindowRuleOpacityAction(BaseModel):
     id: int | None = None
+
 
 class ToggleWindowUrgentAction(BaseModel):
     id: int
 
+
 class ToggleWindowedFullscreenAction(BaseModel):
     id: int | None = None
+
 
 class UnsetWindowUrgentAction(BaseModel):
     id: int
 
+
 class UnsetWorkspaceNameAction(BaseModel):
     reference: WorkspaceReferenceArg | None = None
+
 
 # Wire-name to variant class mapping
 _ACTION_VARIANTS: dict[str, type[BaseModel]] = {
@@ -740,14 +880,157 @@ _ACTION_VARIANT_NAMES: dict[type[BaseModel], str] = {
     UnsetWorkspaceNameAction: "UnsetWorkspaceName",
 }
 
+
 class Action(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
-    variant: CenterColumnAction | CenterVisibleColumnsAction | CenterWindowAction | ClearDynamicCastTargetAction | CloseOverviewAction | CloseWindowAction | ConsumeOrExpelWindowLeftAction | ConsumeOrExpelWindowRightAction | ConsumeWindowIntoColumnAction | DebugToggleDamageAction | DebugToggleOpaqueRegionsAction | DoScreenTransitionAction | ExpandColumnToAvailableWidthAction | ExpelWindowFromColumnAction | FocusColumnAction | FocusColumnFirstAction | FocusColumnLastAction | FocusColumnLeftAction | FocusColumnLeftOrLastAction | FocusColumnOrMonitorLeftAction | FocusColumnOrMonitorRightAction | FocusColumnRightAction | FocusColumnRightOrFirstAction | FocusFloatingAction | FocusMonitorAction | FocusMonitorDownAction | FocusMonitorLeftAction | FocusMonitorNextAction | FocusMonitorPreviousAction | FocusMonitorRightAction | FocusMonitorUpAction | FocusTilingAction | FocusWindowAction | FocusWindowBottomAction | FocusWindowDownAction | FocusWindowDownOrColumnLeftAction | FocusWindowDownOrColumnRightAction | FocusWindowDownOrTopAction | FocusWindowInColumnAction | FocusWindowOrMonitorDownAction | FocusWindowOrMonitorUpAction | FocusWindowOrWorkspaceDownAction | FocusWindowOrWorkspaceUpAction | FocusWindowPreviousAction | FocusWindowTopAction | FocusWindowUpAction | FocusWindowUpOrBottomAction | FocusWindowUpOrColumnLeftAction | FocusWindowUpOrColumnRightAction | FocusWorkspaceAction | FocusWorkspaceDownAction | FocusWorkspacePreviousAction | FocusWorkspaceUpAction | FullscreenWindowAction | LoadConfigFileAction | MaximizeColumnAction | MaximizeWindowToEdgesAction | MoveColumnLeftAction | MoveColumnLeftOrToMonitorLeftAction | MoveColumnRightAction | MoveColumnRightOrToMonitorRightAction | MoveColumnToFirstAction | MoveColumnToIndexAction | MoveColumnToLastAction | MoveColumnToMonitorAction | MoveColumnToMonitorDownAction | MoveColumnToMonitorLeftAction | MoveColumnToMonitorNextAction | MoveColumnToMonitorPreviousAction | MoveColumnToMonitorRightAction | MoveColumnToMonitorUpAction | MoveColumnToWorkspaceAction | MoveColumnToWorkspaceDownAction | MoveColumnToWorkspaceUpAction | MoveFloatingWindowAction | MoveWindowDownAction | MoveWindowDownOrToWorkspaceDownAction | MoveWindowToFloatingAction | MoveWindowToMonitorAction | MoveWindowToMonitorDownAction | MoveWindowToMonitorLeftAction | MoveWindowToMonitorNextAction | MoveWindowToMonitorPreviousAction | MoveWindowToMonitorRightAction | MoveWindowToMonitorUpAction | MoveWindowToTilingAction | MoveWindowToWorkspaceAction | MoveWindowToWorkspaceDownAction | MoveWindowToWorkspaceUpAction | MoveWindowUpAction | MoveWindowUpOrToWorkspaceUpAction | MoveWorkspaceDownAction | MoveWorkspaceToIndexAction | MoveWorkspaceToMonitorAction | MoveWorkspaceToMonitorDownAction | MoveWorkspaceToMonitorLeftAction | MoveWorkspaceToMonitorNextAction | MoveWorkspaceToMonitorPreviousAction | MoveWorkspaceToMonitorRightAction | MoveWorkspaceToMonitorUpAction | MoveWorkspaceUpAction | OpenOverviewAction | PowerOffMonitorsAction | PowerOnMonitorsAction | QuitAction | ResetWindowHeightAction | ScreenshotAction | ScreenshotScreenAction | ScreenshotWindowAction | SetColumnDisplayAction | SetColumnWidthAction | SetDynamicCastMonitorAction | SetDynamicCastWindowAction | SetWindowHeightAction | SetWindowUrgentAction | SetWindowWidthAction | SetWorkspaceNameAction | ShowHotkeyOverlayAction | SpawnAction | SpawnShAction | SwapWindowLeftAction | SwapWindowRightAction | SwitchFocusBetweenFloatingAndTilingAction | SwitchLayoutAction | SwitchPresetColumnWidthAction | SwitchPresetColumnWidthBackAction | SwitchPresetWindowHeightAction | SwitchPresetWindowHeightBackAction | SwitchPresetWindowWidthAction | SwitchPresetWindowWidthBackAction | ToggleColumnTabbedDisplayAction | ToggleDebugTintAction | ToggleKeyboardShortcutsInhibitAction | ToggleOverviewAction | ToggleWindowFloatingAction | ToggleWindowRuleOpacityAction | ToggleWindowUrgentAction | ToggleWindowedFullscreenAction | UnsetWindowUrgentAction | UnsetWorkspaceNameAction
+    variant: (
+        CenterColumnAction
+        | CenterVisibleColumnsAction
+        | CenterWindowAction
+        | ClearDynamicCastTargetAction
+        | CloseOverviewAction
+        | CloseWindowAction
+        | ConsumeOrExpelWindowLeftAction
+        | ConsumeOrExpelWindowRightAction
+        | ConsumeWindowIntoColumnAction
+        | DebugToggleDamageAction
+        | DebugToggleOpaqueRegionsAction
+        | DoScreenTransitionAction
+        | ExpandColumnToAvailableWidthAction
+        | ExpelWindowFromColumnAction
+        | FocusColumnAction
+        | FocusColumnFirstAction
+        | FocusColumnLastAction
+        | FocusColumnLeftAction
+        | FocusColumnLeftOrLastAction
+        | FocusColumnOrMonitorLeftAction
+        | FocusColumnOrMonitorRightAction
+        | FocusColumnRightAction
+        | FocusColumnRightOrFirstAction
+        | FocusFloatingAction
+        | FocusMonitorAction
+        | FocusMonitorDownAction
+        | FocusMonitorLeftAction
+        | FocusMonitorNextAction
+        | FocusMonitorPreviousAction
+        | FocusMonitorRightAction
+        | FocusMonitorUpAction
+        | FocusTilingAction
+        | FocusWindowAction
+        | FocusWindowBottomAction
+        | FocusWindowDownAction
+        | FocusWindowDownOrColumnLeftAction
+        | FocusWindowDownOrColumnRightAction
+        | FocusWindowDownOrTopAction
+        | FocusWindowInColumnAction
+        | FocusWindowOrMonitorDownAction
+        | FocusWindowOrMonitorUpAction
+        | FocusWindowOrWorkspaceDownAction
+        | FocusWindowOrWorkspaceUpAction
+        | FocusWindowPreviousAction
+        | FocusWindowTopAction
+        | FocusWindowUpAction
+        | FocusWindowUpOrBottomAction
+        | FocusWindowUpOrColumnLeftAction
+        | FocusWindowUpOrColumnRightAction
+        | FocusWorkspaceAction
+        | FocusWorkspaceDownAction
+        | FocusWorkspacePreviousAction
+        | FocusWorkspaceUpAction
+        | FullscreenWindowAction
+        | LoadConfigFileAction
+        | MaximizeColumnAction
+        | MaximizeWindowToEdgesAction
+        | MoveColumnLeftAction
+        | MoveColumnLeftOrToMonitorLeftAction
+        | MoveColumnRightAction
+        | MoveColumnRightOrToMonitorRightAction
+        | MoveColumnToFirstAction
+        | MoveColumnToIndexAction
+        | MoveColumnToLastAction
+        | MoveColumnToMonitorAction
+        | MoveColumnToMonitorDownAction
+        | MoveColumnToMonitorLeftAction
+        | MoveColumnToMonitorNextAction
+        | MoveColumnToMonitorPreviousAction
+        | MoveColumnToMonitorRightAction
+        | MoveColumnToMonitorUpAction
+        | MoveColumnToWorkspaceAction
+        | MoveColumnToWorkspaceDownAction
+        | MoveColumnToWorkspaceUpAction
+        | MoveFloatingWindowAction
+        | MoveWindowDownAction
+        | MoveWindowDownOrToWorkspaceDownAction
+        | MoveWindowToFloatingAction
+        | MoveWindowToMonitorAction
+        | MoveWindowToMonitorDownAction
+        | MoveWindowToMonitorLeftAction
+        | MoveWindowToMonitorNextAction
+        | MoveWindowToMonitorPreviousAction
+        | MoveWindowToMonitorRightAction
+        | MoveWindowToMonitorUpAction
+        | MoveWindowToTilingAction
+        | MoveWindowToWorkspaceAction
+        | MoveWindowToWorkspaceDownAction
+        | MoveWindowToWorkspaceUpAction
+        | MoveWindowUpAction
+        | MoveWindowUpOrToWorkspaceUpAction
+        | MoveWorkspaceDownAction
+        | MoveWorkspaceToIndexAction
+        | MoveWorkspaceToMonitorAction
+        | MoveWorkspaceToMonitorDownAction
+        | MoveWorkspaceToMonitorLeftAction
+        | MoveWorkspaceToMonitorNextAction
+        | MoveWorkspaceToMonitorPreviousAction
+        | MoveWorkspaceToMonitorRightAction
+        | MoveWorkspaceToMonitorUpAction
+        | MoveWorkspaceUpAction
+        | OpenOverviewAction
+        | PowerOffMonitorsAction
+        | PowerOnMonitorsAction
+        | QuitAction
+        | ResetWindowHeightAction
+        | ScreenshotAction
+        | ScreenshotScreenAction
+        | ScreenshotWindowAction
+        | SetColumnDisplayAction
+        | SetColumnWidthAction
+        | SetDynamicCastMonitorAction
+        | SetDynamicCastWindowAction
+        | SetWindowHeightAction
+        | SetWindowUrgentAction
+        | SetWindowWidthAction
+        | SetWorkspaceNameAction
+        | ShowHotkeyOverlayAction
+        | SpawnAction
+        | SpawnShAction
+        | SwapWindowLeftAction
+        | SwapWindowRightAction
+        | SwitchFocusBetweenFloatingAndTilingAction
+        | SwitchLayoutAction
+        | SwitchPresetColumnWidthAction
+        | SwitchPresetColumnWidthBackAction
+        | SwitchPresetWindowHeightAction
+        | SwitchPresetWindowHeightBackAction
+        | SwitchPresetWindowWidthAction
+        | SwitchPresetWindowWidthBackAction
+        | ToggleColumnTabbedDisplayAction
+        | ToggleDebugTintAction
+        | ToggleKeyboardShortcutsInhibitAction
+        | ToggleOverviewAction
+        | ToggleWindowFloatingAction
+        | ToggleWindowRuleOpacityAction
+        | ToggleWindowUrgentAction
+        | ToggleWindowedFullscreenAction
+        | UnsetWindowUrgentAction
+        | UnsetWorkspaceNameAction
+    )
 
     @model_validator(mode="before")
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+
         # If variant is already a decoded model instance, pass through
         if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
             return data
@@ -756,4 +1039,5 @@ class Action(BaseModel):
     @model_serializer
     def _encode_external_tag(self) -> Any:
         from niri_pypc.types.codec import encode_externally_tagged
+
         return encode_externally_tagged(self.variant, _ACTION_VARIANT_NAMES)

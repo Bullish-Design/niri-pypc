@@ -17,52 +17,67 @@ from niri_pypc.types.generated.models import (
 class ConfigLoadedEvent(BaseModel):
     failed: bool
 
+
 class KeyboardLayoutSwitchedEvent(BaseModel):
     idx: int
+
 
 class KeyboardLayoutsChangedEvent(BaseModel):
     keyboard_layouts: KeyboardLayouts
 
+
 class OverviewOpenedOrClosedEvent(BaseModel):
     is_open: bool
+
 
 class ScreenshotCapturedEvent(BaseModel):
     path: str | None = None
 
+
 class WindowClosedEvent(BaseModel):
     id: int
 
+
 class WindowFocusChangedEvent(BaseModel):
     id: int | None = None
+
 
 class WindowFocusTimestampChangedEvent(BaseModel):
     focus_timestamp: Timestamp | None = None
     id: int
 
+
 class WindowLayoutsChangedEvent(BaseModel):
     changes: list[Any]
 
+
 class WindowOpenedOrChangedEvent(BaseModel):
     window: Window
+
 
 class WindowUrgencyChangedEvent(BaseModel):
     id: int
     urgent: bool
 
+
 class WindowsChangedEvent(BaseModel):
     windows: list[Any]
+
 
 class WorkspaceActivatedEvent(BaseModel):
     focused: bool
     id: int
 
+
 class WorkspaceActiveWindowChangedEvent(BaseModel):
     active_window_id: int | None = None
     workspace_id: int
 
+
 class WorkspaceUrgencyChangedEvent(BaseModel):
     id: int
     urgent: bool
+
 
 class WorkspacesChangedEvent(BaseModel):
     workspaces: list[Any]
@@ -113,23 +128,47 @@ _EVENT_VARIANT_NAMES: dict[type[BaseModel], str] = {
     WorkspacesChangedEvent: "WorkspacesChanged",
 }
 
+
 class Event(BaseModel):
     model_config = ConfigDict(populate_by_name=True, strict=False)
-    variant: ConfigLoadedEvent | KeyboardLayoutSwitchedEvent | KeyboardLayoutsChangedEvent | OverviewOpenedOrClosedEvent | ScreenshotCapturedEvent | WindowClosedEvent | WindowFocusChangedEvent | WindowFocusTimestampChangedEvent | WindowLayoutsChangedEvent | WindowOpenedOrChangedEvent | WindowUrgencyChangedEvent | WindowsChangedEvent | WorkspaceActivatedEvent | WorkspaceActiveWindowChangedEvent | WorkspaceUrgencyChangedEvent | WorkspacesChangedEvent | UnknownEvent
+    variant: (
+        ConfigLoadedEvent
+        | KeyboardLayoutSwitchedEvent
+        | KeyboardLayoutsChangedEvent
+        | OverviewOpenedOrClosedEvent
+        | ScreenshotCapturedEvent
+        | WindowClosedEvent
+        | WindowFocusChangedEvent
+        | WindowFocusTimestampChangedEvent
+        | WindowLayoutsChangedEvent
+        | WindowOpenedOrChangedEvent
+        | WindowUrgencyChangedEvent
+        | WindowsChangedEvent
+        | WorkspaceActivatedEvent
+        | WorkspaceActiveWindowChangedEvent
+        | WorkspaceUrgencyChangedEvent
+        | WorkspacesChangedEvent
+        | UnknownEvent
+    )
 
     @model_validator(mode="before")
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+
         # If variant is already a decoded model instance, pass through
         if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
             return data
-        return {"variant": decode_externally_tagged(
-            data, _EVENT_VARIANTS,
-            unknown_sentinel=UnknownEvent,
-        )}
+        return {
+            "variant": decode_externally_tagged(
+                data,
+                _EVENT_VARIANTS,
+                unknown_sentinel=UnknownEvent,
+            )
+        }
 
     @model_serializer
     def _encode_external_tag(self) -> Any:
         from niri_pypc.types.codec import encode_externally_tagged
+
         return encode_externally_tagged(self.variant, _EVENT_VARIANT_NAMES)

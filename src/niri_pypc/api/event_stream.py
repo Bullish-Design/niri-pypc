@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Any, AsyncIterator
+from collections.abc import AsyncIterator
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -29,7 +30,7 @@ class NiriEventStream:
     def __init__(self, config: NiriConfig) -> None:
         self._config = config
         self._lifecycle = LifecycleManager()
-        self._queue: asyncio.Queue[BaseModel] | None = None
+        self._queue: asyncio.Queue[BaseModel | _StreamClosed] | None = None
         self._reader_task: asyncio.Task[None] | None = None
         self._connection: UnixConnection | None = None
 
@@ -62,7 +63,8 @@ class NiriEventStream:
         )
         instance._connection = conn
 
-        from niri_pypc.types.generated.request import EventStreamRequest, Request as RequestModel
+        from niri_pypc.types.generated.request import EventStreamRequest
+        from niri_pypc.types.generated.request import Request as RequestModel
 
         request_root = RequestModel(variant=EventStreamRequest())
         payload = request_root.model_dump(mode="json")
@@ -162,14 +164,14 @@ class NiriEventStream:
         try:
             read_timeout = timeout if timeout is not None else self._config.event_read_timeout
             event = await asyncio.wait_for(self._queue.get(), timeout=read_timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             from niri_pypc.errors import NiriTimeoutError
 
             raise NiriTimeoutError(
                 "No event received within timeout",
                 operation="next",
                 retryable=True,
-            )
+            ) from None
 
         if isinstance(event, _StreamClosed):
             raise LifecycleError(
