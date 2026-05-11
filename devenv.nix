@@ -2,7 +2,7 @@
 
 {
   # https://devenv.sh/basics/
-  env.GREET = "devenv";
+  env.GREET = "niri-pypc devenv";
 
   # https://devenv.sh/packages/
   packages = [ 
