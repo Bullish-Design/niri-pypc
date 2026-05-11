@@ -1,56 +1,60 @@
 { pkgs, lib, config, inputs, ... }:
 
 {
-  # https://devenv.sh/basics/
   env.GREET = "niri-pypc devenv";
 
-  # https://devenv.sh/packages/
-  packages = [ 
-    pkgs.git 
+  packages = [
+    pkgs.git
     pkgs.uv
-    ];
+  ];
 
-  # https://devenv.sh/languages/
-  # languages.rust.enable = true;
   languages = {
-      python = {
-          enable = true;
-          version = "3.13";
-          venv.enable = true;
-          uv.enable = true;
-        };
+    python = {
+      enable = true;
+      version = "3.13";
+      venv.enable = true;
+      uv.enable = true;
     };
+    rust = {
+      enable = true;
+      channel = "stable";
+      lsp.enable = false;
+    };
+  };
 
-  # https://devenv.sh/processes/
-  # processes.cargo-watch.exec = "cargo-watch";
-
-  # https://devenv.sh/services/
-  # services.postgres.enable = true;
-
-  # https://devenv.sh/scripts/
-  scripts.hello.exec = ''
-    echo hello from $GREET
-  '';
+  scripts = {
+    hello.exec = "echo hello from $GREET";
+    export-schema.exec = ''
+      cd tools/schema_exporter && cargo run --release -- --output-dir ../../schema/exported/
+    '';
+    normalize-ir.exec = ''
+      python tools/normalize_ir.py \
+        --schema-dir schema/exported/ \
+        --output schema/ir/niri-ipc-ir.json \
+        --upstream-pin schema/upstream-pin.toml
+    '';
+    generate-types.exec = ''
+      python tools/generate_types.py \
+        --ir schema/ir/niri-ipc-ir.json \
+        --output-dir src/niri_pypc/types/generated/
+    '';
+    verify-generated.exec = ''
+      python tools/verify_generated.py \
+        --ir schema/ir/niri-ipc-ir.json \
+        --generated-dir src/niri_pypc/types/generated/
+    '';
+    regen-all.exec = ''
+      export-schema && normalize-ir && generate-types
+    '';
+  };
 
   enterShell = ''
     hello
     git --version
   '';
 
-  # https://devenv.sh/tasks/
-  # tasks = {
-  #   "myproj:setup".exec = "mytool build";
-  #   "devenv:enterShell".after = [ "myproj:setup" ];
-  # };
-
-  # https://devenv.sh/tests/
   enterTest = ''
     echo "Running tests"
     git --version | grep --color=auto "${pkgs.git.version}"
   '';
-
-  # https://devenv.sh/pre-commit-hooks/
-  # pre-commit.hooks.shellcheck.enable = true;
-
-  # See full reference at https://devenv.sh/reference/options/
 }

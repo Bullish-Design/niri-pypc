@@ -45,8 +45,7 @@ include = [
 ]
 
 [tool.uv]
-# This repo currently tracks environment/tooling config before package scaffolding is added.
-package = false
+package = true
 
 [tool.pytest.ini_options]
 addopts = "-q --cov=niri_pypc --cov-report=term-missing"

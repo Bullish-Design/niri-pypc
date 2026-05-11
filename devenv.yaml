@@ -4,6 +4,11 @@ inputs:
     url: github:cachix/devenv-nixpkgs/rolling
   nixpkgs-python:
     url: github:cachix/nixpkgs-python
+  rust-overlay:
+    url: github:oxalica/rust-overlay
+    inputs:
+      nixpkgs:
+        follows: nixpkgs
   nix2container:
     url: github:nlewo/nix2container
   mk-shell-bin:
