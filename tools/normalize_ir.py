@@ -26,27 +26,76 @@ def resolve_ref(ref: str) -> str:
 
 
 def canonical_type(schema: dict, defs: dict) -> str:
-    """Convert JSON Schema type notation to canonical IR type string."""
-    raw = schema.get("type")
-    if isinstance(raw, list):
-        if "null" in raw:
-            inner = [t for t in raw if t != "null"][0]
-            inner_type = _primitive_type(inner)
-            return f"option<{inner_type}>" if inner_type else "option<ref:Unknown>"
-        return _primitive_type(raw[0])
-    if raw:
-        return _primitive_type(raw)
+    """Convert JSON Schema type notation to canonical IR type string.
 
+    Precedence order:
+    1. $ref
+    2. anyOf (nullable unions)
+    3. arrays with items
+    4. arrays with prefixItems (fixed-length tuples)
+    5. objects with additionalProperties (maps)
+    6. nullable type arrays like ["string", "null"]
+    7. plain primitives
+    """
+
+    # 1. Direct $ref — always takes precedence
     if "$ref" in schema:
         return f"ref:{resolve_ref(schema['$ref'])}"
 
+    # 2. anyOf — typically nullable refs: [{"$ref": "..."}, {"type": "null"}]
     if "anyOf" in schema:
-        non_null = [s for s in schema["anyOf"] if s.get("type") != "null"]
+        variants = schema["anyOf"]
+        non_null = [s for s in variants if s.get("type") != "null"]
+        has_null = len(non_null) < len(variants)
         if non_null:
             inner = canonical_type(non_null[0], defs)
-            return f"option<{inner}>"
+            return f"option<{inner}>" if has_null else inner
         return "option<ref:Unknown>"
 
+    raw_type = schema.get("type")
+
+    # 3. Handle nullable type arrays: {"type": ["array", "null"], ...}
+    if isinstance(raw_type, list):
+        non_null_types = [t for t in raw_type if t != "null"]
+        has_null = len(non_null_types) < len(raw_type)
+        if not non_null_types:
+            return "option<ref:Unknown>"
+        # Recurse with the non-null type to pick up items/additionalProperties/prefixItems
+        inner_schema = dict(schema)
+        inner_schema["type"] = non_null_types[0]
+        inner = canonical_type(inner_schema, defs)
+        return f"option<{inner}>" if has_null else inner
+
+    # 4. Arrays with typed items
+    if raw_type == "array" or (raw_type is None and "items" in schema):
+        if "items" in schema and isinstance(schema["items"], dict):
+            inner = canonical_type(schema["items"], defs)
+            return f"array<{inner}>"
+        if "prefixItems" in schema:
+            return _normalize_prefix_items(schema, defs)
+        return "array<ref:Unknown>"
+
+    # 5. Arrays with prefixItems but no explicit type
+    if "prefixItems" in schema:
+        return _normalize_prefix_items(schema, defs)
+
+    # 6. Objects with additionalProperties (maps)
+    if raw_type == "object" or (raw_type is None and "additionalProperties" in schema):
+        if "additionalProperties" in schema and isinstance(schema["additionalProperties"], dict):
+            val = canonical_type(schema["additionalProperties"], defs)
+            return f"map<string,{val}>"
+        if "properties" in schema and schema["properties"]:
+            # Real struct — handled elsewhere (extract_fields)
+            return "object"
+        if not schema.get("properties"):
+            # Empty object (e.g., Rust unit struct serialized as {})
+            return "object"
+
+    # 7. Plain primitives
+    if raw_type:
+        return _primitive_type(raw_type)
+
+    # 8. Bare items/additionalProperties without type key
     if "items" in schema and isinstance(schema["items"], dict):
         inner = canonical_type(schema["items"], defs)
         return f"array<{inner}>"
@@ -55,10 +104,31 @@ def canonical_type(schema: dict, defs: dict) -> str:
         val = canonical_type(schema["additionalProperties"], defs)
         return f"map<string,{val}>"
 
-    if schema.get("properties") and schema["properties"] == {}:
+    # Empty schema with only properties: {}
+    if schema.get("properties") is not None and schema["properties"] == {}:
         return "object"
 
     return "string"
+
+
+def _normalize_prefix_items(schema: dict, defs: dict) -> str:
+    """Normalize a fixed-length prefixItems array.
+
+    If all elements have the same type, emit array<T>.
+    Otherwise, emit tuple<T1,T2,...>.
+    """
+    prefix = schema["prefixItems"]
+    element_types = [canonical_type(item, defs) for item in prefix]
+
+    if not element_types:
+        return "array<ref:Unknown>"
+
+    # If all elements are the same type, use array<T>
+    if len(set(element_types)) == 1:
+        return f"array<{element_types[0]}>"
+
+    # Heterogeneous: use tuple notation
+    return f"tuple<{','.join(element_types)}>"
 
 
 def _primitive_type(t: str) -> str:
