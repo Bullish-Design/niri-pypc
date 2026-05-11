@@ -683,7 +683,7 @@ class TestReplyRoundTrip:
 ### Step 1.11: Run the test suite
 
 ```bash
-PYTHONPATH=src pytest tests/ -q
+devenv shell -- pytest tests/ -q
 ```
 
 All existing tests plus the new ones should pass. If any existing tests break due to the regenerated types, update the test fixtures — the new types are correct, so tests that relied on broken shapes need updating.
@@ -1556,7 +1556,7 @@ python tools/verify_generated.py --ir schema/ir/niri-ipc-ir.json \
   --generated-dir src/niri_pypc/types/generated
 
 # 4. Run full test suite
-PYTHONPATH=src pytest tests/ -q --tb=short
+devenv shell -- pytest tests/ -q --tb=short
 ```
 
 ### Step 10.2: Check the specific acceptance criteria
