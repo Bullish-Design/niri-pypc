@@ -188,6 +188,18 @@ def classify_variants(schema: dict, defs: dict, name: str) -> list[dict]:
                 )
                 continue
 
+            # Nullable ref or complex anyOf payload
+            if "anyOf" in var_payload:
+                inner = canonical_type(var_payload, defs)
+                variants.append(
+                    {
+                        "name": var_name,
+                        "kind": "newtype",
+                        "inner_type": inner,
+                    }
+                )
+                continue
+
             # Struct variant (inline fields): {"VariantName": {"properties": {...}}}
             if "properties" in var_payload:
                 fields = extract_fields(var_payload, defs)
