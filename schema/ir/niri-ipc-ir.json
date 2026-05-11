@@ -1,0 +1,1880 @@
+{
+  "ir_version": "1",
+  "upstream_crate": "niri-ipc",
+  "upstream_version": "25.11",
+  "upstream_features": [
+    "json-schema"
+  ],
+  "schema_hashes": {
+    "request": "sha256:853b61540cc3e816af3339e5aa6a6db903e65f893bc04ea4de5ccc223fc1e8db",
+    "reply": "sha256:43db10ba65370c7f443ce50045deebb75497a6baa2e9b264dc1dce870c5a4e5a",
+    "event": "sha256:8a568750f5e149bfaf78cd489bc6b163b31592a0db5a5df4c5bfa3f469b64cc4",
+    "action": "sha256:3ec6694cd79ab3fc8344eec35141dedc77134e0d04cdd632735fe80fcc764450"
+  },
+  "types": [
+    {
+      "name": "Action",
+      "kind": "enum",
+      "tag_type": "external",
+      "variants": [
+        {
+          "name": "CenterColumn",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "CenterVisibleColumns",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "CenterWindow",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "option<integer>",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "ClearDynamicCastTarget",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "CloseOverview",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "CloseWindow",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "option<integer>",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "ConsumeOrExpelWindowLeft",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "option<integer>",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "ConsumeOrExpelWindowRight",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "option<integer>",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "ConsumeWindowIntoColumn",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "DebugToggleDamage",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "DebugToggleOpaqueRegions",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "DoScreenTransition",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "delay_ms",
+              "type": "option<integer>",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "ExpandColumnToAvailableWidth",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "ExpelWindowFromColumn",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusColumn",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "index",
+              "type": "integer",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "FocusColumnFirst",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusColumnLast",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusColumnLeft",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusColumnLeftOrLast",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusColumnOrMonitorLeft",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusColumnOrMonitorRight",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusColumnRight",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusColumnRightOrFirst",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusFloating",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusMonitor",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "output",
+              "type": "string",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "FocusMonitorDown",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusMonitorLeft",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusMonitorNext",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusMonitorPrevious",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusMonitorRight",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusMonitorUp",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusTiling",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusWindow",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "integer",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "FocusWindowBottom",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusWindowDown",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusWindowDownOrColumnLeft",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusWindowDownOrColumnRight",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusWindowDownOrTop",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusWindowInColumn",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "index",
+              "type": "integer",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "FocusWindowOrMonitorDown",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusWindowOrMonitorUp",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusWindowOrWorkspaceDown",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusWindowOrWorkspaceUp",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusWindowPrevious",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusWindowTop",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusWindowUp",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusWindowUpOrBottom",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusWindowUpOrColumnLeft",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusWindowUpOrColumnRight",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusWorkspace",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "reference",
+              "type": "ref:WorkspaceReferenceArg",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "FocusWorkspaceDown",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusWorkspacePrevious",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusWorkspaceUp",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FullscreenWindow",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "option<integer>",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "LoadConfigFile",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MaximizeColumn",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MaximizeWindowToEdges",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "option<integer>",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "MoveColumnLeft",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveColumnLeftOrToMonitorLeft",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveColumnRight",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveColumnRightOrToMonitorRight",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveColumnToFirst",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveColumnToIndex",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "index",
+              "type": "integer",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "MoveColumnToLast",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveColumnToMonitor",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "output",
+              "type": "string",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "MoveColumnToMonitorDown",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveColumnToMonitorLeft",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveColumnToMonitorNext",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveColumnToMonitorPrevious",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveColumnToMonitorRight",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveColumnToMonitorUp",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveColumnToWorkspace",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "focus",
+              "type": "boolean",
+              "required": true
+            },
+            {
+              "name": "reference",
+              "type": "ref:WorkspaceReferenceArg",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "MoveColumnToWorkspaceDown",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "focus",
+              "type": "boolean",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "MoveColumnToWorkspaceUp",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "focus",
+              "type": "boolean",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "MoveFloatingWindow",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "option<integer>",
+              "required": false
+            },
+            {
+              "name": "x",
+              "type": "ref:PositionChange",
+              "required": true
+            },
+            {
+              "name": "y",
+              "type": "ref:PositionChange",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "MoveWindowDown",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveWindowDownOrToWorkspaceDown",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveWindowToFloating",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "option<integer>",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "MoveWindowToMonitor",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "option<integer>",
+              "required": false
+            },
+            {
+              "name": "output",
+              "type": "string",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "MoveWindowToMonitorDown",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveWindowToMonitorLeft",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveWindowToMonitorNext",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveWindowToMonitorPrevious",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveWindowToMonitorRight",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveWindowToMonitorUp",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveWindowToTiling",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "option<integer>",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "MoveWindowToWorkspace",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "focus",
+              "type": "boolean",
+              "required": true
+            },
+            {
+              "name": "reference",
+              "type": "ref:WorkspaceReferenceArg",
+              "required": true
+            },
+            {
+              "name": "window_id",
+              "type": "option<integer>",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "MoveWindowToWorkspaceDown",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "focus",
+              "type": "boolean",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "MoveWindowToWorkspaceUp",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "focus",
+              "type": "boolean",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "MoveWindowUp",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveWindowUpOrToWorkspaceUp",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveWorkspaceDown",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveWorkspaceToIndex",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "index",
+              "type": "integer",
+              "required": true
+            },
+            {
+              "name": "reference",
+              "type": "option<ref:WorkspaceReferenceArg>",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "MoveWorkspaceToMonitor",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "output",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "reference",
+              "type": "option<ref:WorkspaceReferenceArg>",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "MoveWorkspaceToMonitorDown",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveWorkspaceToMonitorLeft",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveWorkspaceToMonitorNext",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveWorkspaceToMonitorPrevious",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveWorkspaceToMonitorRight",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveWorkspaceToMonitorUp",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "MoveWorkspaceUp",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "OpenOverview",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "PowerOffMonitors",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "PowerOnMonitors",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "Quit",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "skip_confirmation",
+              "type": "boolean",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "ResetWindowHeight",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "option<integer>",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "Screenshot",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "path",
+              "type": "option<string>",
+              "required": false
+            },
+            {
+              "name": "show_pointer",
+              "type": "boolean",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "ScreenshotScreen",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "path",
+              "type": "option<string>",
+              "required": false
+            },
+            {
+              "name": "show_pointer",
+              "type": "boolean",
+              "required": true
+            },
+            {
+              "name": "write_to_disk",
+              "type": "boolean",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "ScreenshotWindow",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "option<integer>",
+              "required": false
+            },
+            {
+              "name": "path",
+              "type": "option<string>",
+              "required": false
+            },
+            {
+              "name": "write_to_disk",
+              "type": "boolean",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "SetColumnDisplay",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "display",
+              "type": "ref:ColumnDisplay",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "SetColumnWidth",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "change",
+              "type": "ref:SizeChange",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "SetDynamicCastMonitor",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "output",
+              "type": "option<string>",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "SetDynamicCastWindow",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "option<integer>",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "SetWindowHeight",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "change",
+              "type": "ref:SizeChange",
+              "required": true
+            },
+            {
+              "name": "id",
+              "type": "option<integer>",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "SetWindowUrgent",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "integer",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "SetWindowWidth",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "change",
+              "type": "ref:SizeChange",
+              "required": true
+            },
+            {
+              "name": "id",
+              "type": "option<integer>",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "SetWorkspaceName",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "name",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "workspace",
+              "type": "option<ref:WorkspaceReferenceArg>",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "ShowHotkeyOverlay",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "Spawn",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "command",
+              "type": "array<ref:Unknown>",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "SpawnSh",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "command",
+              "type": "string",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "SwapWindowLeft",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "SwapWindowRight",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "SwitchFocusBetweenFloatingAndTiling",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "SwitchLayout",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "layout",
+              "type": "ref:LayoutSwitchTarget",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "SwitchPresetColumnWidth",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "SwitchPresetColumnWidthBack",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "SwitchPresetWindowHeight",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "option<integer>",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "SwitchPresetWindowHeightBack",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "option<integer>",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "SwitchPresetWindowWidth",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "option<integer>",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "SwitchPresetWindowWidthBack",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "option<integer>",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "ToggleColumnTabbedDisplay",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "ToggleDebugTint",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "ToggleKeyboardShortcutsInhibit",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "ToggleOverview",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "ToggleWindowFloating",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "option<integer>",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "ToggleWindowRuleOpacity",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "option<integer>",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "ToggleWindowUrgent",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "integer",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "ToggleWindowedFullscreen",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "option<integer>",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "UnsetWindowUrgent",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "integer",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "UnsetWorkspaceName",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "reference",
+              "type": "option<ref:WorkspaceReferenceArg>",
+              "required": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Event",
+      "kind": "enum",
+      "tag_type": "external",
+      "variants": [
+        {
+          "name": "ConfigLoaded",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "failed",
+              "type": "boolean",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "KeyboardLayoutSwitched",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "idx",
+              "type": "integer",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "KeyboardLayoutsChanged",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "keyboard_layouts",
+              "type": "ref:KeyboardLayouts",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "OverviewOpenedOrClosed",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "is_open",
+              "type": "boolean",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "ScreenshotCaptured",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "path",
+              "type": "option<string>",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "WindowClosed",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "integer",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "WindowFocusChanged",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "option<integer>",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "WindowFocusTimestampChanged",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "focus_timestamp",
+              "type": "option<ref:Timestamp>",
+              "required": false
+            },
+            {
+              "name": "id",
+              "type": "integer",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "WindowLayoutsChanged",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "changes",
+              "type": "array<ref:Unknown>",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "WindowOpenedOrChanged",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "window",
+              "type": "ref:Window",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "WindowUrgencyChanged",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "integer",
+              "required": true
+            },
+            {
+              "name": "urgent",
+              "type": "boolean",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "WindowsChanged",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "windows",
+              "type": "array<ref:Unknown>",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "WorkspaceActivated",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "focused",
+              "type": "boolean",
+              "required": true
+            },
+            {
+              "name": "id",
+              "type": "integer",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "WorkspaceActiveWindowChanged",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "active_window_id",
+              "type": "option<integer>",
+              "required": false
+            },
+            {
+              "name": "workspace_id",
+              "type": "integer",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "WorkspaceUrgencyChanged",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "id",
+              "type": "integer",
+              "required": true
+            },
+            {
+              "name": "urgent",
+              "type": "boolean",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "WorkspacesChanged",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "workspaces",
+              "type": "array<ref:Unknown>",
+              "required": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Reply",
+      "kind": "enum",
+      "tag_type": "external",
+      "variants": [
+        {
+          "name": "Err",
+          "kind": "newtype",
+          "inner_type": "string"
+        },
+        {
+          "name": "Ok",
+          "kind": "newtype",
+          "inner_type": "ref:Response"
+        }
+      ]
+    },
+    {
+      "name": "Request",
+      "kind": "enum",
+      "tag_type": "external",
+      "variants": [
+        {
+          "name": "Action",
+          "kind": "newtype",
+          "inner_type": "ref:Action"
+        },
+        {
+          "name": "EventStream",
+          "kind": "unit"
+        },
+        {
+          "name": "FocusedOutput",
+          "kind": "unit"
+        },
+        {
+          "name": "FocusedWindow",
+          "kind": "unit"
+        },
+        {
+          "name": "KeyboardLayouts",
+          "kind": "unit"
+        },
+        {
+          "name": "Layers",
+          "kind": "unit"
+        },
+        {
+          "name": "Output",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "action",
+              "type": "ref:OutputAction",
+              "required": true
+            },
+            {
+              "name": "output",
+              "type": "string",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "Outputs",
+          "kind": "unit"
+        },
+        {
+          "name": "OverviewState",
+          "kind": "unit"
+        },
+        {
+          "name": "PickColor",
+          "kind": "unit"
+        },
+        {
+          "name": "PickWindow",
+          "kind": "unit"
+        },
+        {
+          "name": "ReturnError",
+          "kind": "unit"
+        },
+        {
+          "name": "Version",
+          "kind": "unit"
+        },
+        {
+          "name": "Windows",
+          "kind": "unit"
+        },
+        {
+          "name": "Workspaces",
+          "kind": "unit"
+        }
+      ]
+    },
+    {
+      "name": "Response",
+      "kind": "enum",
+      "tag_type": "external",
+      "variants": [
+        {
+          "name": "FocusedOutput",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "FocusedWindow",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "Handled",
+          "kind": "unit"
+        },
+        {
+          "name": "KeyboardLayouts",
+          "kind": "newtype",
+          "inner_type": "ref:KeyboardLayouts"
+        },
+        {
+          "name": "Layers",
+          "kind": "newtype",
+          "inner_type": "array<ref:Unknown>"
+        },
+        {
+          "name": "OutputConfigChanged",
+          "kind": "newtype",
+          "inner_type": "ref:OutputConfigChanged"
+        },
+        {
+          "name": "Outputs",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "OverviewState",
+          "kind": "newtype",
+          "inner_type": "ref:Overview"
+        },
+        {
+          "name": "PickedColor",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "PickedWindow",
+          "kind": "struct",
+          "fields": []
+        },
+        {
+          "name": "Version",
+          "kind": "newtype",
+          "inner_type": "string"
+        },
+        {
+          "name": "Windows",
+          "kind": "newtype",
+          "inner_type": "array<ref:Unknown>"
+        },
+        {
+          "name": "Workspaces",
+          "kind": "newtype",
+          "inner_type": "array<ref:Unknown>"
+        }
+      ]
+    },
+    {
+      "name": "ConfiguredMode",
+      "kind": "struct",
+      "fields": [
+        {
+          "name": "height",
+          "type": "integer",
+          "required": true
+        },
+        {
+          "name": "refresh",
+          "type": "option<float>",
+          "required": false
+        },
+        {
+          "name": "width",
+          "type": "integer",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "ConfiguredPosition",
+      "kind": "struct",
+      "fields": [
+        {
+          "name": "x",
+          "type": "integer",
+          "required": true
+        },
+        {
+          "name": "y",
+          "type": "integer",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "KeyboardLayouts",
+      "kind": "struct",
+      "fields": [
+        {
+          "name": "current_idx",
+          "type": "integer",
+          "required": true
+        },
+        {
+          "name": "names",
+          "type": "array<ref:Unknown>",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "LayerSurface",
+      "kind": "struct",
+      "fields": [
+        {
+          "name": "keyboard_interactivity",
+          "type": "ref:LayerSurfaceKeyboardInteractivity",
+          "required": true
+        },
+        {
+          "name": "layer",
+          "type": "ref:Layer",
+          "required": true
+        },
+        {
+          "name": "namespace",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "output",
+          "type": "string",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "LogicalOutput",
+      "kind": "struct",
+      "fields": [
+        {
+          "name": "height",
+          "type": "integer",
+          "required": true
+        },
+        {
+          "name": "scale",
+          "type": "float",
+          "required": true
+        },
+        {
+          "name": "transform",
+          "type": "ref:Transform",
+          "required": true
+        },
+        {
+          "name": "width",
+          "type": "integer",
+          "required": true
+        },
+        {
+          "name": "x",
+          "type": "integer",
+          "required": true
+        },
+        {
+          "name": "y",
+          "type": "integer",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "Mode",
+      "kind": "struct",
+      "fields": [
+        {
+          "name": "height",
+          "type": "integer",
+          "required": true
+        },
+        {
+          "name": "is_preferred",
+          "type": "boolean",
+          "required": true
+        },
+        {
+          "name": "refresh_rate",
+          "type": "integer",
+          "required": true
+        },
+        {
+          "name": "width",
+          "type": "integer",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "Output",
+      "kind": "struct",
+      "fields": [
+        {
+          "name": "current_mode",
+          "type": "option<integer>",
+          "required": false
+        },
+        {
+          "name": "is_custom_mode",
+          "type": "boolean",
+          "required": true
+        },
+        {
+          "name": "logical",
+          "type": "option<ref:LogicalOutput>",
+          "required": false
+        },
+        {
+          "name": "make",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "model",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "modes",
+          "type": "array<ref:Unknown>",
+          "required": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "physical_size",
+          "type": "option<array<ref:Unknown>>",
+          "required": false
+        },
+        {
+          "name": "serial",
+          "type": "option<string>",
+          "required": false
+        },
+        {
+          "name": "vrr_enabled",
+          "type": "boolean",
+          "required": true
+        },
+        {
+          "name": "vrr_supported",
+          "type": "boolean",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "Overview",
+      "kind": "struct",
+      "fields": [
+        {
+          "name": "is_open",
+          "type": "boolean",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "PickedColor",
+      "kind": "struct",
+      "fields": [
+        {
+          "name": "rgb",
+          "type": "array<ref:Unknown>",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "Timestamp",
+      "kind": "struct",
+      "fields": [
+        {
+          "name": "nanos",
+          "type": "integer",
+          "required": true
+        },
+        {
+          "name": "secs",
+          "type": "integer",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "VrrToSet",
+      "kind": "struct",
+      "fields": [
+        {
+          "name": "on_demand",
+          "type": "boolean",
+          "required": true
+        },
+        {
+          "name": "vrr",
+          "type": "boolean",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "Window",
+      "kind": "struct",
+      "fields": [
+        {
+          "name": "app_id",
+          "type": "option<string>",
+          "required": false
+        },
+        {
+          "name": "focus_timestamp",
+          "type": "option<ref:Timestamp>",
+          "required": false
+        },
+        {
+          "name": "id",
+          "type": "integer",
+          "required": true
+        },
+        {
+          "name": "is_floating",
+          "type": "boolean",
+          "required": true
+        },
+        {
+          "name": "is_focused",
+          "type": "boolean",
+          "required": true
+        },
+        {
+          "name": "is_urgent",
+          "type": "boolean",
+          "required": true
+        },
+        {
+          "name": "layout",
+          "type": "ref:WindowLayout",
+          "required": true
+        },
+        {
+          "name": "pid",
+          "type": "option<integer>",
+          "required": false
+        },
+        {
+          "name": "title",
+          "type": "option<string>",
+          "required": false
+        },
+        {
+          "name": "workspace_id",
+          "type": "option<integer>",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "WindowLayout",
+      "kind": "struct",
+      "fields": [
+        {
+          "name": "pos_in_scrolling_layout",
+          "type": "option<array<ref:Unknown>>",
+          "required": false
+        },
+        {
+          "name": "tile_pos_in_workspace_view",
+          "type": "option<array<ref:Unknown>>",
+          "required": false
+        },
+        {
+          "name": "tile_size",
+          "type": "array<ref:Unknown>",
+          "required": true
+        },
+        {
+          "name": "window_offset_in_tile",
+          "type": "array<ref:Unknown>",
+          "required": true
+        },
+        {
+          "name": "window_size",
+          "type": "array<ref:Unknown>",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "Workspace",
+      "kind": "struct",
+      "fields": [
+        {
+          "name": "active_window_id",
+          "type": "option<integer>",
+          "required": false
+        },
+        {
+          "name": "id",
+          "type": "integer",
+          "required": true
+        },
+        {
+          "name": "idx",
+          "type": "integer",
+          "required": true
+        },
+        {
+          "name": "is_active",
+          "type": "boolean",
+          "required": true
+        },
+        {
+          "name": "is_focused",
+          "type": "boolean",
+          "required": true
+        },
+        {
+          "name": "is_urgent",
+          "type": "boolean",
+          "required": true
+        },
+        {
+          "name": "name",
+          "type": "option<string>",
+          "required": false
+        },
+        {
+          "name": "output",
+          "type": "option<string>",
+          "required": false
+        }
+      ]
+    }
+  ]
+}
