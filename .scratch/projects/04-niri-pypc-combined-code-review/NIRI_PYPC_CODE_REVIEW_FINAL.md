@@ -19,7 +19,7 @@ This document is intended to be the final review reference for remediation plann
 
 However, the library is **not yet protocol-correct** against its own pinned contract.
 
-The dominant problem is the **schema -> IR -> generation pipeline**. The current normalization and generation flow loses protocol information for arrays, maps, tuple-like arrays, and nullable reference payloads. That information loss propagates into incorrect generated models, degraded typing, and at least some **broken reply round-trips that discard payload data**.
+The dominant problem is the **schema -> IR -> generation pipeline**. The current normalization and generation flow loses protocol information for arrays, maps, fixed-length `prefixItems` array shapes, and nullable reference payloads. That information loss propagates into incorrect generated models, degraded typing, and at least some **broken reply round-trips that discard payload data**.
 
 That issue is more important than the smaller runtime, lint, style, or type-check concerns. Until the generation pipeline is corrected and the generated artifacts are regenerated and re-verified, the library should not be described as fully spec-compliant.
 
@@ -154,7 +154,7 @@ But it materially undercalls the generation problem by treating `verify-generate
 
 These are the issues that most directly block correctness claims.
 
-### C1. IR normalization is lossy for arrays, maps, tuple-like arrays, and nullable refs
+### C1. IR normalization is lossy for arrays, maps, fixed-length `prefixItems` arrays, and nullable refs
 
 **Files:**
 - `tools/normalize_ir.py`
@@ -176,7 +176,7 @@ That causes the following downstream degradations:
 
 - arrays with typed `items` become `array<ref:Unknown>`
 - maps with typed `additionalProperties` are not preserved when `type: object` is present
-- tuple-like arrays with `prefixItems` are not preserved as structured tuples
+- fixed-length arrays with `prefixItems` are degraded to generic arrays without preserving element-level intent
 - nullable arrays and refs lose fidelity depending on shape
 
 **Confirmed examples from the attached IR**
@@ -184,7 +184,7 @@ That causes the following downstream degradations:
 - `Action.Spawn.command` is normalized as `array<ref:Unknown>` instead of `array<string>`.
 - `Output.modes` is normalized as `array<ref:Unknown>` instead of `array<ref:Mode>`.
 - `PickedColor.rgb` becomes `array<ref:Unknown>` instead of a typed float triple.
-- `WindowLayout` tuple-like fields such as `tile_size`, `window_size`, and `window_offset_in_tile` degrade to generic arrays.
+- `WindowLayout` `prefixItems` fields such as `tile_size`, `window_size`, and `window_offset_in_tile` degrade to generic arrays.
 - `Output.physical_size` degrades to `option<array<ref:Unknown>>` instead of a typed pair.
 
 **Impact**
@@ -198,11 +198,11 @@ Refactor `canonical_type()` so that schema shape analysis happens in the right p
 1. `$ref`
 2. nullable unions (`type: [T, null]`, `anyOf`, `oneOf` where relevant)
 3. arrays with `items`
-4. tuple-like arrays with `prefixItems`
+4. arrays with `prefixItems`
 5. maps with `additionalProperties`
 6. plain objects / primitives
 
-Unsupported tuple-like structures should hard-fail generation rather than silently degrade.
+Unsupported `prefixItems` shapes should either be represented intentionally (e.g., fixed-length homogeneous arrays) or hard-fail generation rather than silently degrade.
 
 ---
 
@@ -332,7 +332,7 @@ Treat this as the acceptance test for the generator repair. This specific reprod
 
 These do not eclipse the generator problem, but they are still important correctness issues.
 
-### H1. `verify-generated` is failing and must be treated as a correctness gate, not a cosmetic nuisance
+### H1. `verify-generated` is failing and should be treated as a correctness gate, not a cosmetic nuisance
 
 **Files:**
 - `tools/verify_generated.py`
@@ -355,7 +355,7 @@ Some diffs are formatting-only, but in this repository that is not the whole sto
 - Fix normalization and generation first.
 - Regenerate the tree.
 - Ensure `verify-generated` passes.
-- Make it a non-negotiable CI gate.
+- Make it a required CI gate.
 
 ---
 
@@ -448,7 +448,7 @@ Reserve capacity for the sentinel, drain one slot before enqueueing, or replace 
 
 When `next()` reads `_StreamClosed`, it raises `LifecycleError("Event stream has been closed")`.
 
-The spec expectation is that connection loss should surface as `TransportError`; closure by caller and transport loss are not the same condition.
+Connection loss should surface as `TransportError`; closure by caller and transport loss are not the same condition.
 
 **Impact**
 
@@ -720,7 +720,7 @@ The current suite’s 89% coverage is respectable, but it does not validate the 
 There is not enough schema-fidelity coverage for:
 - nullable reply payload variants,
 - typed maps and typed lists in replies,
-- tuple-like arrays,
+- fixed-length `prefixItems` array shapes,
 - richer struct payload shapes,
 - generator regressions around `Outputs`, `Windows`, `Workspaces`, `Layers`, `PickedColor`, and `Focused*` variants.
 
@@ -778,7 +778,7 @@ Make a clean-tree reproducibility pass part of CI and release preparation.
 
 ---
 
-### G3. Documentation and code examples should be synchronized with the actual API shape
+### G3. Documentation and code examples should stay synchronized with the actual API shape
 
 **Observed example drift**
 
@@ -830,7 +830,7 @@ This is the recommended order of work.
    - `PickedWindow`
    - `Spawn.command`
    - `Output.modes`
-   - tuple-like geometry fields
+   - `prefixItems` geometry fields
 
 ### Phase 2: Harden event-stream semantics
 
@@ -888,4 +888,3 @@ The most important conclusion from this final review is simple:
 > Fix the schema/IR/generation pipeline first. Everything else should be sequenced after that.
 
 Once that is corrected, the rest of the codebase looks very salvageable. The architecture is already good enough to support a clean remediation pass.
-

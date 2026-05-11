@@ -133,7 +133,7 @@ The core issue lives in `tools/normalize_ir.py`.
 The current `canonical_type()` function classifies by `schema["type"]` too early and too shallowly. In practice this means:
 
 - array schemas get collapsed before their item shape is preserved
-- tuple-like arrays using `prefixItems` are not represented faithfully
+- fixed-length arrays using `prefixItems` are not represented faithfully
 - map/object-with-`additionalProperties` schemas degrade or are flattened incorrectly
 - optional refs expressed via `anyOf` are often misclassified
 - unsupported/ambiguous shapes silently fall back to weak defaults like `string` or `ref:Unknown`
@@ -228,7 +228,7 @@ That is the opposite of the concept.
 
 ### Final recommendation for this area
 
-This should be the **first refactor** and should be treated as a foundational architectural repair.
+This should be the **first refactor** and treated as a foundational architectural repair.
 
 #### Required refactor direction
 
@@ -236,7 +236,7 @@ This should be the **first refactor** and should be treated as a foundational ar
 2. Add dedicated helpers for:
    - optional detection and stripping
    - array normalization
-   - tuple normalization
+   - fixed-length `prefixItems` normalization
    - map normalization
    - primitive fallback
 3. Preserve these forms explicitly:
@@ -244,20 +244,20 @@ This should be the **first refactor** and should be treated as a foundational ar
    - `option<T>`
    - `array<T>`
    - `map<string, T>`
-   - fixed-length tuples
+   - intentional fixed-length array shapes where schema requires them
 4. Fix variant classification so payloads are classified structurally:
    - only real object-with-fields payloads become `struct`
    - scalar/ref/array/map/option payloads become `newtype`
 5. Make the normalizer fail loudly on truly unsupported shapes.
 6. Regenerate all protocol files from the corrected IR.
 
-### My recommendation on tuple-like arrays
+### My recommendation on fixed-length `prefixItems` arrays
 
 The implementation-grade guide suggests preserving homogeneous fixed-length arrays as ordinary arrays unless forced to do more.
 
-That is acceptable as an intern-safe patch, but it is **not the cleanest final architecture**.
+That is a reasonable default and should not be treated as a quality compromise by itself.
 
-Because compatibility is not a constraint here, I recommend introducing explicit tuple support in the IR if upstream schema uses tuple-like arrays meaningfully.
+Because compatibility is not a constraint here, I recommend preserving element-level intent clearly, but without requiring tuple syntax in the IR as a hard architectural rule.
 
 Examples that should be represented more faithfully than `list[Any]` or even generic `list[float]`:
 
@@ -268,11 +268,11 @@ Examples that should be represented more faithfully than `list[Any]` or even gen
 
 The clean design is:
 
-- IR supports `tuple<T1,T2,...>`
-- generator emits `tuple[...]` or a deliberate fixed-length alias
-- tests enforce it on real protocol fields
+- IR explicitly distinguishes generic arrays from fixed-length `prefixItems` arrays
+- generator emits a deliberate representation that preserves intent (typed list, fixed-length alias, or tuple where justified)
+- tests enforce the representation on real protocol fields
 
-This is a better long-term architecture than flattening everything to lists.
+The important constraint is preserving structure and semantics, not enforcing one syntax choice everywhere.
 
 ---
 
@@ -423,8 +423,8 @@ asyncio.Queue[_EventItem | _ErrorItem | _ClosedItem]
 4. User close → enqueue `_ClosedItem`
 5. `next()` dispatches on actual internal item type
 6. `__anext__()` converts closed-stream terminal state to `StopAsyncIteration`
-7. Queue insertion for terminal items must be non-blocking and full-queue-safe
-8. `close()` must be idempotent and never fail because the queue is full
+7. Queue insertion for terminal items should be non-blocking and full-queue-safe
+8. `close()` should be idempotent and should not fail because the queue is full
 
 ### Timeout policy recommendation
 
@@ -802,7 +802,7 @@ That is more explicit and easier to reason about.
 
 If you strongly want version mismatch policy in the first-class API now, then implement it properly and add a dedicated `CompatibilityError`.
 
-What is not acceptable is leaving the dead knob in place.
+Leaving the dead knob in place is not desirable for the target architecture.
 
 ---
 
@@ -818,7 +818,7 @@ That is why the suite can be green while the library still has serious architect
 
 #### 1. IR normalization fidelity
 
-There are no focused tests that prove arrays, maps, optional refs, and tuple-like shapes survive normalization correctly.
+There are no focused tests that prove arrays, maps, optional refs, and fixed-length `prefixItems` shapes survive normalization correctly.
 
 #### 2. Generated annotation fidelity
 
@@ -919,7 +919,7 @@ If generated artifacts are noisy, non-deterministic, or mixed with build junk, t
 - stabilize output formatting and blank-line behavior
 - ensure import groups are deterministic
 - ensure unions/variants/fields/types are ordered deterministically
-- make `verify_generated` a hard gate that must always be green
+- make `verify_generated` a hard gate that is expected to stay green
 
 ### Important prioritization note
 
@@ -989,7 +989,7 @@ Its one conservative tendency is that it slightly favors intern-safe implementat
 
 Examples:
 
-- keeping tuple-like arrays as generic arrays unless forced otherwise
+- keeping fixed-length `prefixItems` arrays as generic arrays unless forced otherwise
 - preserving more lifecycle structure than may actually be needed for the client/bundle
 
 Those are understandable compromises, but given the explicit no-compatibility constraint, the final architecture can be cleaner than the guide's minimum viable fix.
@@ -1028,7 +1028,7 @@ It adds useful polish-minded recommendations around:
 
 It is too forgiving in one important place: the suggestion to log malformed events and continue.
 
-That is not the right policy for a pinned protocol substrate. In this library, malformed inbound events should terminate the stream with a real decode/protocol failure.
+That is not the preferred policy for a pinned protocol substrate. In this library, malformed inbound events should terminate the stream with a real decode/protocol failure.
 
 It also suggests `skip_to_ready()` for the bundle lifecycle. That is cleaner than direct private-state mutation, but still preserves an abstraction I believe should be removed altogether.
 
@@ -1057,7 +1057,7 @@ Generated protocol types should faithfully and deterministically encode the actu
 ### Required changes
 
 - rewrite `canonical_type()` shape-first
-- preserve arrays, maps, options, refs, tuples
+- preserve arrays, maps, options, refs, and fixed-length `prefixItems` intent
 - fix variant classification
 - regenerate all types
 - add focused generation tests
@@ -1075,10 +1075,10 @@ Generated protocol types should faithfully and deterministically encode the actu
 - `LayersResponse.payload` is `list[LayerSurface]`
 - `WindowsResponse.payload` is `list[Window]`
 - `WorkspacesResponse.payload` is `list[Workspace]`
-- tuple-like structures are represented intentionally and consistently
+- fixed-length `prefixItems` structures are represented intentionally and consistently
 - `verify_generated` exits 0
 
-## P0 — Redesign `NiriEventStream`
+## P0 — Refactor `NiriEventStream` Semantics
 
 ### Why it is P0
 
@@ -1232,7 +1232,7 @@ Because the codebase currently allows green tests despite real correctness and a
 
 ### End-state goal
 
-The original defects should become impossible to reintroduce silently.
+The original defects should be difficult to reintroduce silently.
 
 ## P2 — Clean generator determinism and repo hygiene
 
@@ -1298,7 +1298,7 @@ This library's current problems are semantic and architectural, not performance-
 
 ## Recommended target architecture
 
-The clean final architecture should look like this.
+The target final architecture should look like this.
 
 ## Layer 1: Protocol authority
 
@@ -1412,7 +1412,7 @@ Focus first on:
 - make reply unwrapping structural
 - improve error context and truncation handling
 
-### Phase 6 — Redesign `NiriEventStream`
+### Phase 6 — Refactor `NiriEventStream` semantics
 
 - explicit queue item types
 - queue-safe close/error insertion
@@ -1590,7 +1590,7 @@ The refactor should not be considered complete until all of the following are tr
 
 ## Protocol generation
 
-- arrays, maps, options, refs, and tuple-like structures are preserved faithfully
+- arrays, maps, options, refs, and fixed-length `prefixItems` structures are preserved faithfully
 - no high-value protocol fields degrade to `Any` without necessity
 - known broken response wrappers now carry real payload types
 - generated output is deterministic and `verify_generated` is green
