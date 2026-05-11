@@ -1417,6 +1417,314 @@
       ]
     },
     {
+      "name": "ColumnDisplay",
+      "kind": "enum",
+      "tag_type": "external",
+      "variants": [
+        {
+          "name": "Normal",
+          "kind": "unit"
+        },
+        {
+          "name": "Tabbed",
+          "kind": "unit"
+        }
+      ]
+    },
+    {
+      "name": "HSyncPolarity",
+      "kind": "enum",
+      "tag_type": "external",
+      "variants": [
+        {
+          "name": "NHSync",
+          "kind": "unit"
+        },
+        {
+          "name": "PHSync",
+          "kind": "unit"
+        }
+      ]
+    },
+    {
+      "name": "Layer",
+      "kind": "enum",
+      "tag_type": "external",
+      "variants": [
+        {
+          "name": "Background",
+          "kind": "unit"
+        },
+        {
+          "name": "Bottom",
+          "kind": "unit"
+        },
+        {
+          "name": "Overlay",
+          "kind": "unit"
+        },
+        {
+          "name": "Top",
+          "kind": "unit"
+        }
+      ]
+    },
+    {
+      "name": "LayerSurfaceKeyboardInteractivity",
+      "kind": "enum",
+      "tag_type": "external",
+      "variants": [
+        {
+          "name": "Exclusive",
+          "kind": "unit"
+        },
+        {
+          "name": "None",
+          "kind": "unit"
+        },
+        {
+          "name": "OnDemand",
+          "kind": "unit"
+        }
+      ]
+    },
+    {
+      "name": "LayoutSwitchTarget",
+      "kind": "enum",
+      "tag_type": "external",
+      "variants": [
+        {
+          "name": "Index",
+          "kind": "newtype",
+          "inner_type": "integer"
+        },
+        {
+          "name": "Next",
+          "kind": "unit"
+        },
+        {
+          "name": "Prev",
+          "kind": "unit"
+        }
+      ]
+    },
+    {
+      "name": "ModeToSet",
+      "kind": "enum",
+      "tag_type": "external",
+      "variants": [
+        {
+          "name": "Automatic",
+          "kind": "unit"
+        },
+        {
+          "name": "Specific",
+          "kind": "newtype",
+          "inner_type": "ref:ConfiguredMode"
+        }
+      ]
+    },
+    {
+      "name": "OutputAction",
+      "kind": "enum",
+      "tag_type": "external",
+      "variants": [
+        {
+          "name": "CustomMode",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "mode",
+              "type": "ref:ConfiguredMode",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "Mode",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "mode",
+              "type": "ref:ModeToSet",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "Modeline",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "clock",
+              "type": "float",
+              "required": true
+            },
+            {
+              "name": "hdisplay",
+              "type": "integer",
+              "required": true
+            },
+            {
+              "name": "hsync_end",
+              "type": "integer",
+              "required": true
+            },
+            {
+              "name": "hsync_polarity",
+              "type": "ref:HSyncPolarity",
+              "required": true
+            },
+            {
+              "name": "hsync_start",
+              "type": "integer",
+              "required": true
+            },
+            {
+              "name": "htotal",
+              "type": "integer",
+              "required": true
+            },
+            {
+              "name": "vdisplay",
+              "type": "integer",
+              "required": true
+            },
+            {
+              "name": "vsync_end",
+              "type": "integer",
+              "required": true
+            },
+            {
+              "name": "vsync_polarity",
+              "type": "ref:VSyncPolarity",
+              "required": true
+            },
+            {
+              "name": "vsync_start",
+              "type": "integer",
+              "required": true
+            },
+            {
+              "name": "vtotal",
+              "type": "integer",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "Off",
+          "kind": "unit"
+        },
+        {
+          "name": "On",
+          "kind": "unit"
+        },
+        {
+          "name": "Position",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "position",
+              "type": "ref:PositionToSet",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "Scale",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "scale",
+              "type": "ref:ScaleToSet",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "Transform",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "transform",
+              "type": "ref:Transform",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "Vrr",
+          "kind": "struct",
+          "fields": [
+            {
+              "name": "vrr",
+              "type": "ref:VrrToSet",
+              "required": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "OutputConfigChanged",
+      "kind": "enum",
+      "tag_type": "external",
+      "variants": [
+        {
+          "name": "Applied",
+          "kind": "unit"
+        },
+        {
+          "name": "OutputWasMissing",
+          "kind": "unit"
+        }
+      ]
+    },
+    {
+      "name": "PositionChange",
+      "kind": "enum",
+      "tag_type": "external",
+      "variants": [
+        {
+          "name": "AdjustFixed",
+          "kind": "newtype",
+          "inner_type": "float"
+        },
+        {
+          "name": "AdjustProportion",
+          "kind": "newtype",
+          "inner_type": "float"
+        },
+        {
+          "name": "SetFixed",
+          "kind": "newtype",
+          "inner_type": "float"
+        },
+        {
+          "name": "SetProportion",
+          "kind": "newtype",
+          "inner_type": "float"
+        }
+      ]
+    },
+    {
+      "name": "PositionToSet",
+      "kind": "enum",
+      "tag_type": "external",
+      "variants": [
+        {
+          "name": "Automatic",
+          "kind": "unit"
+        },
+        {
+          "name": "Specific",
+          "kind": "newtype",
+          "inner_type": "ref:ConfiguredPosition"
+        }
+      ]
+    },
+    {
       "name": "Response",
       "kind": "enum",
       "tag_type": "external",
@@ -1484,6 +1792,125 @@
           "name": "Workspaces",
           "kind": "newtype",
           "inner_type": "array<ref:Unknown>"
+        }
+      ]
+    },
+    {
+      "name": "ScaleToSet",
+      "kind": "enum",
+      "tag_type": "external",
+      "variants": [
+        {
+          "name": "Automatic",
+          "kind": "unit"
+        },
+        {
+          "name": "Specific",
+          "kind": "newtype",
+          "inner_type": "float"
+        }
+      ]
+    },
+    {
+      "name": "SizeChange",
+      "kind": "enum",
+      "tag_type": "external",
+      "variants": [
+        {
+          "name": "AdjustFixed",
+          "kind": "newtype",
+          "inner_type": "integer"
+        },
+        {
+          "name": "AdjustProportion",
+          "kind": "newtype",
+          "inner_type": "float"
+        },
+        {
+          "name": "SetFixed",
+          "kind": "newtype",
+          "inner_type": "integer"
+        },
+        {
+          "name": "SetProportion",
+          "kind": "newtype",
+          "inner_type": "float"
+        }
+      ]
+    },
+    {
+      "name": "Transform",
+      "kind": "enum",
+      "tag_type": "external",
+      "variants": [
+        {
+          "name": "180",
+          "kind": "unit"
+        },
+        {
+          "name": "270",
+          "kind": "unit"
+        },
+        {
+          "name": "90",
+          "kind": "unit"
+        },
+        {
+          "name": "Flipped",
+          "kind": "unit"
+        },
+        {
+          "name": "Flipped180",
+          "kind": "unit"
+        },
+        {
+          "name": "Flipped270",
+          "kind": "unit"
+        },
+        {
+          "name": "Flipped90",
+          "kind": "unit"
+        },
+        {
+          "name": "Normal",
+          "kind": "unit"
+        }
+      ]
+    },
+    {
+      "name": "VSyncPolarity",
+      "kind": "enum",
+      "tag_type": "external",
+      "variants": [
+        {
+          "name": "NVSync",
+          "kind": "unit"
+        },
+        {
+          "name": "PVSync",
+          "kind": "unit"
+        }
+      ]
+    },
+    {
+      "name": "WorkspaceReferenceArg",
+      "kind": "enum",
+      "tag_type": "external",
+      "variants": [
+        {
+          "name": "Id",
+          "kind": "newtype",
+          "inner_type": "integer"
+        },
+        {
+          "name": "Index",
+          "kind": "newtype",
+          "inner_type": "integer"
+        },
+        {
+          "name": "Name",
+          "kind": "newtype",
+          "inner_type": "string"
         }
       ]
     },

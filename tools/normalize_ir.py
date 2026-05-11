@@ -200,8 +200,25 @@ def extract_structs(defs: dict) -> list[dict]:
     return sorted(structs, key=lambda s: s["name"])
 
 
-def build_enums(schemas: dict[str, dict], defs: dict) -> list[dict]:
-    """Build enum entries from exported schema files."""
+def extract_enums(defs: dict) -> list[dict]:
+    """Extract all enum types from $defs."""
+    enums = []
+    for name, schema in defs.items():
+        if "oneOf" in schema:
+            variants = classify_variants(schema, defs, name)
+            enums.append(
+                {
+                    "name": name,
+                    "kind": "enum",
+                    "tag_type": "external",
+                    "variants": variants,
+                }
+            )
+    return sorted(enums, key=lambda e: e["name"])
+
+
+def build_top_enums(schemas: dict[str, dict], defs: dict) -> list[dict]:
+    """Build enum entries from top-level exported schema."""
     enums = []
     type_config = {
         "request": {"name": "Request"},
@@ -232,19 +249,6 @@ def build_enums(schemas: dict[str, dict], defs: dict) -> list[dict]:
             "variants": reply_variants,
         }
     )
-
-    # Extract Response enum from reply's $defs
-    response_schema = defs.get("Response")
-    if response_schema and "oneOf" in response_schema:
-        response_variants = classify_variants(response_schema, defs, "Response")
-        enums.append(
-            {
-                "name": "Response",
-                "kind": "enum",
-                "tag_type": "external",
-                "variants": response_variants,
-            }
-        )
 
     return sorted(enums, key=lambda e: e["name"])
 
@@ -283,8 +287,17 @@ def main():
         defs = schema.get("$defs", {})
         all_defs.update(defs)
 
-    enums = build_enums(schemas, all_defs)
+    top_enums = build_top_enums(schemas, all_defs)
+    def_enums = extract_enums(all_defs)
     structs = extract_structs(all_defs)
+
+    # Deduplicate enums by name (top-level takes precedence)
+    seen_names = {e["name"] for e in top_enums}
+    enums = list(top_enums)
+    for e in def_enums:
+        if e["name"] not in seen_names:
+            enums.append(e)
+            seen_names.add(e["name"])
 
     ir = {
         "ir_version": "1",
