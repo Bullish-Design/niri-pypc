@@ -13,7 +13,7 @@
 - [x] Step 10: Framing Module
 - [x] Step 11: Unix Connection Transport
 - [x] Step 12: Lifecycle Runtime State Machine
-- [ ] Step 13: Command Client API (`NiriClient`)
+- [x] Step 13: Command Client API (`NiriClient`)
 - [ ] Step 14: Event Stream API (`NiriEventStream`)
 - [ ] Step 15: Bundle API (`NiriConnectionBundle`)
 - [ ] Step 16: Public API Exports and Package Surface
