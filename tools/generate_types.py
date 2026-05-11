@@ -84,6 +84,11 @@ def ir_type_to_python(ir_type: str) -> str:
         parts = ir_type[4:-1].split(",", 1)
         val_py = ir_type_to_python(parts[1].strip()) if len(parts) > 1 else "Any"
         return f"dict[str, {val_py}]"
+    if ir_type.startswith("tuple<"):
+        inner = ir_type[6:-1]
+        parts = inner.split(",")
+        py_types = [ir_type_to_python(p.strip()) for p in parts]
+        return f"tuple[{', '.join(py_types)}]"
     if ir_type.startswith("ref:"):
         name = ir_type[4:]
         if name == "Unknown":
@@ -378,12 +383,23 @@ def _collect_refs_from_variant(v: dict, refs: set[str]) -> None:
 
 
 def _extract_refs_from_type(t: str, refs: set[str]) -> None:
+    """Recursively extract all ref:X references from an IR type string."""
     if t.startswith("ref:"):
-        refs.add(t[4:])
-    elif t.startswith("option<ref:"):
-        refs.add(t[11:-1])
-    elif t.startswith("array<ref:"):
-        refs.add(t[10:-1])
+        name = t[4:]
+        if name != "Unknown":
+            refs.add(name)
+    elif t.startswith("option<"):
+        _extract_refs_from_type(t[7:-1], refs)
+    elif t.startswith("array<"):
+        _extract_refs_from_type(t[6:-1], refs)
+    elif t.startswith("map<"):
+        parts = t[4:-1].split(",", 1)
+        if len(parts) > 1:
+            _extract_refs_from_type(parts[1].strip(), refs)
+    elif t.startswith("tuple<"):
+        inner = t[6:-1]
+        for part in inner.split(","):
+            _extract_refs_from_type(part.strip(), refs)
 
 
 if __name__ == "__main__":

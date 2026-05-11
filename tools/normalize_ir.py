@@ -166,7 +166,12 @@ def classify_variants(schema: dict, defs: dict, name: str) -> list[dict]:
             var_payload = props[var_name]
 
             # Empty struct: {"VariantName": {"type": "object"}}
-            if var_payload.get("type") == "object" and not var_payload.get("properties"):
+            # Keep map-like objects in the typed branch below.
+            if (
+                var_payload.get("type") == "object"
+                and not var_payload.get("properties")
+                and "additionalProperties" not in var_payload
+            ):
                 variants.append(
                     {
                         "name": var_name,
