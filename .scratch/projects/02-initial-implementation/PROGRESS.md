@@ -17,8 +17,8 @@
 - [x] Step 14: Event Stream API (`NiriEventStream`)
 - [x] Step 15: Bundle API (`NiriConnectionBundle`)
 - [x] Step 16: Public API Exports and Package Surface
-- [ ] Step 17: Test Fixtures and Mock Server Infrastructure
-- [ ] Step 18: Type Tests
+- [x] Step 17: Test Fixtures and Mock Server Infrastructure
+- [x] Step 18: Type Tests
 - [ ] Step 19: Transport and Runtime Tests
 - [ ] Step 20: API and Integration Tests
 - [ ] Step 21: Live Tests (Optional/Gated)
