@@ -1,0 +1,8 @@
+# Upstream pin for niri-pypc protocol artifacts.
+# The pinned crate version is the authoritative source of truth for all
+# generated protocol types. Bumping this pin requires re-exporting schema,
+# re-normalizing IR, regenerating types, and updating tests.
+[upstream]
+crate = "niri-ipc"
+version = "25.11"
+features = ["json-schema"]
