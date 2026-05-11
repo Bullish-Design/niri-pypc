@@ -121,6 +121,9 @@ class Event(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+        # If variant is already a decoded model instance, pass through
+        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
+            return data
         return {"variant": decode_externally_tagged(
             data, _EVENT_VARIANTS,
             unknown_sentinel=UnknownEvent,

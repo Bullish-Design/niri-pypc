@@ -195,6 +195,9 @@ def gen_enum_code(enum_name: str, variants: list[dict], has_unknown: bool) -> st
     lines.append("    @classmethod")
     lines.append("    def _decode_external_tag(cls, data: Any) -> dict[str, Any]:")
     lines.append("        from niri_pypc.types.codec import decode_externally_tagged")
+    lines.append("        # If variant is already a decoded model instance, pass through")
+    lines.append('        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):')
+    lines.append("            return data")
     if has_unknown:
         lines.append(f'        return {{"variant": decode_externally_tagged(')
         lines.append(f"            data, {var_table},")

@@ -35,6 +35,9 @@ class ColumnDisplay(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+        # If variant is already a decoded model instance, pass through
+        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
+            return data
         return {"variant": decode_externally_tagged(data, _COLUMNDISPLAY_VARIANTS)}
 
     @model_serializer
@@ -68,6 +71,9 @@ class HSyncPolarity(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+        # If variant is already a decoded model instance, pass through
+        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
+            return data
         return {"variant": decode_externally_tagged(data, _HSYNCPOLARITY_VARIANTS)}
 
     @model_serializer
@@ -111,6 +117,9 @@ class Layer(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+        # If variant is already a decoded model instance, pass through
+        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
+            return data
         return {"variant": decode_externally_tagged(data, _LAYER_VARIANTS)}
 
     @model_serializer
@@ -149,6 +158,9 @@ class LayerSurfaceKeyboardInteractivity(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+        # If variant is already a decoded model instance, pass through
+        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
+            return data
         return {"variant": decode_externally_tagged(data, _LAYERSURFACEKEYBOARDINTERACTIVITY_VARIANTS)}
 
     @model_serializer
@@ -187,6 +199,9 @@ class LayoutSwitchTarget(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+        # If variant is already a decoded model instance, pass through
+        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
+            return data
         return {"variant": decode_externally_tagged(data, _LAYOUTSWITCHTARGET_VARIANTS)}
 
     @model_serializer
@@ -220,6 +235,9 @@ class ModeToSet(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+        # If variant is already a decoded model instance, pass through
+        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
+            return data
         return {"variant": decode_externally_tagged(data, _MODETOSET_VARIANTS)}
 
     @model_serializer
@@ -298,6 +316,9 @@ class OutputAction(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+        # If variant is already a decoded model instance, pass through
+        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
+            return data
         return {"variant": decode_externally_tagged(data, _OUTPUTACTION_VARIANTS)}
 
     @model_serializer
@@ -331,6 +352,9 @@ class OutputConfigChanged(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+        # If variant is already a decoded model instance, pass through
+        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
+            return data
         return {"variant": decode_externally_tagged(data, _OUTPUTCONFIGCHANGED_VARIANTS)}
 
     @model_serializer
@@ -374,6 +398,9 @@ class PositionChange(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+        # If variant is already a decoded model instance, pass through
+        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
+            return data
         return {"variant": decode_externally_tagged(data, _POSITIONCHANGE_VARIANTS)}
 
     @model_serializer
@@ -407,6 +434,9 @@ class PositionToSet(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+        # If variant is already a decoded model instance, pass through
+        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
+            return data
         return {"variant": decode_externally_tagged(data, _POSITIONTOSET_VARIANTS)}
 
     @model_serializer
@@ -440,6 +470,9 @@ class ScaleToSet(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+        # If variant is already a decoded model instance, pass through
+        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
+            return data
         return {"variant": decode_externally_tagged(data, _SCALETOSET_VARIANTS)}
 
     @model_serializer
@@ -483,6 +516,9 @@ class SizeChange(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+        # If variant is already a decoded model instance, pass through
+        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
+            return data
         return {"variant": decode_externally_tagged(data, _SIZECHANGE_VARIANTS)}
 
     @model_serializer
@@ -546,6 +582,9 @@ class Transform(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+        # If variant is already a decoded model instance, pass through
+        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
+            return data
         return {"variant": decode_externally_tagged(data, _TRANSFORM_VARIANTS)}
 
     @model_serializer
@@ -579,6 +618,9 @@ class VSyncPolarity(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+        # If variant is already a decoded model instance, pass through
+        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
+            return data
         return {"variant": decode_externally_tagged(data, _VSYNCPOLARITY_VARIANTS)}
 
     @model_serializer
@@ -617,6 +659,9 @@ class WorkspaceReferenceArg(BaseModel):
     @classmethod
     def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
         from niri_pypc.types.codec import decode_externally_tagged
+        # If variant is already a decoded model instance, pass through
+        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
+            return data
         return {"variant": decode_externally_tagged(data, _WORKSPACEREFERENCEARG_VARIANTS)}
 
     @model_serializer
