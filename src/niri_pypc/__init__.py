@@ -8,6 +8,7 @@ from niri_pypc.config import BackpressureMode, NiriConfig
 from niri_pypc.errors import (
     ConfigError,
     DecodeError,
+    EncodeError,
     InternalError,
     LifecycleError,
     NiriError,
@@ -17,14 +18,12 @@ from niri_pypc.errors import (
     TransportError,
 )
 
-# Generated types are accessed via niri_pypc.types
-# e.g., from niri_pypc.types import Request, Event, Action
-
 __all__ = [
     "__version__",
     "BackpressureMode",
     "ConfigError",
     "DecodeError",
+    "EncodeError",
     "InternalError",
     "LifecycleError",
     "NiriClient",

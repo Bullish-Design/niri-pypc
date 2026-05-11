@@ -15,10 +15,12 @@ class NiriError(Exception):
         operation: str | None = None,
         socket_path: str | None = None,
         retryable: bool = False,
+        cause: Exception | None = None,
     ) -> None:
         self.operation = operation
         self.socket_path = socket_path
         self.retryable = retryable
+        self.cause = cause
         super().__init__(message)
 
 
@@ -33,6 +35,8 @@ class NiriTimeoutError(NiriError, TimeoutError):
 class DecodeError(NiriError):
     """Validation or shape failure during decode."""
 
+    MAX_PAYLOAD_EXCERPT = 1024
+
     def __init__(
         self,
         message: str,
@@ -40,8 +44,14 @@ class DecodeError(NiriError):
         raw_payload: str | None = None,
         **kwargs: Any,
     ) -> None:
+        if raw_payload is not None and len(raw_payload) > self.MAX_PAYLOAD_EXCERPT:
+            raw_payload = raw_payload[: self.MAX_PAYLOAD_EXCERPT]
         self.raw_payload = raw_payload
         super().__init__(message, **kwargs)
+
+
+class EncodeError(NiriError):
+    """Failure during outbound encoding."""
 
 
 class ProtocolError(NiriError):
