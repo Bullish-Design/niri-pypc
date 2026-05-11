@@ -11,7 +11,7 @@
 - [x] Step 8: Error Taxonomy
 - [x] Step 9: Configuration Layer
 - [x] Step 10: Framing Module
-- [ ] Step 11: Unix Connection Transport
+- [x] Step 11: Unix Connection Transport
 - [ ] Step 12: Lifecycle Runtime State Machine
 - [ ] Step 13: Command Client API (`NiriClient`)
 - [ ] Step 14: Event Stream API (`NiriEventStream`)
