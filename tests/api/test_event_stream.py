@@ -1,0 +1,160 @@
+"""Tests for NiriEventStream."""
+
+from __future__ import annotations
+
+import asyncio
+import json
+import tempfile
+from pathlib import Path
+
+import pytest
+
+from niri_pypc.config import BackpressureMode, NiriConfig
+from niri_pypc.api.event_stream import NiriEventStream
+from niri_pypc.errors import LifecycleError
+
+
+@pytest.fixture
+async def event_server():
+    """Create a mock niri event server.
+
+    Accepts one connection, reads the EventStream request, then sends
+    configured event frames. Closes on EOF.
+    """
+    server_control = {"events": [], "received_request": None, "close_on_connect": False}
+
+    async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
+        try:
+            data = await asyncio.wait_for(reader.readuntil(b"\n"), timeout=5.0)
+        except (asyncio.IncompleteReadError, asyncio.TimeoutError):
+            writer.close()
+            return
+        server_control["received_request"] = data
+
+        if server_control.get("close_on_connect"):
+            writer.close()
+            return
+
+        for evt in server_control["events"]:
+            frame = json.dumps(evt).encode() + b"\n"
+            writer.write(frame)
+            await writer.drain()
+            await asyncio.sleep(0.01)
+        # Close writer after sending all events so client sees EOF
+        writer.close()
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        socket_path = Path(tmpdir) / "event.sock"
+        server = await asyncio.start_unix_server(handler, path=str(socket_path))
+        yield socket_path, server_control
+        server.close()
+        await server.wait_closed()
+
+
+class TestNiriEventStream:
+    async def test_stream_yields_events(self, event_server):
+        """EventStream yields decoded events in order."""
+        socket_path, ctrl = event_server
+        ctrl["events"] = [
+            {"WorkspaceActivated": {"id": 1, "focused": True}},
+            {"WorkspaceActivated": {"id": 2, "focused": False}},
+        ]
+
+        config = NiriConfig(socket_path=socket_path)
+        stream = await NiriEventStream.connect(config)
+        e1 = await stream.next(timeout=1.0)
+        assert e1.id == 1
+        assert e1.focused is True
+
+        e2 = await stream.next(timeout=1.0)
+        assert e2.id == 2
+        assert e2.focused is False
+
+        await stream.close()
+
+    async def test_stream_receives_eventstream_request(self, event_server):
+        """Stream sends an EventStream request on connect."""
+        socket_path, ctrl = event_server
+        ctrl["events"] = [{"WorkspaceActivated": {"id": 1, "focused": True}}]
+
+        config = NiriConfig(socket_path=socket_path)
+        stream = await NiriEventStream.connect(config)
+        await stream.next(timeout=1.0)
+        await stream.close()
+
+        assert ctrl["received_request"] is not None
+        assert b"EventStream" in ctrl["received_request"]
+
+    async def test_close_is_idempotent(self, event_server):
+        """Close can be called multiple times."""
+        socket_path, ctrl = event_server
+        ctrl["events"] = [{"WorkspaceActivated": {"id": 1, "focused": True}}]
+
+        config = NiriConfig(socket_path=socket_path)
+        stream = await NiriEventStream.connect(config)
+        await stream.close()
+        await stream.close()  # second close should not raise
+        assert stream._lifecycle.is_terminal
+
+    async def test_next_after_close_raises(self, event_server):
+        """Calling next() after close raises LifecycleError."""
+        socket_path, ctrl = event_server
+        ctrl["events"] = [{"WorkspaceActivated": {"id": 1, "focused": True}}]
+
+        config = NiriConfig(socket_path=socket_path)
+        stream = await NiriEventStream.connect(config)
+        await stream.close()
+        with pytest.raises(LifecycleError, match="Event stream is closed"):
+            await stream.next(timeout=1.0)
+
+    async def test_async_iterator(self, event_server):
+        """Stream supports async iteration."""
+        socket_path, ctrl = event_server
+        ctrl["events"] = [
+            {"WorkspaceActivated": {"id": 1, "focused": True}},
+            {"WorkspaceActivated": {"id": 2, "focused": False}},
+        ]
+
+        config = NiriConfig(socket_path=socket_path)
+        stream = await NiriEventStream.connect(config)
+
+        events = []
+        async for event in stream:
+            events.append((event.id, event.focused))
+            if len(events) == 2:
+                break
+
+        assert events == [(1, True), (2, False)]
+
+    async def test_async_context_manager(self, event_server):
+        """Stream works as async context manager."""
+        socket_path, ctrl = event_server
+        ctrl["events"] = [{"WorkspaceActivated": {"id": 1, "focused": True}}]
+
+        config = NiriConfig(socket_path=socket_path)
+        async with await NiriEventStream.connect(config) as stream:
+            event = await stream.next(timeout=1.0)
+            assert event.id == 1
+
+        assert stream._lifecycle.is_terminal
+
+    async def test_unknown_event_does_not_crash(self, event_server):
+        """Unknown event variants produce UnknownEvent sentinel."""
+        socket_path, ctrl = event_server
+        ctrl["events"] = [
+            {"UnknownFutureEvent": {"some": "data"}},
+            {"WorkspaceActivated": {"id": 3, "focused": True}},
+        ]
+
+        config = NiriConfig(socket_path=socket_path)
+        stream = await NiriEventStream.connect(config)
+        e1 = await stream.next(timeout=1.0)
+        from niri_pypc.types.generated.event import UnknownEvent
+
+        assert isinstance(e1, UnknownEvent)
+        assert e1.variant_name == "UnknownFutureEvent"
+
+        e2 = await stream.next(timeout=1.0)
+        assert e2.id == 3
+
+        await stream.close()
