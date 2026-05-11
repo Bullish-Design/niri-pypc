@@ -19,7 +19,6 @@ class TestNiriConfig:
         assert cfg.event_read_timeout is None
         assert cfg.max_frame_size == 4 * 1024 * 1024
         assert cfg.event_queue_capacity == 256
-        assert cfg.strict_version_check is True
         assert cfg.backpressure_mode == BackpressureMode.DROP_OLDEST
 
     def test_explicit_socket_path(self):

@@ -67,7 +67,7 @@ class TestResponsePayloadTypes:
 
     def test_version_response_has_str_payload(self):
         ann = _get_field_annotation(VersionResponse, "payload")
-        assert ann == str
+        assert ann is str
 
 
 class TestModelFieldTypes:

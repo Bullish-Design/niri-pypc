@@ -216,6 +216,9 @@ tools/schema_exporter/target/
 .cursorignore
 .cursorindexingignore
 
+# Local agent scratch workspace
+.scratch/
+
 # Marimo
 marimo/_static/
 marimo/_lsp/

@@ -7,6 +7,8 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
+from niri_pypc.errors import ConfigError
+
 
 class BackpressureMode(enum.Enum):
     DROP_OLDEST = "drop_oldest"
@@ -23,17 +25,15 @@ class NiriConfig:
     event_read_timeout: float | None = None
     max_frame_size: int = 4 * 1024 * 1024  # 4 MiB
     event_queue_capacity: int = 256
-    strict_version_check: bool = True
     backpressure_mode: BackpressureMode = BackpressureMode.DROP_OLDEST
 
     def resolve_socket_path(self) -> Path:
-        """Resolve socket path: explicit path → NIRI_SOCKET → ConfigError."""
+        """Resolve socket path: explicit path -> NIRI_SOCKET -> ConfigError."""
         if self.socket_path is not None:
             return self.socket_path
         env = os.environ.get("NIRI_SOCKET")
         if env:
             return Path(env)
-        from niri_pypc.errors import ConfigError
 
         raise ConfigError(
             "No socket path: set socket_path or NIRI_SOCKET environment variable",
