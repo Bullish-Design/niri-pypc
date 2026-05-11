@@ -1,15 +1,15 @@
 # PROGRESS
 
-- [ ] Step 0: Bootstrap and Repository Orientation
-- [ ] Step 1: Package Skeleton and Tooling Baseline
-- [ ] Step 2: Upstream Pin Manifest and Schema Directories
-- [ ] Step 3: Rust Schema Exporter
-- [ ] Step 4: IR Normalization Tool
-- [ ] Step 5: Type Generator
-- [ ] Step 6: Generated Verification Tool
-- [ ] Step 7: Type Codec Layer
-- [ ] Step 8: Error Taxonomy
-- [ ] Step 9: Configuration Layer
+- [x] Step 0: Bootstrap and Repository Orientation
+- [x] Step 1: Package Skeleton and Tooling Baseline
+- [x] Step 2: Upstream Pin Manifest and Schema Directories
+- [x] Step 3: Rust Schema Exporter
+- [x] Step 4: IR Normalization Tool
+- [x] Step 5: Type Generator
+- [x] Step 6: Generated Verification Tool
+- [x] Step 7: Type Codec Layer
+- [x] Step 8: Error Taxonomy
+- [x] Step 9: Configuration Layer
 - [ ] Step 10: Framing Module
 - [ ] Step 11: Unix Connection Transport
 - [ ] Step 12: Lifecycle Runtime State Machine
