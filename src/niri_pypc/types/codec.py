@@ -6,7 +6,7 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from niri_pypc.errors import DecodeError, EncodeError, RemoteError
+from niri_pypc.errors import DecodeError, EncodeError
 from niri_pypc.types.base import ProtocolModel, ProtocolVariant, UnknownEvent
 
 
@@ -138,31 +138,4 @@ def encode_externally_tagged(value: ProtocolModel) -> Any:
     raise EncodeError(
         f"Unsupported variant kind: {kind}",
         operation="encode_externally_tagged",
-    )
-
-
-def unwrap_reply(reply: BaseModel) -> Any:
-    """Unwrap a niri Reply envelope."""
-    variant = getattr(reply, "variant", None)
-    if variant is None:
-        raise DecodeError(
-            "Reply missing variant field",
-            operation="unwrap_reply",
-        )
-
-    from niri_pypc.types.generated.reply import ErrReply, OkReply
-
-    if isinstance(variant, OkReply):
-        return getattr(variant, "payload", variant)
-    if isinstance(variant, ErrReply):
-        msg = getattr(variant, "payload", str(variant))
-        raise RemoteError(
-            f"Compositor error: {msg}",
-            operation="unwrap_reply",
-            remote_message=str(msg),
-        )
-
-    raise DecodeError(
-        f"Unexpected reply variant: {type(variant).__name__}",
-        operation="unwrap_reply",
     )
