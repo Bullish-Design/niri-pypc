@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import fcntl
 import json
 import os
 import tempfile
@@ -23,6 +24,7 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "nested: nested/windowed niri integration tests")
     config.addinivalue_line("markers", "smoke: manual real-session checks")
     config.addinivalue_line("markers", "niri_scenario(name): select nested niri scenario fixture")
+    config.addinivalue_line("markers", "visible_demo: curated visible nested demo tests")
 
 
 def pytest_addoption(parser):
@@ -164,10 +166,36 @@ async def mock_unified_server():
 # =============================================================================
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def nested_harness() -> NestedNiriHarness:
     """Provide a nested niri harness instance."""
     return NestedNiriHarness()
+
+
+def _visible_mode_requested(config: pytest.Config) -> bool:
+    return bool(config.getoption("--nested-visible") or os.environ.get("NIRI_PYPC_NESTED_VISIBLE") == "1")
+
+
+@pytest.fixture(scope="session")
+def visible_nested_session_lock(request: pytest.FixtureRequest):
+    """Guard visible nested runs so only one process/session runs at a time."""
+    if not _visible_mode_requested(request.config):
+        yield
+        return
+
+    lock_path = Path("/tmp/niri-pypc-visible-nested.lock")
+    lock_file = lock_path.open("a+b")
+    try:
+        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        lock_file.close()
+        pytest.skip("Visible nested tests already running in another process/session")
+
+    try:
+        yield
+    finally:
+        fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+        lock_file.close()
 
 
 @pytest.fixture
@@ -188,10 +216,21 @@ async def nested_niri(nested_harness: NestedNiriHarness, request: pytest.Fixture
         pytest.skip("No niri_scenario marker - cannot run nested test")
 
     scenario_key = scenario_marker.args[0]
-    visible = bool(request.config.getoption("--nested-visible") or os.environ.get("NIRI_PYPC_NESTED_VISIBLE") == "1")
+    visible = _visible_mode_requested(request.config)
     startup_timeout_opt = request.config.getoption("--nested-startup-timeout")
     startup_timeout = float(startup_timeout_opt) if startup_timeout_opt else None
     niri_binary = os.environ.get("NIRI_PYPC_NIRI_BINARY", "niri")
+
+    if visible and os.environ.get("NIRI_PYPC_ALLOW_VISIBLE_NESTED") != "1":
+        pytest.skip("Visible nested mode requires NIRI_PYPC_ALLOW_VISIBLE_NESTED=1")
+
+    if visible and os.environ.get("PYTEST_XDIST_WORKER"):
+        pytest.skip("Visible nested mode is disabled under xdist workers")
+    numprocesses = getattr(request.config.option, "numprocesses", None)
+    if visible and numprocesses and int(numprocesses) > 1:
+        pytest.skip("Visible nested mode requires serial execution (no -n > 1)")
+
+    request.getfixturevalue("visible_nested_session_lock")
 
     try:
         instance = await nested_harness.start(

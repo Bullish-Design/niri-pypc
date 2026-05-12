@@ -31,3 +31,47 @@ Implement the plan by creating fixture directories, harness helpers, and first n
   - nested tests no longer fail hard in unsupported environments (`11 skipped`),
   - watch mode is available via `--nested-visible` / `NIRI_PYPC_NESTED_VISIBLE=1`,
   - README documents exact commands and toggles.
+
+- Added repo-root VISUAL_TEST_SUITE_HARDENING_GUIDE.md with concrete implementation sequence, code-touch guidance, verification plan, and rollout notes for visible nested test hardening.
+
+## 2026-05-12 Visual Hardening Rollout Applied
+
+- Implemented all rollout-plan changes from section `12) Rollout Plan` in `VISUAL_TEST_SUITE_HARDENING_GUIDE.md`.
+- Core hardening landed in:
+  - `tests/helpers/nested_niri.py`
+  - `tests/conftest.py`
+  - `tests/integration/test_nested_niri_basic.py`
+  - `README.md`
+  - `tests/helpers/test_nested_niri_hardening.py` (new)
+- Notable behavior now:
+  - visible mode requires explicit `NIRI_PYPC_ALLOW_VISIBLE_NESTED=1`,
+  - visible mode validates parent Wayland socket preflight before spawn,
+  - visible mode uses strict PID socket matching only,
+  - visible mode is protected by a cross-process lock and serial-only rules,
+  - startup compositor/backend failures open a session circuit breaker,
+  - cleanup is process-group-aware (child pgid only).
+- Validation status:
+  - `uv sync`, `ruff check .`, `ruff format --check .`, `ty check .` all passing.
+  - Added targeted unit tests for hardening logic; they pass with `--no-cov`.
+
+## 2026-05-12 Long-Lived Demo Addition
+
+- User requested a long-lived visual demo independent from per-test nested lifecycle.
+- Implemented `demo/visual_demo.py` with dedicated demo fixtures in `demo/fixtures/...`.
+- Demo keeps a single visible nested niri instance alive and continuously exercises:
+  - command snapshots (version, outputs, workspaces, windows, focused output/window),
+  - event stream ingestion and event-type counters,
+  - bundle lifecycle management.
+- Safety constraints preserved:
+  - requires explicit `NIRI_PYPC_ALLOW_VISIBLE_NESTED=1`,
+  - enforces single-run lock across processes,
+  - reuses hardened visible harness behavior for fail-closed preflight, strict PID socket matching, circuit breaker, and process-group cleanup.
+
+## 2026-05-12 Wire-Log Analysis Artifact
+
+- User provided full `demo/visual_demo.py --wire-log` output for diagnosis.
+- Added `DEMO_ERROR_REPORT.md` at repository root summarizing observed runtime behavior and protocol findings:
+  - event-stream ack appears to surface as `UnknownEvent` (`Ok`/`Handled`) during startup,
+  - many unit action payloads (string form) are rejected with compositor parse errors,
+  - structured action payloads with arguments succeed,
+  - command snapshots/event stream/spawn/teardown remain operational.

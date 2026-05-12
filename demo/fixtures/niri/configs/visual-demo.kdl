@@ -1,0 +1,12 @@
+// Dedicated config for long-lived visual demo runs.
+// Minimal nested setup so the compositor can start reliably in visible mode.
+
+layout {
+    focus-ring {
+        width 3
+        active-color "#38bdf8"
+        inactive-color "#475569"
+    }
+}
+
+prefer-no-csd

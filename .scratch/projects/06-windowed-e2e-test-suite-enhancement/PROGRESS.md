@@ -73,3 +73,69 @@ The full E2E testing refactoring has been implemented according to `E2E_TESTING_
   - `scenario-multi-output.yaml`: `min_workspaces` 2 -> 1, `workspace_output_map` -> `{}`
   - `scenario-dense-workspace.yaml`: `min_workspaces` 5 -> 1
 - Confirmed startup now reaches compositor initialization and skips only due missing compositor backend (`WaylandError(Connection(NoCompositor))`) in this environment.
+
+- [x] Authored detailed VISUAL_TEST_SUITE_HARDENING_GUIDE.md at repo root with step-by-step implementation for hardening steps 1-7 (2026-05-12).
+- [x] Implemented visual suite hardening rollout plan section 12 end-to-end (2026-05-12).
+
+## Visual Suite Hardening Rollout (2026-05-12)
+
+Implemented from `VISUAL_TEST_SUITE_HARDENING_GUIDE.md` rollout plan:
+
+1. **Steps 1-3 (preflight, unsafe opt-in, PID-strict socket discovery)**
+- Added fail-closed visible preflight in `NestedNiriHarness._visible_preflight(...)`.
+- Enforced visible opt-in in fixture via `NIRI_PYPC_ALLOW_VISIBLE_NESTED=1`.
+- Added strict PID socket matching path in `_wait_for_socket(..., strict_pid=...)`; visible mode uses strict mode only.
+
+2. **Steps 4-5 (single-run lock + circuit breaker)**
+- Added session-scoped visible lock (`/tmp/niri-pypc-visible-nested.lock`) using `fcntl.flock`.
+- Added visible-mode circuit breaker state in harness; startup failure signatures open breaker and block relaunches.
+
+3. **Steps 6-7 (cleanup hardening + serial enforcement)**
+- Added `pid`/`pgid` metadata to `NestedNiriInstance`.
+- Added process-group-aware termination (`SIGTERM` then `SIGKILL`) scoped to child process group.
+- Added serial-only enforcement for visible mode (`PYTEST_XDIST_WORKER` and `-n > 1` checks -> skip).
+
+4. **Docs + curated visible marker**
+- Updated `README.md` with safe visible command, required opt-in, safety rules, and incident recovery.
+- Added marker registration for `visible_demo`; tagged a minimal demo test.
+
+5. **New targeted tests**
+- Added `tests/helpers/test_nested_niri_hardening.py` covering:
+  - strict PID socket behavior,
+  - non-strict fallback behavior,
+  - visible preflight pass/fail,
+  - circuit breaker signature opening.
+
+## Verification Results (2026-05-12)
+
+- `devenv shell -- uv sync --extra dev`: pass
+- `devenv shell -- ruff check .`: pass
+- `devenv shell -- ruff format --check .`: initially failed on pre-existing formatting; resolved by running `devenv shell -- ruff format .`; now pass
+- `devenv shell -- ty check .`: pass
+- `devenv shell -- pytest tests/helpers/test_nested_niri_hardening.py -q --no-cov`: pass
+
+## Long-Lived Visual Demo (2026-05-12)
+
+- Added dedicated demo fixtures:
+  - `demo/fixtures/niri/configs/visual-demo.kdl`
+  - `demo/fixtures/niri/scenarios/scenario-visual-demo.yaml`
+- Added long-lived demo entrypoint:
+  - `demo/visual_demo.py`
+- Safety constraints applied in demo runtime:
+  - explicit unsafe opt-in required (`NIRI_PYPC_ALLOW_VISIBLE_NESTED=1`),
+  - single-run cross-process lock (`/tmp/niri-pypc-visible-nested-demo.lock`),
+  - fail-closed visible preflight + strict PID socket discovery + circuit breaker inherited via `NestedNiriHarness.start(..., visible=True)`,
+  - process-group-aware teardown inherited via `NestedNiriHarness.stop(...)`.
+- Demo functionality exercised continuously:
+  - command API snapshots via `NiriClient` (`Version`, `Outputs`, `Workspaces`, `Windows`, `FocusedOutput`, `FocusedWindow`),
+  - streaming API via `NiriEventStream` through `NiriConnectionBundle`,
+  - long-lived single visible nested compositor until Ctrl+C or `--duration`.
+
+## Demo Diagnostics Report (2026-05-12)
+
+- Added root-level `DEMO_ERROR_REPORT.md` with detailed analysis of live `--wire-log` output.
+- Report captures:
+  - confirmed working paths (spawn, snapshots, event flow, teardown),
+  - confirmed failures (unit action parse errors),
+  - suspected protocol issues (event-stream ack handling, action unit-variant wire shape),
+  - concrete follow-up investigation steps.

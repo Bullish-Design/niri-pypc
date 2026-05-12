@@ -1,0 +1,15 @@
+key: visual-demo
+config_fixture: visual-demo.kdl
+runtime:
+  startup_timeout_s: 20.0
+  ready_probe_interval_s: 0.1
+  settle_delay_s: 0.25
+  event_timeout_s: 5.0
+capabilities:
+  requires_multi_output: false
+expectations:
+  min_outputs: 1
+  min_workspaces: 1
+  allow_zero_windows: true
+  output_names: []
+  workspace_output_map: {}

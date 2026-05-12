@@ -134,14 +134,47 @@ devenv shell -- pytest -m nested -s
 Visible watch mode for demos (opens nested compositor window when the host session supports it):
 
 ```bash
-devenv shell -- pytest -m nested -s --nested-visible
+NIRI_PYPC_ALLOW_VISIBLE_NESTED=1 devenv shell -- pytest -m visible_demo -s --nested-visible
 ```
 
 Useful environment toggles:
 
 ```bash
 NIRI_PYPC_NESTED_VISIBLE=1              # same as --nested-visible
+NIRI_PYPC_ALLOW_VISIBLE_NESTED=1        # explicit unsafe opt-in required for visible mode
 NIRI_PYPC_NIRI_BINARY=/path/to/niri     # override niri binary path
 NIRI_PYPC_KEEP_NESTED_ARTIFACTS=1       # keep runtime/log dirs on nested startup failure
 NIRI_PYPC_NESTED_DEBUG=1                # print nested launch env/socket diagnostics
 ```
+
+Long-lived visible demo (single nested instance, runs until Ctrl+C):
+
+```bash
+NIRI_PYPC_ALLOW_VISIBLE_NESTED=1 devenv shell -- python demo/visual_demo.py
+```
+
+Optional demo controls:
+
+```bash
+NIRI_PYPC_ALLOW_VISIBLE_NESTED=1 devenv shell -- python demo/visual_demo.py --snapshot-interval 2 --duration 120
+```
+
+If the default terminal auto-detection does not open a demo window, set an explicit spawn command:
+
+```bash
+NIRI_PYPC_ALLOW_VISIBLE_NESTED=1 devenv shell -- python demo/visual_demo.py --spawn-command "foot"
+```
+
+### Visible mode safety rules
+
+- Visible nested mode is fail-closed and requires `NIRI_PYPC_ALLOW_VISIBLE_NESTED=1`.
+- Visible nested mode is serial-only (`xdist` workers and `-n > 1` are skipped).
+- A cross-process lock prevents concurrent visible nested runs.
+- If startup hits compositor/backend failures, a session circuit breaker stops further visible relaunch attempts.
+
+### Incident recovery (visible mode)
+
+1. Validate the active display socket: `test -S "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY"`.
+2. If the socket check fails but compositor processes still exist, treat the session as inconsistent.
+3. Close any visible nested test run, clear stale local test artifacts if needed, and retry once.
+4. If inconsistencies persist, restart the graphical login session before rerunning visible tests.

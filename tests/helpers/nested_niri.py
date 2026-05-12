@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import os
 import shutil
+import signal
 import subprocess
 import tempfile
 import time
@@ -60,6 +61,8 @@ class NestedNiriInstance:
     artifacts_dir: Path
     process: subprocess.Popen
     scenario: NestedNiriScenario
+    pid: int
+    pgid: int | None = None
     startup_time_s: float = 0.0
 
 
@@ -69,6 +72,8 @@ class NestedNiriHarness:
     def __init__(self, fixtures_root: Path | None = None):
         self.fixtures_root = fixtures_root or Path(__file__).parent.parent / "fixtures"
         self._scenarios: dict[str, NestedNiriScenario] = {}
+        self._visible_circuit_open = False
+        self._visible_circuit_reason = ""
 
     def load_scenario(self, scenario_key: str) -> NestedNiriScenario:
         """Load scenario manifest by key.
@@ -144,11 +149,20 @@ class NestedNiriHarness:
         parent_runtime_dir = Path(env.get("XDG_RUNTIME_DIR", ""))
         wayland_display = env.get("WAYLAND_DISPLAY")
         socket_scan_dir = runtime_dir
+        existing_sockets = self._list_candidate_sockets(runtime_dir)
         if visible:
+            if self._visible_circuit_open:
+                shutil.rmtree(temp_root)
+                raise RuntimeError(f"Visible circuit open: {self._visible_circuit_reason}")
             # Visible nested mode: keep the real user runtime dir so this niri
             # instance can connect to the host compositor reliably.
             env["XDG_RUNTIME_DIR"] = str(parent_runtime_dir)
             socket_scan_dir = parent_runtime_dir
+            existing_sockets = self._list_candidate_sockets(socket_scan_dir)
+            preflight_ok, preflight_reason = self._visible_preflight(env)
+            if not preflight_ok:
+                shutil.rmtree(temp_root)
+                raise RuntimeError(f"Visible preflight failed: {preflight_reason}")
         else:
             env["XDG_RUNTIME_DIR"] = str(runtime_dir)
 
@@ -202,8 +216,11 @@ class NestedNiriHarness:
                 stderr=stderr_log,
                 start_new_session=True,
             )
-
-        existing_sockets = self._list_candidate_sockets(socket_scan_dir)
+        pgid: int | None = None
+        try:
+            pgid = os.getpgid(process.pid)
+        except OSError:
+            pgid = None
         start_time = time.time()
 
         socket_path = await self._wait_for_socket(
@@ -212,17 +229,15 @@ class NestedNiriHarness:
             scenario.runtime.ready_probe_interval_s,
             pid=process.pid,
             existing_sockets=existing_sockets,
+            strict_pid=visible,
         )
 
         if socket_path is None:
-            process.terminate()
-            try:
-                process.wait(timeout=2.0)
-            except subprocess.TimeoutExpired:
-                process.kill()
-                process.wait()
+            self._terminate_process_tree(process, pgid=pgid, term_timeout_s=2.0)
 
             stderr_tail = self.get_log_tail_from_dir(logs_dir)
+            if visible:
+                self._maybe_open_visible_circuit(stderr_tail)
             if os.environ.get("NIRI_PYPC_KEEP_NESTED_ARTIFACTS") == "1":
                 raise RuntimeError(
                     f"Nested niri failed to start within {startup_timeout_s}s.\n"
@@ -244,6 +259,8 @@ class NestedNiriHarness:
             artifacts_dir=artifacts_dir,
             process=process,
             scenario=scenario,
+            pid=process.pid,
+            pgid=pgid,
             startup_time_s=startup_time,
         )
 
@@ -254,6 +271,7 @@ class NestedNiriHarness:
         interval: float,
         pid: int,
         existing_sockets: set[Path],
+        strict_pid: bool,
     ) -> Path | None:
         """Wait for niri IPC socket to appear.
 
@@ -270,8 +288,12 @@ class NestedNiriHarness:
         while time.time() < deadline:
             for f in self._list_candidate_sockets(runtime_dir):
                 if f".{pid}.sock" in f.name:
+                    if os.environ.get("NIRI_PYPC_NESTED_DEBUG") == "1":
+                        print(f"[nested_niri] strict_pid={strict_pid} socket_match={f}")
                     return f
-                if f not in existing_sockets:
+                if not strict_pid and f not in existing_sockets:
+                    if os.environ.get("NIRI_PYPC_NESTED_DEBUG") == "1":
+                        print(f"[nested_niri] strict_pid={strict_pid} fallback_socket={f}")
                     return f
             await asyncio.sleep(interval)
 
@@ -295,15 +317,65 @@ class NestedNiriHarness:
         Args:
             instance: Running instance to stop
         """
-        instance.process.terminate()
-
-        try:
-            instance.process.wait(timeout=5.0)
-        except subprocess.TimeoutExpired:
-            instance.process.kill()
-            instance.process.wait()
+        self._terminate_process_tree(instance.process, pgid=instance.pgid, term_timeout_s=5.0)
 
         shutil.rmtree(instance.runtime_dir)
+
+    def _visible_preflight(self, env: dict[str, str]) -> tuple[bool, str]:
+        wayland_display = env.get("WAYLAND_DISPLAY", "")
+        if not wayland_display:
+            return False, "WAYLAND_DISPLAY is not set"
+        runtime_dir = env.get("XDG_RUNTIME_DIR", "")
+        if not runtime_dir:
+            return False, "XDG_RUNTIME_DIR is not set"
+        display_socket = Path(runtime_dir) / wayland_display
+        if not display_socket.exists():
+            return False, f"WAYLAND_DISPLAY socket does not exist: {display_socket}"
+        if not display_socket.is_socket():
+            return False, f"WAYLAND_DISPLAY path is not a socket: {display_socket}"
+        session_type = env.get("XDG_SESSION_TYPE")
+        if session_type and session_type.lower() != "wayland":
+            return False, f"XDG_SESSION_TYPE is not wayland: {session_type}"
+        return True, ""
+
+    @staticmethod
+    def _terminate_process_tree(process: subprocess.Popen, pgid: int | None, term_timeout_s: float) -> None:
+        if process.poll() is not None:
+            return
+        if pgid is not None:
+            try:
+                os.killpg(pgid, signal.SIGTERM)
+            except ProcessLookupError:
+                pass
+        else:
+            process.terminate()
+
+        try:
+            process.wait(timeout=term_timeout_s)
+            return
+        except subprocess.TimeoutExpired:
+            pass
+
+        if pgid is not None:
+            try:
+                os.killpg(pgid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+        else:
+            process.kill()
+        process.wait()
+
+    def _maybe_open_visible_circuit(self, stderr_tail: str) -> None:
+        failure_signatures = (
+            "WaylandError(Connection(NoCompositor))",
+            "EventLoopCreation(",
+            "cannot open display",
+        )
+        for signature in failure_signatures:
+            if signature in stderr_tail:
+                self._visible_circuit_open = True
+                self._visible_circuit_reason = signature
+                return
 
     def get_log_tail(self, instance: NestedNiriInstance, lines: int = 50) -> str:
         """Get last N lines of niri logs for failure diagnosis.
