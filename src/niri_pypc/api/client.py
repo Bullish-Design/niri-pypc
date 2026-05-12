@@ -8,7 +8,7 @@ from pydantic import BaseModel
 
 from niri_pypc.config import NiriConfig
 from niri_pypc.errors import LifecycleError
-from niri_pypc.transport.connection import UnixConnection
+from niri_pypc.transport.connection import DEFAULT_STREAM_LIMIT, UnixConnection
 from niri_pypc.transport.framing import decode_frame, encode_frame
 from niri_pypc.types.codec import unwrap_reply
 from niri_pypc.types.generated.reply import Reply
@@ -51,6 +51,7 @@ class NiriClient:
         conn = await UnixConnection.connect(
             socket_path,
             timeout=self._config.connect_timeout,
+            stream_limit=max(self._config.max_frame_size + 1, DEFAULT_STREAM_LIMIT),
         )
         try:
             from niri_pypc.types.generated.request import Request as RequestModel

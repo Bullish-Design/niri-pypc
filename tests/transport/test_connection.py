@@ -100,6 +100,24 @@ class TestUnixConnectionWriteRead:
         server.close()
         await server.wait_closed()
 
+    async def test_large_frame_supported_when_stream_limit_raised(self, socket_path):
+        """Large frames should pass when connect stream_limit is configured above default."""
+
+        payload = b"x" * 70000
+
+        async def handler(reader, writer):
+            writer.write(payload + b"\n")
+            await writer.drain()
+            writer.close()
+
+        server = await asyncio.start_unix_server(handler, path=str(socket_path))
+        conn = await UnixConnection.connect(socket_path, timeout=5.0, stream_limit=200000)
+        response = await conn.read_frame(max_size=200000, timeout=1.0)
+        assert response == payload
+        await conn.close()
+        server.close()
+        await server.wait_closed()
+
     async def test_eof_raises_transport_error(self, socket_path):
         """Server closes immediately without sending data."""
 

@@ -11,7 +11,7 @@ import pytest
 
 from niri_pypc.api.client import NiriClient
 from niri_pypc.config import NiriConfig
-from niri_pypc.errors import RemoteError, TransportError
+from niri_pypc.errors import ProtocolError, RemoteError, TransportError
 
 
 @pytest.fixture
@@ -122,3 +122,40 @@ class TestNiriClient:
             assert result.variant.payload == "0.1.0"
         # After context manager exit, client should be closed
         assert client.is_closed
+
+    async def test_request_accepts_large_frame_within_max_size(self, mock_server):
+        """Large frames above asyncio defaults are accepted when under max_frame_size."""
+        socket_path, ctrl = mock_server
+        payload = "x" * 70000
+        ctrl["response"] = json.dumps({"Ok": {"Version": payload}}).encode() + b"\n"
+
+        config = NiriConfig(
+            socket_path=socket_path,
+            connect_timeout=5.0,
+            request_timeout=5.0,
+            max_frame_size=200000,
+        )
+        async with NiriClient.connect(config) as client:
+            from niri_pypc.types.generated.request import VersionRequest
+
+            result = await client.request(VersionRequest())
+
+        assert result.variant.payload == payload
+
+    async def test_request_rejects_large_frame_over_max_size(self, mock_server):
+        """Frames over configured max_frame_size raise ProtocolError."""
+        socket_path, ctrl = mock_server
+        payload = "x" * 70000
+        ctrl["response"] = json.dumps({"Ok": {"Version": payload}}).encode() + b"\n"
+
+        config = NiriConfig(
+            socket_path=socket_path,
+            connect_timeout=5.0,
+            request_timeout=5.0,
+            max_frame_size=1024,
+        )
+        async with NiriClient.connect(config) as client:
+            from niri_pypc.types.generated.request import VersionRequest
+
+            with pytest.raises(ProtocolError, match="Frame exceeds maximum"):
+                await client.request(VersionRequest())

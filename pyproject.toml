@@ -38,6 +38,7 @@ packages = ["src/niri_pypc"]
 [tool.hatch.build.targets.sdist]
 include = [
   "src",
+  "LICENSE",
   "README.md",
 #  "SPEC.md",
 #  "docs",

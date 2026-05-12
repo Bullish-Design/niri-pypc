@@ -20,7 +20,7 @@ from niri_pypc.errors import (
     TransportError,
 )
 from niri_pypc.runtime.lifecycle import LifecycleManager, LifecycleState
-from niri_pypc.transport.connection import UnixConnection
+from niri_pypc.transport.connection import DEFAULT_STREAM_LIMIT, UnixConnection
 from niri_pypc.transport.framing import decode_frame, encode_frame
 from niri_pypc.types.generated.event import Event
 
@@ -76,6 +76,7 @@ class NiriEventStream:
         conn = await UnixConnection.connect(
             socket_path,
             timeout=config.connect_timeout,
+            stream_limit=max(config.max_frame_size + 1, DEFAULT_STREAM_LIMIT),
         )
         instance._connection = conn
 

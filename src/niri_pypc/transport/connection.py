@@ -8,6 +8,8 @@ from typing import Any
 
 from niri_pypc.errors import NiriTimeoutError, ProtocolError, TransportError
 
+DEFAULT_STREAM_LIMIT = 64 * 1024
+
 
 class UnixConnection:
     """Raw Unix socket connection wrapper.
@@ -20,11 +22,14 @@ class UnixConnection:
         reader: asyncio.StreamReader,
         writer: asyncio.StreamWriter,
         socket_path: Path,
+        *,
+        stream_limit: int = DEFAULT_STREAM_LIMIT,
     ) -> None:
         self._reader = reader
         self._writer = writer
         self._socket_path = socket_path
         self._closed = False
+        self._stream_limit = stream_limit
 
     @classmethod
     async def connect(
@@ -32,11 +37,13 @@ class UnixConnection:
         socket_path: Path,
         *,
         timeout: float = 5.0,
+        stream_limit: int | None = None,
     ) -> UnixConnection:
         """Open a Unix domain socket connection."""
+        limit = stream_limit if stream_limit is not None else DEFAULT_STREAM_LIMIT
         try:
             reader, writer = await asyncio.wait_for(
-                asyncio.open_unix_connection(str(socket_path)),
+                asyncio.open_unix_connection(str(socket_path), limit=limit),
                 timeout=timeout,
             )
         except TimeoutError as exc:
@@ -56,7 +63,7 @@ class UnixConnection:
                 cause=exc,
             ) from exc
 
-        return cls(reader, writer, socket_path)
+        return cls(reader, writer, socket_path, stream_limit=limit)
 
     async def write_frame(self, data: bytes) -> None:
         """Write bytes to the socket."""
@@ -116,6 +123,14 @@ class UnixConnection:
                 ) from exc
             raise TransportError(
                 "Connection closed by remote",
+                operation="read_frame",
+                socket_path=str(self._socket_path),
+                cause=exc,
+                ) from exc
+        except asyncio.LimitOverrunError as exc:
+            self._closed = True
+            raise ProtocolError(
+                f"Frame exceeds maximum {max_size} bytes before delimiter",
                 operation="read_frame",
                 socket_path=str(self._socket_path),
                 cause=exc,

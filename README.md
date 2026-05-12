@@ -85,6 +85,12 @@ asyncio.run(main())
 - **Event stream** (`NiriEventStream`): persistent connection with bounded queue and backpressure
 - **Bundle** (`NiriConnectionBundle`): convenience wrapper with error isolation
 
+## Framing and limits
+
+- Frames are newline-delimited JSON.
+- `NiriConfig.max_frame_size` controls the maximum accepted frame payload size.
+- Event streaming uses one persistent socket plus a bounded in-memory queue with configurable backpressure behavior.
+
 ## Non-Goals
 
 - No state engine or compositor state tracking (see `niri-state` for that)
