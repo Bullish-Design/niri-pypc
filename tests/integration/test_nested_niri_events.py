@@ -117,7 +117,7 @@ async def test_nested_multi_output_event_mapping(nested_niri):
 
     async with NiriClient.connect(config) as client:
         outputs_response = await client.request(OutputsRequest())
-        outputs = outputs_response.variant.payload
+        outputs = outputs_response.payload
 
         if nested_niri.scenario.capabilities.requires_multi_output:
             if len(outputs) < nested_niri.scenario.expectations.min_outputs:

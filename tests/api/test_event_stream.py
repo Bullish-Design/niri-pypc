@@ -11,21 +11,16 @@ import pytest
 
 from niri_pypc.api.event_stream import NiriEventStream
 from niri_pypc.config import NiriConfig
-from niri_pypc.errors import LifecycleError
+from niri_pypc.errors import LifecycleError, ProtocolError, RemoteError
 
 pytestmark = pytest.mark.contract
 
 
 @pytest.fixture
 async def event_server():
-    """Create a mock niri event server.
-
-    Accepts one connection, reads the EventStream request, then sends
-    configured event frames. Closes on EOF.
-    """
     server_control = {"events": [], "received_request": None, "close_on_connect": False}
 
-    async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
+    async def handler(reader, writer):
         try:
             data = await asyncio.wait_for(reader.readuntil(b"\n"), timeout=5.0)
         except (TimeoutError, asyncio.IncompleteReadError):
@@ -37,12 +32,16 @@ async def event_server():
             writer.close()
             return
 
+        # Send bootstrap reply
+        frame = json.dumps({"Ok": {"Handled": {}}}).encode() + b"\n"
+        writer.write(frame)
+        await writer.drain()
+
         for evt in server_control["events"]:
             frame = json.dumps(evt).encode() + b"\n"
             writer.write(frame)
             await writer.drain()
             await asyncio.sleep(0.01)
-        # Close writer after sending all events so client sees EOF
         writer.close()
 
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -55,7 +54,6 @@ async def event_server():
 
 class TestNiriEventStream:
     async def test_stream_yields_events(self, event_server):
-        """EventStream yields decoded events in order."""
         socket_path, ctrl = event_server
         ctrl["events"] = [
             {"WorkspaceActivated": {"id": 1, "focused": True}},
@@ -75,7 +73,6 @@ class TestNiriEventStream:
         await stream.close()
 
     async def test_stream_receives_eventstream_request(self, event_server):
-        """Stream sends an EventStream request on connect."""
         socket_path, ctrl = event_server
         ctrl["events"] = [{"WorkspaceActivated": {"id": 1, "focused": True}}]
 
@@ -88,18 +85,16 @@ class TestNiriEventStream:
         assert b"EventStream" in ctrl["received_request"]
 
     async def test_close_is_idempotent(self, event_server):
-        """Close can be called multiple times."""
         socket_path, ctrl = event_server
         ctrl["events"] = [{"WorkspaceActivated": {"id": 1, "focused": True}}]
 
         config = NiriConfig(socket_path=socket_path)
         stream = await NiriEventStream.connect(config)
         await stream.close()
-        await stream.close()  # second close should not raise
+        await stream.close()
         assert stream._lifecycle.is_terminal
 
     async def test_next_after_close_raises(self, event_server):
-        """Calling next() after close raises LifecycleError."""
         socket_path, ctrl = event_server
         ctrl["events"] = [{"WorkspaceActivated": {"id": 1, "focused": True}}]
 
@@ -110,7 +105,6 @@ class TestNiriEventStream:
             await stream.next(timeout=1.0)
 
     async def test_async_iterator(self, event_server):
-        """Stream supports async iteration."""
         socket_path, ctrl = event_server
         ctrl["events"] = [
             {"WorkspaceActivated": {"id": 1, "focused": True}},
@@ -129,7 +123,6 @@ class TestNiriEventStream:
         assert events == [(1, True), (2, False)]
 
     async def test_async_context_manager(self, event_server):
-        """Stream works as async context manager."""
         socket_path, ctrl = event_server
         ctrl["events"] = [{"WorkspaceActivated": {"id": 1, "focused": True}}]
 
@@ -141,7 +134,6 @@ class TestNiriEventStream:
         assert stream._lifecycle.is_terminal
 
     async def test_unknown_event_does_not_crash(self, event_server):
-        """Unknown event variants produce UnknownEvent sentinel."""
         socket_path, ctrl = event_server
         ctrl["events"] = [
             {"UnknownFutureEvent": {"some": "data"}},
@@ -151,7 +143,7 @@ class TestNiriEventStream:
         config = NiriConfig(socket_path=socket_path)
         stream = await NiriEventStream.connect(config)
         e1 = await stream.next(timeout=1.0)
-        from niri_pypc.types.generated.event import UnknownEvent
+        from niri_pypc.types.base import UnknownEvent
 
         assert isinstance(e1, UnknownEvent)
         assert e1.variant_name == "UnknownFutureEvent"
@@ -161,10 +153,31 @@ class TestNiriEventStream:
 
         await stream.close()
 
+    async def test_handshake_consumed_before_first_event(self, event_server):
+        socket_path, ctrl = event_server
+        ctrl["events"] = [{"WorkspaceActivated": {"id": 1, "focused": True}}]
+
+        config = NiriConfig(socket_path=socket_path)
+        stream = await NiriEventStream.connect(config)
+        event = await stream.next(timeout=1.0)
+
+        assert event.id == 1
+        assert event.focused is True
+
+    async def test_bootstrap_consumed_before_first_event(self, event_server):
+        socket_path, ctrl = event_server
+        ctrl["events"] = [{"WorkspaceActivated": {"id": 1, "focused": True}}]
+
+        config = NiriConfig(socket_path=socket_path)
+        stream = await NiriEventStream.connect(config)
+        event = await stream.next(timeout=1.0)
+
+        assert event.id == 1
+        assert event.focused is True
+
 
 class TestEventStreamEdgeCases:
     async def test_close_with_full_queue_does_not_raise(self, event_server):
-        """close() must not raise QueueFull."""
         socket_path, ctrl = event_server
         ctrl["events"] = [{"WorkspaceActivated": {"id": i, "focused": i % 2 == 0}} for i in range(1, 50)]
         config = NiriConfig(
@@ -176,7 +189,6 @@ class TestEventStreamEdgeCases:
         await stream.close()
 
     async def test_async_for_stops_on_close(self, event_server):
-        """async for should end cleanly when stream is closed."""
         socket_path, ctrl = event_server
         ctrl["events"] = [{"WorkspaceActivated": {"id": i, "focused": i % 2 == 0}} for i in range(1, 50)]
 

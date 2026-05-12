@@ -86,12 +86,13 @@ async def mock_event_server():
     """Create a mock Unix socket server for event-stream testing.
 
     Accepts one connection, reads the EventStream request, then sends
-    configured event frames and closes. Yields (socket_path, control_dict)
+    a bootstrap reply and configured event frames. Yields (socket_path, control_dict)
     where control_dict has:
     - events: list of event dicts to send
+    - bootstrap_reply: dict for the handshake response (default: {"Ok": {"Handled": {}}})
     - received_request: received request frame bytes
     """
-    ctrl = {"events": [], "received_request": None}
+    ctrl = {"events": [], "bootstrap_reply": None, "received_request": None}
 
     async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
         try:
@@ -100,6 +101,12 @@ async def mock_event_server():
             writer.close()
             return
         ctrl["received_request"] = data
+        bootstrap = ctrl.get("bootstrap_reply")
+        if bootstrap is None:
+            bootstrap = {"Ok": {"Handled": {}}}
+        frame = json.dumps(bootstrap).encode() + b"\n"
+        writer.write(frame)
+        await writer.drain()
         for evt in ctrl["events"]:
             frame = json.dumps(evt).encode() + b"\n"
             writer.write(frame)
@@ -140,6 +147,9 @@ async def mock_unified_server():
 
         if b"EventStream" in data:
             evt_ctrl["received_request"] = data
+            frame = json.dumps({"Ok": {"Handled": {}}}).encode() + b"\n"
+            writer.write(frame)
+            await writer.drain()
             for evt in evt_ctrl["events"]:
                 frame = json.dumps(evt).encode() + b"\n"
                 writer.write(frame)

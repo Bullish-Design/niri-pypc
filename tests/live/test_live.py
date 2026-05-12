@@ -24,7 +24,6 @@ pytestmark = [
 
 class TestLiveNiri:
     async def test_version_request(self):
-        """Version request against live compositor returns version string."""
         config = NiriConfig()
         async with NiriClient.connect(config) as client:
             from niri_pypc.types.generated.request import VersionRequest
@@ -32,22 +31,17 @@ class TestLiveNiri:
             result = await client.request(VersionRequest())
 
         assert result is not None
-        # The result should be a Response with a version payload
-        assert hasattr(result, "variant")
-        assert hasattr(result.variant, "payload")
-        assert isinstance(result.variant.payload, str)
+        assert hasattr(result, "payload")
+        assert isinstance(result.payload, str)
 
     async def test_outputs_request(self):
-        """Outputs request against live compositor returns output list."""
         config = NiriConfig()
         async with NiriClient.connect(config) as client:
             from niri_pypc.types.generated.request import FocusedOutputRequest
 
-            # Use FocusedOutput as a request
             result = await client.request(FocusedOutputRequest())
 
         assert result is not None
 
     async def test_niri_socket_env_is_set(self):
-        """Verify that NIRI_SOCKET is set (redundant with skipif)."""
         assert os.environ.get("NIRI_SOCKET") is not None

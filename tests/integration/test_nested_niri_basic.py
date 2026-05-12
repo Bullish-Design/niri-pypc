@@ -17,25 +17,22 @@ from niri_pypc.types.generated.request import (
 @pytest.mark.visible_demo
 @pytest.mark.niri_scenario("minimal")
 async def test_nested_version_request_round_trip(nested_niri):
-    """Test that Version request succeeds on nested socket."""
     config = NiriConfig(socket_path=str(nested_niri.socket_path))
     async with NiriClient.connect(config) as client:
         version = await client.request(VersionRequest())
         assert version is not None
-        assert hasattr(version, "variant")
-        assert hasattr(version.variant, "payload")
-        print(f"Version response: {version.variant.payload}")
+        assert hasattr(version, "payload")
+        print(f"Version response: {version.payload}")
 
 
 @pytest.mark.nested
 @pytest.mark.niri_scenario("minimal")
 async def test_nested_outputs_snapshot_matches_manifest(nested_niri, scenario_expectations):
-    """Test that Outputs request matches scenario manifest expectations."""
     config = NiriConfig(socket_path=str(nested_niri.socket_path))
     async with NiriClient.connect(config) as client:
         outputs_response = await client.request(OutputsRequest())
         assert outputs_response is not None
-        outputs = outputs_response.variant.payload
+        outputs = outputs_response.payload
         assert len(outputs) >= scenario_expectations.min_outputs
         print(f"Outputs: {list(outputs.keys())}")
 
@@ -48,12 +45,11 @@ async def test_nested_outputs_snapshot_matches_manifest(nested_niri, scenario_ex
 @pytest.mark.nested
 @pytest.mark.niri_scenario("minimal")
 async def test_nested_workspaces_snapshot_matches_manifest(nested_niri, scenario_expectations):
-    """Test that Workspaces request matches scenario manifest expectations."""
     config = NiriConfig(socket_path=str(nested_niri.socket_path))
     async with NiriClient.connect(config) as client:
         workspaces_response = await client.request(WorkspacesRequest())
         assert workspaces_response is not None
-        workspaces = workspaces_response.variant.payload
+        workspaces = workspaces_response.payload
         assert len(workspaces) >= scenario_expectations.min_workspaces
         print(f"Workspaces: {[(w.name, w.output) for w in workspaces]}")
 
@@ -67,12 +63,11 @@ async def test_nested_workspaces_snapshot_matches_manifest(nested_niri, scenario
 @pytest.mark.nested
 @pytest.mark.niri_scenario("minimal")
 async def test_nested_windows_request_decodes_on_nested_socket(nested_niri, scenario_expectations):
-    """Test that Windows request decodes properly on nested socket."""
     config = NiriConfig(socket_path=str(nested_niri.socket_path))
     async with NiriClient.connect(config) as client:
         windows_response = await client.request(WindowsRequest())
         assert windows_response is not None
-        windows = windows_response.variant.payload
+        windows = windows_response.payload
         if not scenario_expectations.allow_zero_windows:
             assert len(windows) > 0
         print(f"Windows count: {len(windows)}")
@@ -81,11 +76,10 @@ async def test_nested_windows_request_decodes_on_nested_socket(nested_niri, scen
 @pytest.mark.nested
 @pytest.mark.niri_scenario("multi-output")
 async def test_nested_multi_output_scenario(nested_niri):
-    """Test multi-output scenario."""
     config = NiriConfig(socket_path=str(nested_niri.socket_path))
     async with NiriClient.connect(config) as client:
         outputs_response = await client.request(OutputsRequest())
-        outputs = outputs_response.variant.payload
+        outputs = outputs_response.payload
         if nested_niri.scenario.capabilities.requires_multi_output:
             if len(outputs) < nested_niri.scenario.expectations.min_outputs:
                 pytest.skip(
@@ -100,11 +94,10 @@ async def test_nested_multi_output_scenario(nested_niri):
 @pytest.mark.nested
 @pytest.mark.niri_scenario("dense-workspace")
 async def test_nested_dense_workspace_payload(nested_niri, scenario_expectations):
-    """Test dense workspace scenario for large payload handling."""
     config = NiriConfig(socket_path=str(nested_niri.socket_path))
     async with NiriClient.connect(config) as client:
         workspaces_response = await client.request(WorkspacesRequest())
         assert workspaces_response is not None
-        workspaces = workspaces_response.variant.payload
+        workspaces = workspaces_response.payload
         assert len(workspaces) >= scenario_expectations.min_workspaces
         print(f"Dense workspace test: {len(workspaces)} workspaces")
