@@ -7,6 +7,8 @@ import pytest
 from niri_pypc.errors import LifecycleError
 from niri_pypc.runtime.lifecycle import LifecycleManager, LifecycleState
 
+pytestmark = pytest.mark.contract
+
 
 class TestLifecycleInitialState:
     async def test_initial_state_is_init(self):

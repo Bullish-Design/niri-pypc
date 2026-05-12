@@ -13,10 +13,13 @@ import pytest
 from niri_pypc.api.client import NiriClient
 from niri_pypc.config import NiriConfig
 
-pytestmark = pytest.mark.skipif(
-    not os.environ.get("NIRI_SOCKET"),
-    reason="NIRI_SOCKET not set — skipping live tests",
-)
+pytestmark = [
+    pytest.mark.smoke,
+    pytest.mark.skipif(
+        not os.environ.get("NIRI_SOCKET"),
+        reason="NIRI_SOCKET not set — skipping live tests",
+    ),
+]
 
 
 class TestLiveNiri:

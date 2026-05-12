@@ -7,6 +7,8 @@ import pytest
 from niri_pypc.errors import DecodeError
 from niri_pypc.types.generated.request import Request
 
+pytestmark = pytest.mark.contract
+
 
 class TestEdgeCases:
     def test_none_request_raises(self):

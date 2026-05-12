@@ -9,6 +9,8 @@ import pytest
 from niri_pypc.api.client import NiriClient
 from niri_pypc.config import NiriConfig
 
+pytestmark = pytest.mark.contract
+
 
 class TestCommandFlow:
     async def test_version_request_flow(self, mock_command_server):

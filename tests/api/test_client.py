@@ -13,6 +13,8 @@ from niri_pypc.api.client import NiriClient
 from niri_pypc.config import NiriConfig
 from niri_pypc.errors import ProtocolError, RemoteError, TransportError
 
+pytestmark = pytest.mark.contract
+
 
 @pytest.fixture
 async def mock_server():

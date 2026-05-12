@@ -1,0 +1,15 @@
+key: dense-workspace
+config_fixture: dense-workspace.kdl
+runtime:
+  startup_timeout_s: 15
+  ready_probe_interval_s: 0.1
+  settle_delay_s: 0.25
+  event_timeout_s: 3
+capabilities:
+  requires_multi_output: false
+expectations:
+  min_outputs: 1
+  min_workspaces: 5
+  allow_zero_windows: true
+  output_names: []
+  workspace_output_map: {}

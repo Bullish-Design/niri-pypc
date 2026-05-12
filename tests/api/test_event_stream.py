@@ -13,6 +13,8 @@ from niri_pypc.api.event_stream import NiriEventStream
 from niri_pypc.config import NiriConfig
 from niri_pypc.errors import LifecycleError
 
+pytestmark = pytest.mark.contract
+
 
 @pytest.fixture
 async def event_server():
@@ -176,10 +178,7 @@ class TestEventStreamEdgeCases:
     async def test_async_for_stops_on_close(self, event_server):
         """async for should end cleanly when stream is closed."""
         socket_path, ctrl = event_server
-        ctrl["events"] = [
-            {"WorkspaceActivated": {"id": i, "focused": i % 2 == 0}}
-            for i in range(1, 50)
-        ]
+        ctrl["events"] = [{"WorkspaceActivated": {"id": i, "focused": i % 2 == 0}} for i in range(1, 50)]
 
         config = NiriConfig(socket_path=socket_path)
         stream = await NiriEventStream.connect(config)

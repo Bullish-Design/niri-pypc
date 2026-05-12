@@ -2,6 +2,8 @@
 
 import typing
 
+import pytest
+
 from niri_pypc.types.generated.action import SpawnAction
 from niri_pypc.types.generated.models import (
     LayerSurface,
@@ -22,6 +24,8 @@ from niri_pypc.types.generated.reply import (
     WindowsResponse,
     WorkspacesResponse,
 )
+
+pytestmark = pytest.mark.contract
 
 
 def _get_field_annotation(model_cls, field_name: str):

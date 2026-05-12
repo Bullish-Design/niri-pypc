@@ -1,0 +1,13 @@
+# Base minimal configuration for nested testing
+# Expected invariants: 1 output, 1 active workspace, 0 windows at startup
+# NO startup spawns, bars, or session-global programs
+
+output "DP-1" {
+    res 1920x1080
+    position 0x0
+    scale 1.0
+}
+
+workspace "1" {
+    output "DP-1"
+}

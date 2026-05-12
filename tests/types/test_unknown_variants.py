@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import pytest
+
 from niri_pypc.types.generated.event import Event, UnknownEvent
 from niri_pypc.types.generated.reply import Reply, UnknownReply
+
+pytestmark = pytest.mark.contract
 
 
 class TestUnknownReply:

@@ -12,6 +12,8 @@ import pytest
 from niri_pypc.errors import NiriTimeoutError, ProtocolError, TransportError
 from niri_pypc.transport.connection import UnixConnection
 
+pytestmark = pytest.mark.contract
+
 
 @pytest.fixture
 async def socket_path():

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from niri_pypc.types.generated._metadata import (
     GENERATOR_VERSION,
     IR_HASH,
@@ -10,6 +12,8 @@ from niri_pypc.types.generated._metadata import (
     UPSTREAM_CRATE,
     UPSTREAM_VERSION,
 )
+
+pytestmark = pytest.mark.contract
 
 
 class TestMetadata:

@@ -9,6 +9,8 @@ import pytest
 from niri_pypc.config import BackpressureMode, NiriConfig
 from niri_pypc.errors import ConfigError
 
+pytestmark = pytest.mark.contract
+
 
 class TestNiriConfig:
     def test_defaults(self):

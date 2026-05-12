@@ -7,6 +7,8 @@ import pytest
 from niri_pypc.errors import DecodeError
 from niri_pypc.transport.framing import decode_frame, encode_frame
 
+pytestmark = pytest.mark.contract
+
 
 class TestEncodeFrame:
     def test_encodes_string(self):

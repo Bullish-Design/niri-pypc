@@ -9,6 +9,20 @@ from pathlib import Path
 
 import pytest
 
+from tests.helpers.nested_niri import NestedNiriHarness, NestedNiriInstance
+
+# =============================================================================
+# MARKER REGISTRATION
+# =============================================================================
+
+
+def pytest_configure(config):
+    """Register custom markers."""
+    config.addinivalue_line("markers", "contract: socket-only IPC contract tests")
+    config.addinivalue_line("markers", "nested: nested/windowed niri integration tests")
+    config.addinivalue_line("markers", "smoke: manual real-session checks")
+    config.addinivalue_line("markers", "niri_scenario(name): select nested niri scenario fixture")
+
 
 @pytest.fixture
 async def temp_socket_path():
@@ -126,3 +140,70 @@ async def mock_unified_server():
         yield socket_path, cmd_ctrl, evt_ctrl
         server.close()
         await server.wait_closed()
+
+
+# =============================================================================
+# NESTED NIRI FIXTURES
+# =============================================================================
+
+
+@pytest.fixture
+def nested_harness() -> NestedNiriHarness:
+    """Provide a nested niri harness instance."""
+    return NestedNiriHarness()
+
+
+@pytest.fixture
+async def nested_niri(nested_harness: NestedNiriHarness, request: pytest.FixtureRequest):
+    """Provide a running nested niri instance for testing.
+
+    Requires @pytest.mark.nested and @pytest.mark.niri_scenario("key") markers.
+
+    Usage:
+        @pytest.mark.nested
+        @pytest.mark.niri_scenario("minimal")
+        async def test_something(nested_niri):
+            config = NiriConfig(socket_path=str(nested_niri.socket_path))
+            ...
+    """
+    scenario_marker = request.node.get_closest_marker("niri_scenario")
+    if scenario_marker is None:
+        pytest.skip("No niri_scenario marker - cannot run nested test")
+
+    scenario_key = scenario_marker.args[0]
+    instance = await nested_harness.start(scenario_key)
+    yield instance
+    await nested_harness.stop(instance)
+
+
+@pytest.fixture
+def scenario_expectations(nested_niri: NestedNiriInstance):
+    """Provide scenario expectations for assertions."""
+    return nested_niri.scenario.expectations
+
+
+# =============================================================================
+# FAILURE ARTIFACT CAPTURE
+# =============================================================================
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    """Add failure artifact information to test reports."""
+    outcome = yield
+    report = outcome.get_result()
+
+    if report.when == "call" and report.failed:
+        nested_instance = getattr(item, "_nested_niri_instance", None)
+        if nested_instance:
+            report.sections.append(
+                (
+                    "Nested Niri Failure Artifacts",
+                    f"""Scenario: {nested_instance.scenario.key}
+Config Fixture: {nested_instance.scenario.config_fixture}
+Runtime Dir: {nested_instance.runtime_dir}
+Socket Path: {nested_instance.socket_path}
+Startup Time: {nested_instance.startup_time_s:.2f}s
+""",
+                )
+            )

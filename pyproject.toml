@@ -21,6 +21,7 @@ dev = [
   "pytest-cov>=4.1",
   "ruff>=0.5.0",
   "ty>=0.0.1a11",
+  "PyYAML>=6.0",
 ]
 
 #[project.urls]
@@ -53,6 +54,12 @@ package = true
 addopts = "-q --cov=niri_pypc --cov-report=term-missing"
 testpaths = ["tests"]
 asyncio_mode = "auto"
+markers = [
+  "contract: socket-only IPC contract tests",
+  "nested: nested/windowed niri integration tests",
+  "smoke: manual real-session checks",
+  "niri_scenario(name): select nested niri scenario fixture",
+]
 
 [tool.ruff]
 line-length = 120

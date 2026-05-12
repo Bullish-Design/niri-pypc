@@ -12,6 +12,8 @@ import pytest
 from niri_pypc.api.bundle import NiriConnectionBundle
 from niri_pypc.config import NiriConfig
 
+pytestmark = pytest.mark.contract
+
 
 @pytest.fixture
 async def unified_server():

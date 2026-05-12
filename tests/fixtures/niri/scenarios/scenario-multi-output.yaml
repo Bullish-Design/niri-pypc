@@ -1,0 +1,19 @@
+key: multi-output
+config_fixture: multi-output.kdl
+runtime:
+  startup_timeout_s: 20
+  ready_probe_interval_s: 0.1
+  settle_delay_s: 0.25
+  event_timeout_s: 3
+capabilities:
+  requires_multi_output: true
+expectations:
+  min_outputs: 2
+  min_workspaces: 2
+  allow_zero_windows: true
+  output_names:
+    - "DP-1"
+    - "DP-2"
+  workspace_output_map:
+    "1": "DP-1"
+    "2": "DP-2"

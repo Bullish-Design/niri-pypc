@@ -1,6 +1,10 @@
 """Regression test for reply round-trip fidelity."""
 
+import pytest
+
 from niri_pypc.types.generated.reply import Reply
+
+pytestmark = pytest.mark.contract
 
 
 class TestReplyRoundTrip:

@@ -5,6 +5,7 @@
 
   packages = [
     pkgs.git
+    # pkgs.niri
     pkgs.uv
   ];
 

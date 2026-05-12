@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import pytest
+
 from niri_pypc.api.event_stream import NiriEventStream
 from niri_pypc.config import NiriConfig
+
+pytestmark = pytest.mark.contract
 
 
 class TestEventFlow:

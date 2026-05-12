@@ -1,0 +1,15 @@
+key: minimal
+config_fixture: base-minimal.kdl
+runtime:
+  startup_timeout_s: 15
+  ready_probe_interval_s: 0.1
+  settle_delay_s: 0.25
+  event_timeout_s: 3
+capabilities:
+  requires_multi_output: false
+expectations:
+  min_outputs: 1
+  min_workspaces: 1
+  allow_zero_windows: true
+  output_names: []
+  workspace_output_map: {}
