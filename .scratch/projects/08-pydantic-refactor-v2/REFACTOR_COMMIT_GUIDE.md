@@ -1,6 +1,6 @@
 Absolutely. Here is the implementation-oriented version: exact edit order, suggested commit sequence, what to change in each file, and what must pass before moving on.
 
-This is designed so the intern can execute it mechanically without needing to re-derive the architecture.
+This is designed so the agent can execute it mechanically without needing to re-derive the architecture.
 
 ---
 
@@ -636,7 +636,7 @@ finalize protocol model refactor and validate demo/runtime behavior
 
 # Exact per-file edit order
 
-If the intern wants a strict file-by-file walk, use this order:
+If the agent wants a strict file-by-file walk, use this order:
 
 ## Handwritten runtime first
 
@@ -726,7 +726,7 @@ After Commit 13:
 
 ---
 
-# Intern checklist
+# agent checklist
 
 This is the short version they can keep beside them while implementing.
 
@@ -765,7 +765,7 @@ This is the short version they can keep beside them while implementing.
 
 ---
 
-# One practical rule for the intern
+# One practical rule for the agent
 
 Whenever you are unsure how something should serialize, ask this question:
 
