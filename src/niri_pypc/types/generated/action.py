@@ -877,3 +877,4 @@ class Action(ExternallyTaggedEnum[ActionValue]):
         UnsetWindowUrgentAction,
         UnsetWorkspaceNameAction,
     )
+Action.model_rebuild()

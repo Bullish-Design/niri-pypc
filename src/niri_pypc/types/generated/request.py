@@ -111,3 +111,4 @@ class Request(ExternallyTaggedEnum[RequestValue]):
         WindowsRequest,
         WorkspacesRequest,
     )
+Request.model_rebuild()

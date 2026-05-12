@@ -9,7 +9,6 @@ pytestmark = pytest.mark.contract
 
 class TestReplyRoundTrip:
     def test_outputs_response_preserves_payload(self):
-        """Outputs payload must survive validate -> dump round-trip."""
         raw = {
             "Ok": {
                 "Outputs": {

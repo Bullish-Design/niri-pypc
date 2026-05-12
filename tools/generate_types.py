@@ -316,6 +316,16 @@ from niri_pypc.types.base import ExternallyTaggedEnum, ProtocolModel, ProtocolVa
                     models_lines.append(gen_unknown_sentinel_code(t["name"]))
                 models_lines.append(gen_externally_tagged_wrapper_code(t["name"], t["variants"], has_unknown))
 
+    # Rebuild all non-unit-enum models in models.py to resolve forward references
+    for t in ir_types:
+        if t["name"] in TOP_LEVEL_ENUMS:
+            continue
+        if t["kind"] == "struct":
+            models_lines.append(f"{t['name']}.model_rebuild()")
+        elif t["kind"] == "enum" and not is_all_unit_enum(t):
+            models_lines.append(f"{t['name']}.model_rebuild()")
+        # No need to rebuild variant classes - they're rebuilt when their parent enum is rebuilt
+
     write_file(output_dir / "models.py", "\n".join(models_lines) + "\n", ir, ir_hash)
 
     # ---- Top-level enum files ----
@@ -323,7 +333,7 @@ from niri_pypc.types.base import ExternallyTaggedEnum, ProtocolModel, ProtocolVa
         "action.py": ["Action"],
         "event.py": ["Event"],
         "request.py": ["Request"],
-        "reply.py": ["Reply", "Response"],
+        "reply.py": ["Response", "Reply"],
     }
 
     enum_to_file = {}
@@ -389,6 +399,7 @@ from niri_pypc.types.base import ExternallyTaggedEnum, ProtocolModel, ProtocolVa
         body_lines = list(import_lines)
         body_lines.append("")
 
+        rebuilds = []
         for enum_name in enum_names:
             t = types_by_name.get(enum_name)
             if t and t["kind"] == "enum":
@@ -398,9 +409,14 @@ from niri_pypc.types.base import ExternallyTaggedEnum, ProtocolModel, ProtocolVa
                         body_lines.append("")
                         body_lines.append(gen_variant_code(v, enum_name))
                     body_lines.append(gen_externally_tagged_wrapper_code(enum_name, t["variants"], has_unknown))
+                    rebuilds.append(enum_name)
 
                     if filename == "reply.py" and enum_name == "Reply":
                         body_lines[-1] = body_lines[-1] + gen_reply_unwrap_code()
+
+        # Rebuild all ExternallyTaggedEnum wrappers to resolve forward references
+        for name in rebuilds:
+            body_lines.append(f"{name}.model_rebuild()")
 
         write_file(output_dir / filename, "\n".join(body_lines) + "\n", ir, ir_hash)
 

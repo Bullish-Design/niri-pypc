@@ -20,40 +20,6 @@ from niri_pypc.types.generated.models import (
 )
 
 
-class ErrReply(ProtocolVariant):
-    __niri_wire_name__ = "Err"
-    __niri_variant_kind__ = "newtype"
-    payload: str
-
-class OkReply(ProtocolVariant):
-    __niri_wire_name__ = "Ok"
-    __niri_variant_kind__ = "newtype"
-    payload: Response
-
-ReplyValue: TypeAlias = ErrReply | OkReply
-
-class Reply(ExternallyTaggedEnum[ReplyValue]):
-    __niri_variants__ = (
-        ErrReply,
-        OkReply,
-    )
-    def unwrap(self) -> ResponseValue:
-        if isinstance(self.root, OkReply):
-            return self.root.payload.root
-
-        if isinstance(self.root, ErrReply):
-            raise RemoteError(
-                f"Compositor error: {self.root.payload}",
-                operation="Reply.unwrap",
-                remote_message=self.root.payload,
-            )
-
-        raise DecodeError(
-            f"Unexpected reply variant: {type(self.root).__name__}",
-            operation="Reply.unwrap",
-        )
-
-
 class FocusedOutputResponse(ProtocolVariant):
     __niri_wire_name__ = "FocusedOutput"
     __niri_variant_kind__ = "newtype"
@@ -137,3 +103,39 @@ class Response(ExternallyTaggedEnum[ResponseValue]):
         WindowsResponse,
         WorkspacesResponse,
     )
+
+class ErrReply(ProtocolVariant):
+    __niri_wire_name__ = "Err"
+    __niri_variant_kind__ = "newtype"
+    payload: str
+
+class OkReply(ProtocolVariant):
+    __niri_wire_name__ = "Ok"
+    __niri_variant_kind__ = "newtype"
+    payload: Response
+
+ReplyValue: TypeAlias = ErrReply | OkReply
+
+class Reply(ExternallyTaggedEnum[ReplyValue]):
+    __niri_variants__ = (
+        ErrReply,
+        OkReply,
+    )
+    def unwrap(self) -> ResponseValue:
+        if isinstance(self.root, OkReply):
+            return self.root.payload.root
+
+        if isinstance(self.root, ErrReply):
+            raise RemoteError(
+                f"Compositor error: {self.root.payload}",
+                operation="Reply.unwrap",
+                remote_message=self.root.payload,
+            )
+
+        raise DecodeError(
+            f"Unexpected reply variant: {type(self.root).__name__}",
+            operation="Reply.unwrap",
+        )
+
+Response.model_rebuild()
+Reply.model_rebuild()

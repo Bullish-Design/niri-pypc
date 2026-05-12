@@ -123,3 +123,4 @@ class Event(ExternallyTaggedEnum[EventValue]):
         WorkspacesChangedEvent,
     )
     __niri_unknown_variant_model__ = UnknownEvent
+Event.model_rebuild()

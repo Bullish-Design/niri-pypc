@@ -15,8 +15,9 @@ class ProtocolModel(BaseModel):
 
     model_config = ConfigDict(
         frozen=True,
-        strict=True,
+        strict=False,
         extra="forbid",
+        populate_by_name=True,
     )
 
 
