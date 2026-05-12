@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from functools import lru_cache
-from typing import Any, ClassVar, Generic, Literal, TypeAlias, TypeVar
+from functools import cache
+from typing import Any, ClassVar, Literal, TypeVar
 
 from pydantic import BaseModel, ConfigDict, RootModel, model_serializer, model_validator
 
 from niri_pypc.errors import DecodeError
 
-VariantKind: TypeAlias = Literal["unit", "newtype", "struct"]
+type VariantKind = Literal["unit", "newtype", "struct"]
 
 
 class ProtocolModel(BaseModel):
@@ -38,7 +38,7 @@ class UnknownEvent(ProtocolModel):
 RootT = TypeVar("RootT", bound=ProtocolModel)
 
 
-class ExternallyTaggedEnum(RootModel[RootT], Generic[RootT]):
+class ExternallyTaggedEnum[RootT: ProtocolModel](RootModel[RootT]):
     """Generic RootModel for externally-tagged enums."""
 
     __niri_variants__: ClassVar[tuple[type[ProtocolVariant], ...]]
@@ -94,6 +94,6 @@ class ExternallyTaggedEnum(RootModel[RootT], Generic[RootT]):
         raise ValueError(f"Unknown variant kind: {kind}")
 
     @classmethod
-    @lru_cache(maxsize=None)
+    @cache
     def _variant_map(cls) -> dict[str, type[ProtocolVariant]]:
         return {variant.__niri_wire_name__: variant for variant in cls.__niri_variants__}

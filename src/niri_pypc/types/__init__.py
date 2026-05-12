@@ -1,6 +1,6 @@
 """Protocol types for niri IPC."""
 
-from niri_pypc.types.base import (
+from niri_pypc.types.base import (  # noqa: F401
     ExternallyTaggedEnum,
     ProtocolModel,
     ProtocolVariant,

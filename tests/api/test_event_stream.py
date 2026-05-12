@@ -11,7 +11,7 @@ import pytest
 
 from niri_pypc.api.event_stream import NiriEventStream
 from niri_pypc.config import NiriConfig
-from niri_pypc.errors import LifecycleError, ProtocolError, RemoteError
+from niri_pypc.errors import LifecycleError
 
 pytestmark = pytest.mark.contract
 

@@ -196,14 +196,14 @@ def gen_externally_tagged_wrapper_code(enum_name: str, variants: list[dict], has
     lines.append("")
 
     lines.append(f"class {enum_name}(ExternallyTaggedEnum[{enum_name}Value]):")
-    lines.append(f"    __niri_variants__ = (")
+    lines.append("    __niri_variants__ = (")
     for v in variants:
         cls = variant_class_name(v["name"], enum_name)
         lines.append(f"        {cls},")
     lines.append("    )")
     if has_unknown:
         if has_unknown_base_import:
-            lines.append(f"    __niri_unknown_variant_model__ = UnknownEvent")
+            lines.append("    __niri_unknown_variant_model__ = UnknownEvent")
         else:
             lines.append(f"    __niri_unknown_variant_model__ = {unknown_cls}")
 

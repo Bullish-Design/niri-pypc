@@ -72,9 +72,8 @@ class TestNiriConnectionBundle:
         config = NiriConfig(socket_path=socket_path, connect_timeout=5.0, request_timeout=5.0)
         bundle = await NiriConnectionBundle.open(config)
 
-        from niri_pypc.types.generated.request import VersionRequest
-
         from niri_pypc.types.generated.reply import VersionResponse
+        from niri_pypc.types.generated.request import VersionRequest
 
         result = await bundle.client.request(VersionRequest())
         assert isinstance(result, VersionResponse)

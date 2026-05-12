@@ -19,6 +19,7 @@ from pydantic import BaseModel
 from niri_pypc import NiriClient, NiriConfig, NiriConnectionBundle
 from niri_pypc.types.generated.action import (
     Action,
+    CloseOverviewAction,
     FocusWindowDownAction,
     FocusWindowUpAction,
     FocusWorkspaceDownAction,
@@ -30,9 +31,7 @@ from niri_pypc.types.generated.action import (
     MoveWindowToWorkspaceUpAction,
     MoveWindowUpAction,
     OpenOverviewAction,
-    CloseOverviewAction,
     SpawnShAction,
-    ToggleOverviewAction,
 )
 from niri_pypc.types.generated.models import KeyboardLayouts, LayerSurface, Output, Overview, Window, Workspace
 from niri_pypc.types.generated.reply import (

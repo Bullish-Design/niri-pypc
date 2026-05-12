@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import Any
 
 from niri_pypc.config import NiriConfig
 from niri_pypc.errors import LifecycleError

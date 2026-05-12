@@ -7,7 +7,7 @@ from typing import Any
 import pytest
 
 from niri_pypc.errors import DecodeError, EncodeError
-from niri_pypc.types.base import ExternallyTaggedEnum, ProtocolModel, ProtocolVariant, UnknownEvent
+from niri_pypc.types.base import ProtocolModel, ProtocolVariant
 from niri_pypc.types.codec import decode_externally_tagged, encode_externally_tagged
 
 

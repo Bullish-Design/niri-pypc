@@ -47,7 +47,6 @@ class TestStrEnumContract:
 class TestUnknownReplyRemoved:
     def test_unknown_reply_not_importable(self):
         import importlib
-        import sys
 
         mod = importlib.import_module("niri_pypc.types.generated.reply")
         assert not hasattr(mod, "UnknownReply")
