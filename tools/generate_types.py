@@ -46,10 +46,8 @@ RESERVED_WORDS = {
     "is",
 }
 
-# Top-level protocol enums that get their own files
 TOP_LEVEL_ENUMS = {"Request", "Reply", "Response", "Event", "Action"}
-# Inbound enums that support unknown sentinel fallback
-INBOUND_ENUMS = {"Reply", "Event"}
+INBOUND_ENUMS = {"Event"}
 
 
 def load_ir(path: Path) -> dict:
@@ -110,21 +108,33 @@ def variant_class_name(variant_name: str, enum_name: str) -> str:
     return name
 
 
+def safe_enum_member_name(name: str) -> str:
+    candidate = name.upper().replace("-", "_")
+    if candidate[0].isdigit():
+        candidate = f"VALUE_{candidate}"
+    if candidate in RESERVED_WORDS:
+        candidate = f"{candidate}_"
+    return candidate
+
+
+def is_all_unit_enum(ir_type: dict) -> bool:
+    return ir_type["kind"] == "enum" and all(v["kind"] == "unit" for v in ir_type["variants"])
+
+
 def gen_struct_code(ir_type: dict) -> str:
-    lines = []
+    lines = [f"class {ir_type['name']}(ProtocolModel):"]
     fields = ir_type.get("fields", [])
-    lines.append(f"class {ir_type['name']}(BaseModel):")
-    lines.append("    model_config = ConfigDict(populate_by_name=True, strict=False)")
-    if fields:
-        for f in fields:
-            py_type = ir_type_to_python(f["type"])
-            field_name = safe_field_name(f["name"])
-            if f["required"]:
-                lines.append(f"    {field_name}: {py_type}")
-            else:
-                lines.append(f"    {field_name}: {py_type} = None")
-    else:
+    if not fields:
         lines.append("    pass")
+        return "\n".join(lines)
+
+    for f in fields:
+        py_type = ir_type_to_python(f["type"])
+        field_name = safe_field_name(f["name"])
+        if f["required"]:
+            lines.append(f"    {field_name}: {py_type}")
+        else:
+            lines.append(f"    {field_name}: {py_type} = None")
     return "\n".join(lines)
 
 
@@ -132,7 +142,11 @@ def gen_variant_code(variant: dict, enum_name: str) -> str:
     var_name = variant["name"]
     cls_name = variant_class_name(var_name, enum_name)
     kind = variant["kind"]
-    lines = [f"class {cls_name}(BaseModel):"]
+    lines = [
+        f"class {cls_name}(ProtocolVariant):",
+        f'    __niri_wire_name__ = "{var_name}"',
+        f'    __niri_variant_kind__ = "{kind}"',
+    ]
 
     if kind == "unit":
         lines.append("    pass")
@@ -152,69 +166,79 @@ def gen_variant_code(variant: dict, enum_name: str) -> str:
                     lines.append(f"    {field_name}: {py_type}")
                 else:
                     lines.append(f"    {field_name}: {py_type} = None")
+
     return "\n".join(lines)
 
 
-def gen_unknown_sentinel_code(enum_name: str) -> str:
-    cls_name = f"Unknown{enum_name}"
-    return f"""
-class {cls_name}(BaseModel):
-    variant_name: str
-    raw_payload: Any
-"""
+def gen_all_unit_str_enum_code(ir_type: dict) -> str:
+    """Generate a StrEnum for all-unit enums like Transform, Layer, etc."""
+    lines = ["class StrEnum(str, enum.Enum):", "    pass", ""]
+    # We need to generate the actual StrEnum subclass
+    lines = [f"class {ir_type['name']}(StrEnum):"]
+    for v in ir_type["variants"]:
+        member_name = safe_enum_member_name(v["name"])
+        lines.append(f'    {member_name} = "{v["name"]}"')
+    return "\n".join(lines)
 
 
-def gen_enum_code(enum_name: str, variants: list[dict], has_unknown: bool) -> str:
-    lines = []
+def gen_externally_tagged_wrapper_code(enum_name: str, variants: list[dict], has_unknown: bool) -> str:
+    """Generate a union alias + ExternallyTaggedEnum subclass."""
     unknown_cls = f"Unknown{enum_name}"
-    var_table = f"_{enum_name.upper()}_VARIANTS"
-    name_table = f"_{enum_name.upper()}_VARIANT_NAMES"
-
-    lines.append("")
-    lines.append("# Wire-name to variant class mapping")
-    lines.append(f"{var_table}: dict[str, type[BaseModel]] = {{")
-    for v in variants:
-        cls = variant_class_name(v["name"], enum_name)
-        lines.append(f'    "{v["name"]}": {cls},')
-    lines.append("}")
-    lines.append("")
-    lines.append("# Variant class to wire-name mapping")
-    lines.append(f"{name_table}: dict[type[BaseModel], str] = {{")
-    for v in variants:
-        cls = variant_class_name(v["name"], enum_name)
-        lines.append(f'    {cls}: "{v["name"]}",')
-    lines.append("}")
-    lines.append("")
-
     variant_classes = [variant_class_name(v["name"], enum_name) for v in variants]
     if has_unknown:
         variant_classes.append(unknown_cls)
     union_str = " | ".join(variant_classes)
 
-    lines.append(f"class {enum_name}(BaseModel):")
-    lines.append("    model_config = ConfigDict(populate_by_name=True, strict=False)")
-    lines.append(f"    variant: {union_str}")
-    lines.append("")
-    lines.append('    @model_validator(mode="before")')
-    lines.append("    @classmethod")
-    lines.append("    def _decode_external_tag(cls, data: Any) -> dict[str, Any]:")
-    lines.append("        from niri_pypc.types.codec import decode_externally_tagged")
-    lines.append("        # If variant is already a decoded model instance, pass through")
-    lines.append('        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):')
-    lines.append("            return data")
-    if has_unknown:
-        lines.append('        return {"variant": decode_externally_tagged(')
-        lines.append(f"            data, {var_table},")
-        lines.append(f"            unknown_sentinel={unknown_cls},")
-        lines.append("        )}")
-    else:
-        lines.append(f'        return {{"variant": decode_externally_tagged(data, {var_table})}}')
-    lines.append("")
-    lines.append("    @model_serializer")
-    lines.append("    def _encode_external_tag(self) -> Any:")
-    lines.append("        from niri_pypc.types.codec import encode_externally_tagged")
-    lines.append(f"        return encode_externally_tagged(self.variant, {name_table})")
+    has_unknown_base_import = enum_name == "Event"
 
+    lines = [""]
+    lines.append(f"{enum_name}Value: TypeAlias = {union_str}")
+    lines.append("")
+
+    lines.append(f"class {enum_name}(ExternallyTaggedEnum[{enum_name}Value]):")
+    lines.append(f"    __niri_variants__ = (")
+    for v in variants:
+        cls = variant_class_name(v["name"], enum_name)
+        lines.append(f"        {cls},")
+    lines.append("    )")
+    if has_unknown:
+        if has_unknown_base_import:
+            lines.append(f"    __niri_unknown_variant_model__ = UnknownEvent")
+        else:
+            lines.append(f"    __niri_unknown_variant_model__ = {unknown_cls}")
+
+    return "\n".join(lines)
+
+
+def gen_reply_unwrap_code() -> str:
+    return """
+    def unwrap(self) -> ResponseValue:
+        if isinstance(self.root, OkReply):
+            return self.root.payload.root
+
+        if isinstance(self.root, ErrReply):
+            raise RemoteError(
+                f"Compositor error: {self.root.payload}",
+                operation="Reply.unwrap",
+                remote_message=self.root.payload,
+            )
+
+        raise DecodeError(
+            f"Unexpected reply variant: {type(self.root).__name__}",
+            operation="Reply.unwrap",
+        )
+"""
+
+
+def gen_unknown_sentinel_code(enum_name: str) -> str:
+    """Generate UnknownEvent/UnknownReply sentinel."""
+    cls_name = f"Unknown{enum_name}"
+    lines = [
+        "",
+        f"class {cls_name}(ProtocolModel):",
+        "    variant_name: str",
+        "    raw_payload: Any",
+    ]
     return "\n".join(lines)
 
 
@@ -251,7 +275,7 @@ def main():
     meta_lines = [
         'UPSTREAM_CRATE: str = "{}"'.format(ir["upstream_crate"]),
         'UPSTREAM_VERSION: str = "{}"'.format(ir["upstream_version"]),
-        'GENERATOR_VERSION: str = "1"',
+        'GENERATOR_VERSION: str = "2"',
         'IR_VERSION: str = "{}"'.format(ir["ir_version"]),
         f'IR_HASH: str = "{ir_hash}"',
         "SCHEMA_HASHES: dict[str, str] = {",
@@ -262,13 +286,16 @@ def main():
     write_file(output_dir / "_metadata.py", "\n".join(meta_lines) + "\n", ir, ir_hash)
 
     # ---- models.py: all structs + helper enums ----
-    models_lines = [
-        "from __future__ import annotations",
-        "",
-        "from typing import Any",
-        "from pydantic import BaseModel, ConfigDict, model_validator, model_serializer",
-        "",
-    ]
+    # Import block: base types, plus StrEnum for all-unit enums
+    models_header = """from __future__ import annotations
+
+from enum import StrEnum
+from typing import Any, TypeAlias
+
+from niri_pypc.types.base import ExternallyTaggedEnum, ProtocolModel, ProtocolVariant
+
+"""
+    models_lines = [models_header]
 
     for t in ir_types:
         if t["name"] in TOP_LEVEL_ENUMS:
@@ -277,13 +304,17 @@ def main():
             models_lines.append("")
             models_lines.append(gen_struct_code(t))
         elif t["kind"] == "enum":
-            has_unknown = False
-            # Variant classes
-            for v in t["variants"]:
+            if is_all_unit_enum(t):
                 models_lines.append("")
-                models_lines.append(gen_variant_code(v, t["name"]))
-            # Root enum
-            models_lines.append(gen_enum_code(t["name"], t["variants"], has_unknown))
+                models_lines.append(gen_all_unit_str_enum_code(t))
+            else:
+                has_unknown = t["name"] in INBOUND_ENUMS
+                for v in t["variants"]:
+                    models_lines.append("")
+                    models_lines.append(gen_variant_code(v, t["name"]))
+                if has_unknown:
+                    models_lines.append(gen_unknown_sentinel_code(t["name"]))
+                models_lines.append(gen_externally_tagged_wrapper_code(t["name"], t["variants"], has_unknown))
 
     write_file(output_dir / "models.py", "\n".join(models_lines) + "\n", ir, ir_hash)
 
@@ -295,19 +326,30 @@ def main():
         "reply.py": ["Reply", "Response"],
     }
 
-    # Map top-level enum names to their files
     enum_to_file = {}
     for fname, enames in enum_file_map.items():
         for en in enames:
             enum_to_file[en] = fname.replace(".py", "")
 
     for filename, enum_names in enum_file_map.items():
-        lines = [
+        needs_reply_unwrap = "Reply" in enum_names
+        needs_unknown_event = "Event" in enum_names
+
+        # Build import lines
+        import_lines = [
             "from __future__ import annotations",
             "",
-            "from typing import Any",
-            "from pydantic import BaseModel, ConfigDict, model_validator, model_serializer",
+            "from typing import TypeAlias",
         ]
+
+        base_imports = ["ExternallyTaggedEnum", "ProtocolVariant"]
+        if needs_unknown_event:
+            base_imports.append("ProtocolModel")
+            base_imports.append("UnknownEvent")
+        import_lines.append(f"from niri_pypc.types.base import {', '.join(base_imports)}")
+
+        if needs_reply_unwrap:
+            import_lines.append("from niri_pypc.errors import DecodeError, RemoteError")
 
         # Collect referenced types
         refs = set()
@@ -317,11 +359,9 @@ def main():
                 for v in t["variants"]:
                     _collect_refs_from_variant(v, refs)
 
-        # Filter refs to those that exist and are not in the same file
         same_file = set(enum_names)
         refs = {r for r in refs if r in types_by_name and r not in same_file}
 
-        # Group refs by which module they come from
         models_refs = set()
         top_refs: dict[str, set[str]] = {}
         for r in refs:
@@ -333,35 +373,36 @@ def main():
             else:
                 models_refs.add(r)
 
-        # Import from models.py
         if models_refs:
-            lines.append("from niri_pypc.types.generated.models import (")
+            import_lines.append("from niri_pypc.types.generated.models import (")
             for r in sorted(models_refs):
-                lines.append(f"    {r},")
-            lines.append(")")
+                import_lines.append(f"    {r},")
+            import_lines.append(")")
 
-        # Import from other top-level enum files
         for mod, names in sorted(top_refs.items()):
-            lines.append(f"from niri_pypc.types.generated.{mod} import (")
+            import_lines.append(f"from niri_pypc.types.generated.{mod} import (")
             for r in sorted(names):
-                lines.append(f"    {r},")
-            lines.append(")")
+                import_lines.append(f"    {r},")
+            import_lines.append(")")
 
-        lines.append("")
+        # Build body lines
+        body_lines = list(import_lines)
+        body_lines.append("")
 
         for enum_name in enum_names:
             t = types_by_name.get(enum_name)
             if t and t["kind"] == "enum":
-                has_unknown = enum_name in INBOUND_ENUMS
-                for v in t["variants"]:
-                    lines.append("")
-                    lines.append(gen_variant_code(v, enum_name))
-                if has_unknown:
-                    lines.append("")
-                    lines.append(gen_unknown_sentinel_code(enum_name))
-                lines.append(gen_enum_code(enum_name, t["variants"], has_unknown))
+                if not is_all_unit_enum(t):
+                    has_unknown = enum_name in INBOUND_ENUMS
+                    for v in t["variants"]:
+                        body_lines.append("")
+                        body_lines.append(gen_variant_code(v, enum_name))
+                    body_lines.append(gen_externally_tagged_wrapper_code(enum_name, t["variants"], has_unknown))
 
-        write_file(output_dir / filename, "\n".join(lines) + "\n", ir, ir_hash)
+                    if filename == "reply.py" and enum_name == "Reply":
+                        body_lines[-1] = body_lines[-1] + gen_reply_unwrap_code()
+
+        write_file(output_dir / filename, "\n".join(body_lines) + "\n", ir, ir_hash)
 
     # ---- __init__.py ----
     init_lines = [
@@ -383,7 +424,6 @@ def _collect_refs_from_variant(v: dict, refs: set[str]) -> None:
 
 
 def _extract_refs_from_type(t: str, refs: set[str]) -> None:
-    """Recursively extract all ref:X references from an IR type string."""
     if t.startswith("ref:"):
         name = t[4:]
         if name != "Unknown":

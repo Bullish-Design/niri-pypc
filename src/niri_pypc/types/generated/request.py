@@ -5,8 +5,8 @@
 
 from __future__ import annotations
 
-from typing import Any
-from pydantic import BaseModel, ConfigDict, model_validator, model_serializer
+from typing import TypeAlias
+from niri_pypc.types.base import ExternallyTaggedEnum, ProtocolVariant
 from niri_pypc.types.generated.models import (
     OutputAction,
 )
@@ -15,104 +15,99 @@ from niri_pypc.types.generated.action import (
 )
 
 
-class ActionRequest(BaseModel):
+class ActionRequest(ProtocolVariant):
+    __niri_wire_name__ = "Action"
+    __niri_variant_kind__ = "newtype"
     payload: Action
 
-class EventStreamRequest(BaseModel):
+class EventStreamRequest(ProtocolVariant):
+    __niri_wire_name__ = "EventStream"
+    __niri_variant_kind__ = "unit"
     pass
 
-class FocusedOutputRequest(BaseModel):
+class FocusedOutputRequest(ProtocolVariant):
+    __niri_wire_name__ = "FocusedOutput"
+    __niri_variant_kind__ = "unit"
     pass
 
-class FocusedWindowRequest(BaseModel):
+class FocusedWindowRequest(ProtocolVariant):
+    __niri_wire_name__ = "FocusedWindow"
+    __niri_variant_kind__ = "unit"
     pass
 
-class KeyboardLayoutsRequest(BaseModel):
+class KeyboardLayoutsRequest(ProtocolVariant):
+    __niri_wire_name__ = "KeyboardLayouts"
+    __niri_variant_kind__ = "unit"
     pass
 
-class LayersRequest(BaseModel):
+class LayersRequest(ProtocolVariant):
+    __niri_wire_name__ = "Layers"
+    __niri_variant_kind__ = "unit"
     pass
 
-class OutputRequest(BaseModel):
+class OutputRequest(ProtocolVariant):
+    __niri_wire_name__ = "Output"
+    __niri_variant_kind__ = "struct"
     action: OutputAction
     output: str
 
-class OutputsRequest(BaseModel):
+class OutputsRequest(ProtocolVariant):
+    __niri_wire_name__ = "Outputs"
+    __niri_variant_kind__ = "unit"
     pass
 
-class OverviewStateRequest(BaseModel):
+class OverviewStateRequest(ProtocolVariant):
+    __niri_wire_name__ = "OverviewState"
+    __niri_variant_kind__ = "unit"
     pass
 
-class PickColorRequest(BaseModel):
+class PickColorRequest(ProtocolVariant):
+    __niri_wire_name__ = "PickColor"
+    __niri_variant_kind__ = "unit"
     pass
 
-class PickWindowRequest(BaseModel):
+class PickWindowRequest(ProtocolVariant):
+    __niri_wire_name__ = "PickWindow"
+    __niri_variant_kind__ = "unit"
     pass
 
-class ReturnErrorRequest(BaseModel):
+class ReturnErrorRequest(ProtocolVariant):
+    __niri_wire_name__ = "ReturnError"
+    __niri_variant_kind__ = "unit"
     pass
 
-class VersionRequest(BaseModel):
+class VersionRequest(ProtocolVariant):
+    __niri_wire_name__ = "Version"
+    __niri_variant_kind__ = "unit"
     pass
 
-class WindowsRequest(BaseModel):
+class WindowsRequest(ProtocolVariant):
+    __niri_wire_name__ = "Windows"
+    __niri_variant_kind__ = "unit"
     pass
 
-class WorkspacesRequest(BaseModel):
+class WorkspacesRequest(ProtocolVariant):
+    __niri_wire_name__ = "Workspaces"
+    __niri_variant_kind__ = "unit"
     pass
 
-# Wire-name to variant class mapping
-_REQUEST_VARIANTS: dict[str, type[BaseModel]] = {
-    "Action": ActionRequest,
-    "EventStream": EventStreamRequest,
-    "FocusedOutput": FocusedOutputRequest,
-    "FocusedWindow": FocusedWindowRequest,
-    "KeyboardLayouts": KeyboardLayoutsRequest,
-    "Layers": LayersRequest,
-    "Output": OutputRequest,
-    "Outputs": OutputsRequest,
-    "OverviewState": OverviewStateRequest,
-    "PickColor": PickColorRequest,
-    "PickWindow": PickWindowRequest,
-    "ReturnError": ReturnErrorRequest,
-    "Version": VersionRequest,
-    "Windows": WindowsRequest,
-    "Workspaces": WorkspacesRequest,
-}
+RequestValue: TypeAlias = ActionRequest | EventStreamRequest | FocusedOutputRequest | FocusedWindowRequest | KeyboardLayoutsRequest | LayersRequest | OutputRequest | OutputsRequest | OverviewStateRequest | PickColorRequest | PickWindowRequest | ReturnErrorRequest | VersionRequest | WindowsRequest | WorkspacesRequest
 
-# Variant class to wire-name mapping
-_REQUEST_VARIANT_NAMES: dict[type[BaseModel], str] = {
-    ActionRequest: "Action",
-    EventStreamRequest: "EventStream",
-    FocusedOutputRequest: "FocusedOutput",
-    FocusedWindowRequest: "FocusedWindow",
-    KeyboardLayoutsRequest: "KeyboardLayouts",
-    LayersRequest: "Layers",
-    OutputRequest: "Output",
-    OutputsRequest: "Outputs",
-    OverviewStateRequest: "OverviewState",
-    PickColorRequest: "PickColor",
-    PickWindowRequest: "PickWindow",
-    ReturnErrorRequest: "ReturnError",
-    VersionRequest: "Version",
-    WindowsRequest: "Windows",
-    WorkspacesRequest: "Workspaces",
-}
-
-class Request(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
-    variant: ActionRequest | EventStreamRequest | FocusedOutputRequest | FocusedWindowRequest | KeyboardLayoutsRequest | LayersRequest | OutputRequest | OutputsRequest | OverviewStateRequest | PickColorRequest | PickWindowRequest | ReturnErrorRequest | VersionRequest | WindowsRequest | WorkspacesRequest
-
-    @model_validator(mode="before")
-    @classmethod
-    def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
-        from niri_pypc.types.codec import decode_externally_tagged
-        # If variant is already a decoded model instance, pass through
-        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
-            return data
-        return {"variant": decode_externally_tagged(data, _REQUEST_VARIANTS)}
-
-    @model_serializer
-    def _encode_external_tag(self) -> Any:
-        from niri_pypc.types.codec import encode_externally_tagged
-        return encode_externally_tagged(self.variant, _REQUEST_VARIANT_NAMES)
+class Request(ExternallyTaggedEnum[RequestValue]):
+    __niri_variants__ = (
+        ActionRequest,
+        EventStreamRequest,
+        FocusedOutputRequest,
+        FocusedWindowRequest,
+        KeyboardLayoutsRequest,
+        LayersRequest,
+        OutputRequest,
+        OutputsRequest,
+        OverviewStateRequest,
+        PickColorRequest,
+        PickWindowRequest,
+        ReturnErrorRequest,
+        VersionRequest,
+        WindowsRequest,
+        WorkspacesRequest,
+    )

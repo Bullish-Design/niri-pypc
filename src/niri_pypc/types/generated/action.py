@@ -5,8 +5,8 @@
 
 from __future__ import annotations
 
-from typing import Any
-from pydantic import BaseModel, ConfigDict, model_validator, model_serializer
+from typing import TypeAlias
+from niri_pypc.types.base import ExternallyTaggedEnum, ProtocolVariant
 from niri_pypc.types.generated.models import (
     ColumnDisplay,
     LayoutSwitchTarget,
@@ -16,744 +16,864 @@ from niri_pypc.types.generated.models import (
 )
 
 
-class CenterColumnAction(BaseModel):
+class CenterColumnAction(ProtocolVariant):
+    __niri_wire_name__ = "CenterColumn"
+    __niri_variant_kind__ = "struct"
     pass
 
-class CenterVisibleColumnsAction(BaseModel):
+class CenterVisibleColumnsAction(ProtocolVariant):
+    __niri_wire_name__ = "CenterVisibleColumns"
+    __niri_variant_kind__ = "struct"
     pass
 
-class CenterWindowAction(BaseModel):
+class CenterWindowAction(ProtocolVariant):
+    __niri_wire_name__ = "CenterWindow"
+    __niri_variant_kind__ = "struct"
     id: int | None = None
 
-class ClearDynamicCastTargetAction(BaseModel):
+class ClearDynamicCastTargetAction(ProtocolVariant):
+    __niri_wire_name__ = "ClearDynamicCastTarget"
+    __niri_variant_kind__ = "struct"
     pass
 
-class CloseOverviewAction(BaseModel):
+class CloseOverviewAction(ProtocolVariant):
+    __niri_wire_name__ = "CloseOverview"
+    __niri_variant_kind__ = "struct"
     pass
 
-class CloseWindowAction(BaseModel):
+class CloseWindowAction(ProtocolVariant):
+    __niri_wire_name__ = "CloseWindow"
+    __niri_variant_kind__ = "struct"
     id: int | None = None
 
-class ConsumeOrExpelWindowLeftAction(BaseModel):
+class ConsumeOrExpelWindowLeftAction(ProtocolVariant):
+    __niri_wire_name__ = "ConsumeOrExpelWindowLeft"
+    __niri_variant_kind__ = "struct"
     id: int | None = None
 
-class ConsumeOrExpelWindowRightAction(BaseModel):
+class ConsumeOrExpelWindowRightAction(ProtocolVariant):
+    __niri_wire_name__ = "ConsumeOrExpelWindowRight"
+    __niri_variant_kind__ = "struct"
     id: int | None = None
 
-class ConsumeWindowIntoColumnAction(BaseModel):
+class ConsumeWindowIntoColumnAction(ProtocolVariant):
+    __niri_wire_name__ = "ConsumeWindowIntoColumn"
+    __niri_variant_kind__ = "struct"
     pass
 
-class DebugToggleDamageAction(BaseModel):
+class DebugToggleDamageAction(ProtocolVariant):
+    __niri_wire_name__ = "DebugToggleDamage"
+    __niri_variant_kind__ = "struct"
     pass
 
-class DebugToggleOpaqueRegionsAction(BaseModel):
+class DebugToggleOpaqueRegionsAction(ProtocolVariant):
+    __niri_wire_name__ = "DebugToggleOpaqueRegions"
+    __niri_variant_kind__ = "struct"
     pass
 
-class DoScreenTransitionAction(BaseModel):
+class DoScreenTransitionAction(ProtocolVariant):
+    __niri_wire_name__ = "DoScreenTransition"
+    __niri_variant_kind__ = "struct"
     delay_ms: int | None = None
 
-class ExpandColumnToAvailableWidthAction(BaseModel):
+class ExpandColumnToAvailableWidthAction(ProtocolVariant):
+    __niri_wire_name__ = "ExpandColumnToAvailableWidth"
+    __niri_variant_kind__ = "struct"
     pass
 
-class ExpelWindowFromColumnAction(BaseModel):
+class ExpelWindowFromColumnAction(ProtocolVariant):
+    __niri_wire_name__ = "ExpelWindowFromColumn"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusColumnAction(BaseModel):
+class FocusColumnAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusColumn"
+    __niri_variant_kind__ = "struct"
     index: int
 
-class FocusColumnFirstAction(BaseModel):
+class FocusColumnFirstAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusColumnFirst"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusColumnLastAction(BaseModel):
+class FocusColumnLastAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusColumnLast"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusColumnLeftAction(BaseModel):
+class FocusColumnLeftAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusColumnLeft"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusColumnLeftOrLastAction(BaseModel):
+class FocusColumnLeftOrLastAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusColumnLeftOrLast"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusColumnOrMonitorLeftAction(BaseModel):
+class FocusColumnOrMonitorLeftAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusColumnOrMonitorLeft"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusColumnOrMonitorRightAction(BaseModel):
+class FocusColumnOrMonitorRightAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusColumnOrMonitorRight"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusColumnRightAction(BaseModel):
+class FocusColumnRightAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusColumnRight"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusColumnRightOrFirstAction(BaseModel):
+class FocusColumnRightOrFirstAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusColumnRightOrFirst"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusFloatingAction(BaseModel):
+class FocusFloatingAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusFloating"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusMonitorAction(BaseModel):
+class FocusMonitorAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusMonitor"
+    __niri_variant_kind__ = "struct"
     output: str
 
-class FocusMonitorDownAction(BaseModel):
+class FocusMonitorDownAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusMonitorDown"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusMonitorLeftAction(BaseModel):
+class FocusMonitorLeftAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusMonitorLeft"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusMonitorNextAction(BaseModel):
+class FocusMonitorNextAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusMonitorNext"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusMonitorPreviousAction(BaseModel):
+class FocusMonitorPreviousAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusMonitorPrevious"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusMonitorRightAction(BaseModel):
+class FocusMonitorRightAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusMonitorRight"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusMonitorUpAction(BaseModel):
+class FocusMonitorUpAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusMonitorUp"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusTilingAction(BaseModel):
+class FocusTilingAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusTiling"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusWindowAction(BaseModel):
+class FocusWindowAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusWindow"
+    __niri_variant_kind__ = "struct"
     id: int
 
-class FocusWindowBottomAction(BaseModel):
+class FocusWindowBottomAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusWindowBottom"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusWindowDownAction(BaseModel):
+class FocusWindowDownAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusWindowDown"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusWindowDownOrColumnLeftAction(BaseModel):
+class FocusWindowDownOrColumnLeftAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusWindowDownOrColumnLeft"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusWindowDownOrColumnRightAction(BaseModel):
+class FocusWindowDownOrColumnRightAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusWindowDownOrColumnRight"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusWindowDownOrTopAction(BaseModel):
+class FocusWindowDownOrTopAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusWindowDownOrTop"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusWindowInColumnAction(BaseModel):
+class FocusWindowInColumnAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusWindowInColumn"
+    __niri_variant_kind__ = "struct"
     index: int
 
-class FocusWindowOrMonitorDownAction(BaseModel):
+class FocusWindowOrMonitorDownAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusWindowOrMonitorDown"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusWindowOrMonitorUpAction(BaseModel):
+class FocusWindowOrMonitorUpAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusWindowOrMonitorUp"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusWindowOrWorkspaceDownAction(BaseModel):
+class FocusWindowOrWorkspaceDownAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusWindowOrWorkspaceDown"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusWindowOrWorkspaceUpAction(BaseModel):
+class FocusWindowOrWorkspaceUpAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusWindowOrWorkspaceUp"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusWindowPreviousAction(BaseModel):
+class FocusWindowPreviousAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusWindowPrevious"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusWindowTopAction(BaseModel):
+class FocusWindowTopAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusWindowTop"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusWindowUpAction(BaseModel):
+class FocusWindowUpAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusWindowUp"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusWindowUpOrBottomAction(BaseModel):
+class FocusWindowUpOrBottomAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusWindowUpOrBottom"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusWindowUpOrColumnLeftAction(BaseModel):
+class FocusWindowUpOrColumnLeftAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusWindowUpOrColumnLeft"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusWindowUpOrColumnRightAction(BaseModel):
+class FocusWindowUpOrColumnRightAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusWindowUpOrColumnRight"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusWorkspaceAction(BaseModel):
+class FocusWorkspaceAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusWorkspace"
+    __niri_variant_kind__ = "struct"
     reference: WorkspaceReferenceArg
 
-class FocusWorkspaceDownAction(BaseModel):
+class FocusWorkspaceDownAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusWorkspaceDown"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusWorkspacePreviousAction(BaseModel):
+class FocusWorkspacePreviousAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusWorkspacePrevious"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FocusWorkspaceUpAction(BaseModel):
+class FocusWorkspaceUpAction(ProtocolVariant):
+    __niri_wire_name__ = "FocusWorkspaceUp"
+    __niri_variant_kind__ = "struct"
     pass
 
-class FullscreenWindowAction(BaseModel):
+class FullscreenWindowAction(ProtocolVariant):
+    __niri_wire_name__ = "FullscreenWindow"
+    __niri_variant_kind__ = "struct"
     id: int | None = None
 
-class LoadConfigFileAction(BaseModel):
+class LoadConfigFileAction(ProtocolVariant):
+    __niri_wire_name__ = "LoadConfigFile"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MaximizeColumnAction(BaseModel):
+class MaximizeColumnAction(ProtocolVariant):
+    __niri_wire_name__ = "MaximizeColumn"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MaximizeWindowToEdgesAction(BaseModel):
+class MaximizeWindowToEdgesAction(ProtocolVariant):
+    __niri_wire_name__ = "MaximizeWindowToEdges"
+    __niri_variant_kind__ = "struct"
     id: int | None = None
 
-class MoveColumnLeftAction(BaseModel):
+class MoveColumnLeftAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveColumnLeft"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveColumnLeftOrToMonitorLeftAction(BaseModel):
+class MoveColumnLeftOrToMonitorLeftAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveColumnLeftOrToMonitorLeft"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveColumnRightAction(BaseModel):
+class MoveColumnRightAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveColumnRight"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveColumnRightOrToMonitorRightAction(BaseModel):
+class MoveColumnRightOrToMonitorRightAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveColumnRightOrToMonitorRight"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveColumnToFirstAction(BaseModel):
+class MoveColumnToFirstAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveColumnToFirst"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveColumnToIndexAction(BaseModel):
+class MoveColumnToIndexAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveColumnToIndex"
+    __niri_variant_kind__ = "struct"
     index: int
 
-class MoveColumnToLastAction(BaseModel):
+class MoveColumnToLastAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveColumnToLast"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveColumnToMonitorAction(BaseModel):
+class MoveColumnToMonitorAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveColumnToMonitor"
+    __niri_variant_kind__ = "struct"
     output: str
 
-class MoveColumnToMonitorDownAction(BaseModel):
+class MoveColumnToMonitorDownAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveColumnToMonitorDown"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveColumnToMonitorLeftAction(BaseModel):
+class MoveColumnToMonitorLeftAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveColumnToMonitorLeft"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveColumnToMonitorNextAction(BaseModel):
+class MoveColumnToMonitorNextAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveColumnToMonitorNext"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveColumnToMonitorPreviousAction(BaseModel):
+class MoveColumnToMonitorPreviousAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveColumnToMonitorPrevious"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveColumnToMonitorRightAction(BaseModel):
+class MoveColumnToMonitorRightAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveColumnToMonitorRight"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveColumnToMonitorUpAction(BaseModel):
+class MoveColumnToMonitorUpAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveColumnToMonitorUp"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveColumnToWorkspaceAction(BaseModel):
+class MoveColumnToWorkspaceAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveColumnToWorkspace"
+    __niri_variant_kind__ = "struct"
     focus: bool
     reference: WorkspaceReferenceArg
 
-class MoveColumnToWorkspaceDownAction(BaseModel):
+class MoveColumnToWorkspaceDownAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveColumnToWorkspaceDown"
+    __niri_variant_kind__ = "struct"
     focus: bool
 
-class MoveColumnToWorkspaceUpAction(BaseModel):
+class MoveColumnToWorkspaceUpAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveColumnToWorkspaceUp"
+    __niri_variant_kind__ = "struct"
     focus: bool
 
-class MoveFloatingWindowAction(BaseModel):
+class MoveFloatingWindowAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveFloatingWindow"
+    __niri_variant_kind__ = "struct"
     id: int | None = None
     x: PositionChange
     y: PositionChange
 
-class MoveWindowDownAction(BaseModel):
+class MoveWindowDownAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveWindowDown"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveWindowDownOrToWorkspaceDownAction(BaseModel):
+class MoveWindowDownOrToWorkspaceDownAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveWindowDownOrToWorkspaceDown"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveWindowToFloatingAction(BaseModel):
+class MoveWindowToFloatingAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveWindowToFloating"
+    __niri_variant_kind__ = "struct"
     id: int | None = None
 
-class MoveWindowToMonitorAction(BaseModel):
+class MoveWindowToMonitorAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveWindowToMonitor"
+    __niri_variant_kind__ = "struct"
     id: int | None = None
     output: str
 
-class MoveWindowToMonitorDownAction(BaseModel):
+class MoveWindowToMonitorDownAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveWindowToMonitorDown"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveWindowToMonitorLeftAction(BaseModel):
+class MoveWindowToMonitorLeftAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveWindowToMonitorLeft"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveWindowToMonitorNextAction(BaseModel):
+class MoveWindowToMonitorNextAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveWindowToMonitorNext"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveWindowToMonitorPreviousAction(BaseModel):
+class MoveWindowToMonitorPreviousAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveWindowToMonitorPrevious"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveWindowToMonitorRightAction(BaseModel):
+class MoveWindowToMonitorRightAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveWindowToMonitorRight"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveWindowToMonitorUpAction(BaseModel):
+class MoveWindowToMonitorUpAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveWindowToMonitorUp"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveWindowToTilingAction(BaseModel):
+class MoveWindowToTilingAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveWindowToTiling"
+    __niri_variant_kind__ = "struct"
     id: int | None = None
 
-class MoveWindowToWorkspaceAction(BaseModel):
+class MoveWindowToWorkspaceAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveWindowToWorkspace"
+    __niri_variant_kind__ = "struct"
     focus: bool
     reference: WorkspaceReferenceArg
     window_id: int | None = None
 
-class MoveWindowToWorkspaceDownAction(BaseModel):
+class MoveWindowToWorkspaceDownAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveWindowToWorkspaceDown"
+    __niri_variant_kind__ = "struct"
     focus: bool
 
-class MoveWindowToWorkspaceUpAction(BaseModel):
+class MoveWindowToWorkspaceUpAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveWindowToWorkspaceUp"
+    __niri_variant_kind__ = "struct"
     focus: bool
 
-class MoveWindowUpAction(BaseModel):
+class MoveWindowUpAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveWindowUp"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveWindowUpOrToWorkspaceUpAction(BaseModel):
+class MoveWindowUpOrToWorkspaceUpAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveWindowUpOrToWorkspaceUp"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveWorkspaceDownAction(BaseModel):
+class MoveWorkspaceDownAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveWorkspaceDown"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveWorkspaceToIndexAction(BaseModel):
+class MoveWorkspaceToIndexAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveWorkspaceToIndex"
+    __niri_variant_kind__ = "struct"
     index: int
     reference: WorkspaceReferenceArg | None = None
 
-class MoveWorkspaceToMonitorAction(BaseModel):
+class MoveWorkspaceToMonitorAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveWorkspaceToMonitor"
+    __niri_variant_kind__ = "struct"
     output: str
     reference: WorkspaceReferenceArg | None = None
 
-class MoveWorkspaceToMonitorDownAction(BaseModel):
+class MoveWorkspaceToMonitorDownAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveWorkspaceToMonitorDown"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveWorkspaceToMonitorLeftAction(BaseModel):
+class MoveWorkspaceToMonitorLeftAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveWorkspaceToMonitorLeft"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveWorkspaceToMonitorNextAction(BaseModel):
+class MoveWorkspaceToMonitorNextAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveWorkspaceToMonitorNext"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveWorkspaceToMonitorPreviousAction(BaseModel):
+class MoveWorkspaceToMonitorPreviousAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveWorkspaceToMonitorPrevious"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveWorkspaceToMonitorRightAction(BaseModel):
+class MoveWorkspaceToMonitorRightAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveWorkspaceToMonitorRight"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveWorkspaceToMonitorUpAction(BaseModel):
+class MoveWorkspaceToMonitorUpAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveWorkspaceToMonitorUp"
+    __niri_variant_kind__ = "struct"
     pass
 
-class MoveWorkspaceUpAction(BaseModel):
+class MoveWorkspaceUpAction(ProtocolVariant):
+    __niri_wire_name__ = "MoveWorkspaceUp"
+    __niri_variant_kind__ = "struct"
     pass
 
-class OpenOverviewAction(BaseModel):
+class OpenOverviewAction(ProtocolVariant):
+    __niri_wire_name__ = "OpenOverview"
+    __niri_variant_kind__ = "struct"
     pass
 
-class PowerOffMonitorsAction(BaseModel):
+class PowerOffMonitorsAction(ProtocolVariant):
+    __niri_wire_name__ = "PowerOffMonitors"
+    __niri_variant_kind__ = "struct"
     pass
 
-class PowerOnMonitorsAction(BaseModel):
+class PowerOnMonitorsAction(ProtocolVariant):
+    __niri_wire_name__ = "PowerOnMonitors"
+    __niri_variant_kind__ = "struct"
     pass
 
-class QuitAction(BaseModel):
+class QuitAction(ProtocolVariant):
+    __niri_wire_name__ = "Quit"
+    __niri_variant_kind__ = "struct"
     skip_confirmation: bool
 
-class ResetWindowHeightAction(BaseModel):
+class ResetWindowHeightAction(ProtocolVariant):
+    __niri_wire_name__ = "ResetWindowHeight"
+    __niri_variant_kind__ = "struct"
     id: int | None = None
 
-class ScreenshotAction(BaseModel):
+class ScreenshotAction(ProtocolVariant):
+    __niri_wire_name__ = "Screenshot"
+    __niri_variant_kind__ = "struct"
     path: str | None = None
     show_pointer: bool
 
-class ScreenshotScreenAction(BaseModel):
+class ScreenshotScreenAction(ProtocolVariant):
+    __niri_wire_name__ = "ScreenshotScreen"
+    __niri_variant_kind__ = "struct"
     path: str | None = None
     show_pointer: bool
     write_to_disk: bool
 
-class ScreenshotWindowAction(BaseModel):
+class ScreenshotWindowAction(ProtocolVariant):
+    __niri_wire_name__ = "ScreenshotWindow"
+    __niri_variant_kind__ = "struct"
     id: int | None = None
     path: str | None = None
     write_to_disk: bool
 
-class SetColumnDisplayAction(BaseModel):
+class SetColumnDisplayAction(ProtocolVariant):
+    __niri_wire_name__ = "SetColumnDisplay"
+    __niri_variant_kind__ = "struct"
     display: ColumnDisplay
 
-class SetColumnWidthAction(BaseModel):
+class SetColumnWidthAction(ProtocolVariant):
+    __niri_wire_name__ = "SetColumnWidth"
+    __niri_variant_kind__ = "struct"
     change: SizeChange
 
-class SetDynamicCastMonitorAction(BaseModel):
+class SetDynamicCastMonitorAction(ProtocolVariant):
+    __niri_wire_name__ = "SetDynamicCastMonitor"
+    __niri_variant_kind__ = "struct"
     output: str | None = None
 
-class SetDynamicCastWindowAction(BaseModel):
+class SetDynamicCastWindowAction(ProtocolVariant):
+    __niri_wire_name__ = "SetDynamicCastWindow"
+    __niri_variant_kind__ = "struct"
     id: int | None = None
 
-class SetWindowHeightAction(BaseModel):
+class SetWindowHeightAction(ProtocolVariant):
+    __niri_wire_name__ = "SetWindowHeight"
+    __niri_variant_kind__ = "struct"
     change: SizeChange
     id: int | None = None
 
-class SetWindowUrgentAction(BaseModel):
+class SetWindowUrgentAction(ProtocolVariant):
+    __niri_wire_name__ = "SetWindowUrgent"
+    __niri_variant_kind__ = "struct"
     id: int
 
-class SetWindowWidthAction(BaseModel):
+class SetWindowWidthAction(ProtocolVariant):
+    __niri_wire_name__ = "SetWindowWidth"
+    __niri_variant_kind__ = "struct"
     change: SizeChange
     id: int | None = None
 
-class SetWorkspaceNameAction(BaseModel):
+class SetWorkspaceNameAction(ProtocolVariant):
+    __niri_wire_name__ = "SetWorkspaceName"
+    __niri_variant_kind__ = "struct"
     name: str
     workspace: WorkspaceReferenceArg | None = None
 
-class ShowHotkeyOverlayAction(BaseModel):
+class ShowHotkeyOverlayAction(ProtocolVariant):
+    __niri_wire_name__ = "ShowHotkeyOverlay"
+    __niri_variant_kind__ = "struct"
     pass
 
-class SpawnAction(BaseModel):
+class SpawnAction(ProtocolVariant):
+    __niri_wire_name__ = "Spawn"
+    __niri_variant_kind__ = "struct"
     command: list[str]
 
-class SpawnShAction(BaseModel):
+class SpawnShAction(ProtocolVariant):
+    __niri_wire_name__ = "SpawnSh"
+    __niri_variant_kind__ = "struct"
     command: str
 
-class SwapWindowLeftAction(BaseModel):
+class SwapWindowLeftAction(ProtocolVariant):
+    __niri_wire_name__ = "SwapWindowLeft"
+    __niri_variant_kind__ = "struct"
     pass
 
-class SwapWindowRightAction(BaseModel):
+class SwapWindowRightAction(ProtocolVariant):
+    __niri_wire_name__ = "SwapWindowRight"
+    __niri_variant_kind__ = "struct"
     pass
 
-class SwitchFocusBetweenFloatingAndTilingAction(BaseModel):
+class SwitchFocusBetweenFloatingAndTilingAction(ProtocolVariant):
+    __niri_wire_name__ = "SwitchFocusBetweenFloatingAndTiling"
+    __niri_variant_kind__ = "struct"
     pass
 
-class SwitchLayoutAction(BaseModel):
+class SwitchLayoutAction(ProtocolVariant):
+    __niri_wire_name__ = "SwitchLayout"
+    __niri_variant_kind__ = "struct"
     layout: LayoutSwitchTarget
 
-class SwitchPresetColumnWidthAction(BaseModel):
+class SwitchPresetColumnWidthAction(ProtocolVariant):
+    __niri_wire_name__ = "SwitchPresetColumnWidth"
+    __niri_variant_kind__ = "struct"
     pass
 
-class SwitchPresetColumnWidthBackAction(BaseModel):
+class SwitchPresetColumnWidthBackAction(ProtocolVariant):
+    __niri_wire_name__ = "SwitchPresetColumnWidthBack"
+    __niri_variant_kind__ = "struct"
     pass
 
-class SwitchPresetWindowHeightAction(BaseModel):
+class SwitchPresetWindowHeightAction(ProtocolVariant):
+    __niri_wire_name__ = "SwitchPresetWindowHeight"
+    __niri_variant_kind__ = "struct"
     id: int | None = None
 
-class SwitchPresetWindowHeightBackAction(BaseModel):
+class SwitchPresetWindowHeightBackAction(ProtocolVariant):
+    __niri_wire_name__ = "SwitchPresetWindowHeightBack"
+    __niri_variant_kind__ = "struct"
     id: int | None = None
 
-class SwitchPresetWindowWidthAction(BaseModel):
+class SwitchPresetWindowWidthAction(ProtocolVariant):
+    __niri_wire_name__ = "SwitchPresetWindowWidth"
+    __niri_variant_kind__ = "struct"
     id: int | None = None
 
-class SwitchPresetWindowWidthBackAction(BaseModel):
+class SwitchPresetWindowWidthBackAction(ProtocolVariant):
+    __niri_wire_name__ = "SwitchPresetWindowWidthBack"
+    __niri_variant_kind__ = "struct"
     id: int | None = None
 
-class ToggleColumnTabbedDisplayAction(BaseModel):
+class ToggleColumnTabbedDisplayAction(ProtocolVariant):
+    __niri_wire_name__ = "ToggleColumnTabbedDisplay"
+    __niri_variant_kind__ = "struct"
     pass
 
-class ToggleDebugTintAction(BaseModel):
+class ToggleDebugTintAction(ProtocolVariant):
+    __niri_wire_name__ = "ToggleDebugTint"
+    __niri_variant_kind__ = "struct"
     pass
 
-class ToggleKeyboardShortcutsInhibitAction(BaseModel):
+class ToggleKeyboardShortcutsInhibitAction(ProtocolVariant):
+    __niri_wire_name__ = "ToggleKeyboardShortcutsInhibit"
+    __niri_variant_kind__ = "struct"
     pass
 
-class ToggleOverviewAction(BaseModel):
+class ToggleOverviewAction(ProtocolVariant):
+    __niri_wire_name__ = "ToggleOverview"
+    __niri_variant_kind__ = "struct"
     pass
 
-class ToggleWindowFloatingAction(BaseModel):
+class ToggleWindowFloatingAction(ProtocolVariant):
+    __niri_wire_name__ = "ToggleWindowFloating"
+    __niri_variant_kind__ = "struct"
     id: int | None = None
 
-class ToggleWindowRuleOpacityAction(BaseModel):
+class ToggleWindowRuleOpacityAction(ProtocolVariant):
+    __niri_wire_name__ = "ToggleWindowRuleOpacity"
+    __niri_variant_kind__ = "struct"
     id: int | None = None
 
-class ToggleWindowUrgentAction(BaseModel):
+class ToggleWindowUrgentAction(ProtocolVariant):
+    __niri_wire_name__ = "ToggleWindowUrgent"
+    __niri_variant_kind__ = "struct"
     id: int
 
-class ToggleWindowedFullscreenAction(BaseModel):
+class ToggleWindowedFullscreenAction(ProtocolVariant):
+    __niri_wire_name__ = "ToggleWindowedFullscreen"
+    __niri_variant_kind__ = "struct"
     id: int | None = None
 
-class UnsetWindowUrgentAction(BaseModel):
+class UnsetWindowUrgentAction(ProtocolVariant):
+    __niri_wire_name__ = "UnsetWindowUrgent"
+    __niri_variant_kind__ = "struct"
     id: int
 
-class UnsetWorkspaceNameAction(BaseModel):
+class UnsetWorkspaceNameAction(ProtocolVariant):
+    __niri_wire_name__ = "UnsetWorkspaceName"
+    __niri_variant_kind__ = "struct"
     reference: WorkspaceReferenceArg | None = None
 
-# Wire-name to variant class mapping
-_ACTION_VARIANTS: dict[str, type[BaseModel]] = {
-    "CenterColumn": CenterColumnAction,
-    "CenterVisibleColumns": CenterVisibleColumnsAction,
-    "CenterWindow": CenterWindowAction,
-    "ClearDynamicCastTarget": ClearDynamicCastTargetAction,
-    "CloseOverview": CloseOverviewAction,
-    "CloseWindow": CloseWindowAction,
-    "ConsumeOrExpelWindowLeft": ConsumeOrExpelWindowLeftAction,
-    "ConsumeOrExpelWindowRight": ConsumeOrExpelWindowRightAction,
-    "ConsumeWindowIntoColumn": ConsumeWindowIntoColumnAction,
-    "DebugToggleDamage": DebugToggleDamageAction,
-    "DebugToggleOpaqueRegions": DebugToggleOpaqueRegionsAction,
-    "DoScreenTransition": DoScreenTransitionAction,
-    "ExpandColumnToAvailableWidth": ExpandColumnToAvailableWidthAction,
-    "ExpelWindowFromColumn": ExpelWindowFromColumnAction,
-    "FocusColumn": FocusColumnAction,
-    "FocusColumnFirst": FocusColumnFirstAction,
-    "FocusColumnLast": FocusColumnLastAction,
-    "FocusColumnLeft": FocusColumnLeftAction,
-    "FocusColumnLeftOrLast": FocusColumnLeftOrLastAction,
-    "FocusColumnOrMonitorLeft": FocusColumnOrMonitorLeftAction,
-    "FocusColumnOrMonitorRight": FocusColumnOrMonitorRightAction,
-    "FocusColumnRight": FocusColumnRightAction,
-    "FocusColumnRightOrFirst": FocusColumnRightOrFirstAction,
-    "FocusFloating": FocusFloatingAction,
-    "FocusMonitor": FocusMonitorAction,
-    "FocusMonitorDown": FocusMonitorDownAction,
-    "FocusMonitorLeft": FocusMonitorLeftAction,
-    "FocusMonitorNext": FocusMonitorNextAction,
-    "FocusMonitorPrevious": FocusMonitorPreviousAction,
-    "FocusMonitorRight": FocusMonitorRightAction,
-    "FocusMonitorUp": FocusMonitorUpAction,
-    "FocusTiling": FocusTilingAction,
-    "FocusWindow": FocusWindowAction,
-    "FocusWindowBottom": FocusWindowBottomAction,
-    "FocusWindowDown": FocusWindowDownAction,
-    "FocusWindowDownOrColumnLeft": FocusWindowDownOrColumnLeftAction,
-    "FocusWindowDownOrColumnRight": FocusWindowDownOrColumnRightAction,
-    "FocusWindowDownOrTop": FocusWindowDownOrTopAction,
-    "FocusWindowInColumn": FocusWindowInColumnAction,
-    "FocusWindowOrMonitorDown": FocusWindowOrMonitorDownAction,
-    "FocusWindowOrMonitorUp": FocusWindowOrMonitorUpAction,
-    "FocusWindowOrWorkspaceDown": FocusWindowOrWorkspaceDownAction,
-    "FocusWindowOrWorkspaceUp": FocusWindowOrWorkspaceUpAction,
-    "FocusWindowPrevious": FocusWindowPreviousAction,
-    "FocusWindowTop": FocusWindowTopAction,
-    "FocusWindowUp": FocusWindowUpAction,
-    "FocusWindowUpOrBottom": FocusWindowUpOrBottomAction,
-    "FocusWindowUpOrColumnLeft": FocusWindowUpOrColumnLeftAction,
-    "FocusWindowUpOrColumnRight": FocusWindowUpOrColumnRightAction,
-    "FocusWorkspace": FocusWorkspaceAction,
-    "FocusWorkspaceDown": FocusWorkspaceDownAction,
-    "FocusWorkspacePrevious": FocusWorkspacePreviousAction,
-    "FocusWorkspaceUp": FocusWorkspaceUpAction,
-    "FullscreenWindow": FullscreenWindowAction,
-    "LoadConfigFile": LoadConfigFileAction,
-    "MaximizeColumn": MaximizeColumnAction,
-    "MaximizeWindowToEdges": MaximizeWindowToEdgesAction,
-    "MoveColumnLeft": MoveColumnLeftAction,
-    "MoveColumnLeftOrToMonitorLeft": MoveColumnLeftOrToMonitorLeftAction,
-    "MoveColumnRight": MoveColumnRightAction,
-    "MoveColumnRightOrToMonitorRight": MoveColumnRightOrToMonitorRightAction,
-    "MoveColumnToFirst": MoveColumnToFirstAction,
-    "MoveColumnToIndex": MoveColumnToIndexAction,
-    "MoveColumnToLast": MoveColumnToLastAction,
-    "MoveColumnToMonitor": MoveColumnToMonitorAction,
-    "MoveColumnToMonitorDown": MoveColumnToMonitorDownAction,
-    "MoveColumnToMonitorLeft": MoveColumnToMonitorLeftAction,
-    "MoveColumnToMonitorNext": MoveColumnToMonitorNextAction,
-    "MoveColumnToMonitorPrevious": MoveColumnToMonitorPreviousAction,
-    "MoveColumnToMonitorRight": MoveColumnToMonitorRightAction,
-    "MoveColumnToMonitorUp": MoveColumnToMonitorUpAction,
-    "MoveColumnToWorkspace": MoveColumnToWorkspaceAction,
-    "MoveColumnToWorkspaceDown": MoveColumnToWorkspaceDownAction,
-    "MoveColumnToWorkspaceUp": MoveColumnToWorkspaceUpAction,
-    "MoveFloatingWindow": MoveFloatingWindowAction,
-    "MoveWindowDown": MoveWindowDownAction,
-    "MoveWindowDownOrToWorkspaceDown": MoveWindowDownOrToWorkspaceDownAction,
-    "MoveWindowToFloating": MoveWindowToFloatingAction,
-    "MoveWindowToMonitor": MoveWindowToMonitorAction,
-    "MoveWindowToMonitorDown": MoveWindowToMonitorDownAction,
-    "MoveWindowToMonitorLeft": MoveWindowToMonitorLeftAction,
-    "MoveWindowToMonitorNext": MoveWindowToMonitorNextAction,
-    "MoveWindowToMonitorPrevious": MoveWindowToMonitorPreviousAction,
-    "MoveWindowToMonitorRight": MoveWindowToMonitorRightAction,
-    "MoveWindowToMonitorUp": MoveWindowToMonitorUpAction,
-    "MoveWindowToTiling": MoveWindowToTilingAction,
-    "MoveWindowToWorkspace": MoveWindowToWorkspaceAction,
-    "MoveWindowToWorkspaceDown": MoveWindowToWorkspaceDownAction,
-    "MoveWindowToWorkspaceUp": MoveWindowToWorkspaceUpAction,
-    "MoveWindowUp": MoveWindowUpAction,
-    "MoveWindowUpOrToWorkspaceUp": MoveWindowUpOrToWorkspaceUpAction,
-    "MoveWorkspaceDown": MoveWorkspaceDownAction,
-    "MoveWorkspaceToIndex": MoveWorkspaceToIndexAction,
-    "MoveWorkspaceToMonitor": MoveWorkspaceToMonitorAction,
-    "MoveWorkspaceToMonitorDown": MoveWorkspaceToMonitorDownAction,
-    "MoveWorkspaceToMonitorLeft": MoveWorkspaceToMonitorLeftAction,
-    "MoveWorkspaceToMonitorNext": MoveWorkspaceToMonitorNextAction,
-    "MoveWorkspaceToMonitorPrevious": MoveWorkspaceToMonitorPreviousAction,
-    "MoveWorkspaceToMonitorRight": MoveWorkspaceToMonitorRightAction,
-    "MoveWorkspaceToMonitorUp": MoveWorkspaceToMonitorUpAction,
-    "MoveWorkspaceUp": MoveWorkspaceUpAction,
-    "OpenOverview": OpenOverviewAction,
-    "PowerOffMonitors": PowerOffMonitorsAction,
-    "PowerOnMonitors": PowerOnMonitorsAction,
-    "Quit": QuitAction,
-    "ResetWindowHeight": ResetWindowHeightAction,
-    "Screenshot": ScreenshotAction,
-    "ScreenshotScreen": ScreenshotScreenAction,
-    "ScreenshotWindow": ScreenshotWindowAction,
-    "SetColumnDisplay": SetColumnDisplayAction,
-    "SetColumnWidth": SetColumnWidthAction,
-    "SetDynamicCastMonitor": SetDynamicCastMonitorAction,
-    "SetDynamicCastWindow": SetDynamicCastWindowAction,
-    "SetWindowHeight": SetWindowHeightAction,
-    "SetWindowUrgent": SetWindowUrgentAction,
-    "SetWindowWidth": SetWindowWidthAction,
-    "SetWorkspaceName": SetWorkspaceNameAction,
-    "ShowHotkeyOverlay": ShowHotkeyOverlayAction,
-    "Spawn": SpawnAction,
-    "SpawnSh": SpawnShAction,
-    "SwapWindowLeft": SwapWindowLeftAction,
-    "SwapWindowRight": SwapWindowRightAction,
-    "SwitchFocusBetweenFloatingAndTiling": SwitchFocusBetweenFloatingAndTilingAction,
-    "SwitchLayout": SwitchLayoutAction,
-    "SwitchPresetColumnWidth": SwitchPresetColumnWidthAction,
-    "SwitchPresetColumnWidthBack": SwitchPresetColumnWidthBackAction,
-    "SwitchPresetWindowHeight": SwitchPresetWindowHeightAction,
-    "SwitchPresetWindowHeightBack": SwitchPresetWindowHeightBackAction,
-    "SwitchPresetWindowWidth": SwitchPresetWindowWidthAction,
-    "SwitchPresetWindowWidthBack": SwitchPresetWindowWidthBackAction,
-    "ToggleColumnTabbedDisplay": ToggleColumnTabbedDisplayAction,
-    "ToggleDebugTint": ToggleDebugTintAction,
-    "ToggleKeyboardShortcutsInhibit": ToggleKeyboardShortcutsInhibitAction,
-    "ToggleOverview": ToggleOverviewAction,
-    "ToggleWindowFloating": ToggleWindowFloatingAction,
-    "ToggleWindowRuleOpacity": ToggleWindowRuleOpacityAction,
-    "ToggleWindowUrgent": ToggleWindowUrgentAction,
-    "ToggleWindowedFullscreen": ToggleWindowedFullscreenAction,
-    "UnsetWindowUrgent": UnsetWindowUrgentAction,
-    "UnsetWorkspaceName": UnsetWorkspaceNameAction,
-}
+ActionValue: TypeAlias = CenterColumnAction | CenterVisibleColumnsAction | CenterWindowAction | ClearDynamicCastTargetAction | CloseOverviewAction | CloseWindowAction | ConsumeOrExpelWindowLeftAction | ConsumeOrExpelWindowRightAction | ConsumeWindowIntoColumnAction | DebugToggleDamageAction | DebugToggleOpaqueRegionsAction | DoScreenTransitionAction | ExpandColumnToAvailableWidthAction | ExpelWindowFromColumnAction | FocusColumnAction | FocusColumnFirstAction | FocusColumnLastAction | FocusColumnLeftAction | FocusColumnLeftOrLastAction | FocusColumnOrMonitorLeftAction | FocusColumnOrMonitorRightAction | FocusColumnRightAction | FocusColumnRightOrFirstAction | FocusFloatingAction | FocusMonitorAction | FocusMonitorDownAction | FocusMonitorLeftAction | FocusMonitorNextAction | FocusMonitorPreviousAction | FocusMonitorRightAction | FocusMonitorUpAction | FocusTilingAction | FocusWindowAction | FocusWindowBottomAction | FocusWindowDownAction | FocusWindowDownOrColumnLeftAction | FocusWindowDownOrColumnRightAction | FocusWindowDownOrTopAction | FocusWindowInColumnAction | FocusWindowOrMonitorDownAction | FocusWindowOrMonitorUpAction | FocusWindowOrWorkspaceDownAction | FocusWindowOrWorkspaceUpAction | FocusWindowPreviousAction | FocusWindowTopAction | FocusWindowUpAction | FocusWindowUpOrBottomAction | FocusWindowUpOrColumnLeftAction | FocusWindowUpOrColumnRightAction | FocusWorkspaceAction | FocusWorkspaceDownAction | FocusWorkspacePreviousAction | FocusWorkspaceUpAction | FullscreenWindowAction | LoadConfigFileAction | MaximizeColumnAction | MaximizeWindowToEdgesAction | MoveColumnLeftAction | MoveColumnLeftOrToMonitorLeftAction | MoveColumnRightAction | MoveColumnRightOrToMonitorRightAction | MoveColumnToFirstAction | MoveColumnToIndexAction | MoveColumnToLastAction | MoveColumnToMonitorAction | MoveColumnToMonitorDownAction | MoveColumnToMonitorLeftAction | MoveColumnToMonitorNextAction | MoveColumnToMonitorPreviousAction | MoveColumnToMonitorRightAction | MoveColumnToMonitorUpAction | MoveColumnToWorkspaceAction | MoveColumnToWorkspaceDownAction | MoveColumnToWorkspaceUpAction | MoveFloatingWindowAction | MoveWindowDownAction | MoveWindowDownOrToWorkspaceDownAction | MoveWindowToFloatingAction | MoveWindowToMonitorAction | MoveWindowToMonitorDownAction | MoveWindowToMonitorLeftAction | MoveWindowToMonitorNextAction | MoveWindowToMonitorPreviousAction | MoveWindowToMonitorRightAction | MoveWindowToMonitorUpAction | MoveWindowToTilingAction | MoveWindowToWorkspaceAction | MoveWindowToWorkspaceDownAction | MoveWindowToWorkspaceUpAction | MoveWindowUpAction | MoveWindowUpOrToWorkspaceUpAction | MoveWorkspaceDownAction | MoveWorkspaceToIndexAction | MoveWorkspaceToMonitorAction | MoveWorkspaceToMonitorDownAction | MoveWorkspaceToMonitorLeftAction | MoveWorkspaceToMonitorNextAction | MoveWorkspaceToMonitorPreviousAction | MoveWorkspaceToMonitorRightAction | MoveWorkspaceToMonitorUpAction | MoveWorkspaceUpAction | OpenOverviewAction | PowerOffMonitorsAction | PowerOnMonitorsAction | QuitAction | ResetWindowHeightAction | ScreenshotAction | ScreenshotScreenAction | ScreenshotWindowAction | SetColumnDisplayAction | SetColumnWidthAction | SetDynamicCastMonitorAction | SetDynamicCastWindowAction | SetWindowHeightAction | SetWindowUrgentAction | SetWindowWidthAction | SetWorkspaceNameAction | ShowHotkeyOverlayAction | SpawnAction | SpawnShAction | SwapWindowLeftAction | SwapWindowRightAction | SwitchFocusBetweenFloatingAndTilingAction | SwitchLayoutAction | SwitchPresetColumnWidthAction | SwitchPresetColumnWidthBackAction | SwitchPresetWindowHeightAction | SwitchPresetWindowHeightBackAction | SwitchPresetWindowWidthAction | SwitchPresetWindowWidthBackAction | ToggleColumnTabbedDisplayAction | ToggleDebugTintAction | ToggleKeyboardShortcutsInhibitAction | ToggleOverviewAction | ToggleWindowFloatingAction | ToggleWindowRuleOpacityAction | ToggleWindowUrgentAction | ToggleWindowedFullscreenAction | UnsetWindowUrgentAction | UnsetWorkspaceNameAction
 
-# Variant class to wire-name mapping
-_ACTION_VARIANT_NAMES: dict[type[BaseModel], str] = {
-    CenterColumnAction: "CenterColumn",
-    CenterVisibleColumnsAction: "CenterVisibleColumns",
-    CenterWindowAction: "CenterWindow",
-    ClearDynamicCastTargetAction: "ClearDynamicCastTarget",
-    CloseOverviewAction: "CloseOverview",
-    CloseWindowAction: "CloseWindow",
-    ConsumeOrExpelWindowLeftAction: "ConsumeOrExpelWindowLeft",
-    ConsumeOrExpelWindowRightAction: "ConsumeOrExpelWindowRight",
-    ConsumeWindowIntoColumnAction: "ConsumeWindowIntoColumn",
-    DebugToggleDamageAction: "DebugToggleDamage",
-    DebugToggleOpaqueRegionsAction: "DebugToggleOpaqueRegions",
-    DoScreenTransitionAction: "DoScreenTransition",
-    ExpandColumnToAvailableWidthAction: "ExpandColumnToAvailableWidth",
-    ExpelWindowFromColumnAction: "ExpelWindowFromColumn",
-    FocusColumnAction: "FocusColumn",
-    FocusColumnFirstAction: "FocusColumnFirst",
-    FocusColumnLastAction: "FocusColumnLast",
-    FocusColumnLeftAction: "FocusColumnLeft",
-    FocusColumnLeftOrLastAction: "FocusColumnLeftOrLast",
-    FocusColumnOrMonitorLeftAction: "FocusColumnOrMonitorLeft",
-    FocusColumnOrMonitorRightAction: "FocusColumnOrMonitorRight",
-    FocusColumnRightAction: "FocusColumnRight",
-    FocusColumnRightOrFirstAction: "FocusColumnRightOrFirst",
-    FocusFloatingAction: "FocusFloating",
-    FocusMonitorAction: "FocusMonitor",
-    FocusMonitorDownAction: "FocusMonitorDown",
-    FocusMonitorLeftAction: "FocusMonitorLeft",
-    FocusMonitorNextAction: "FocusMonitorNext",
-    FocusMonitorPreviousAction: "FocusMonitorPrevious",
-    FocusMonitorRightAction: "FocusMonitorRight",
-    FocusMonitorUpAction: "FocusMonitorUp",
-    FocusTilingAction: "FocusTiling",
-    FocusWindowAction: "FocusWindow",
-    FocusWindowBottomAction: "FocusWindowBottom",
-    FocusWindowDownAction: "FocusWindowDown",
-    FocusWindowDownOrColumnLeftAction: "FocusWindowDownOrColumnLeft",
-    FocusWindowDownOrColumnRightAction: "FocusWindowDownOrColumnRight",
-    FocusWindowDownOrTopAction: "FocusWindowDownOrTop",
-    FocusWindowInColumnAction: "FocusWindowInColumn",
-    FocusWindowOrMonitorDownAction: "FocusWindowOrMonitorDown",
-    FocusWindowOrMonitorUpAction: "FocusWindowOrMonitorUp",
-    FocusWindowOrWorkspaceDownAction: "FocusWindowOrWorkspaceDown",
-    FocusWindowOrWorkspaceUpAction: "FocusWindowOrWorkspaceUp",
-    FocusWindowPreviousAction: "FocusWindowPrevious",
-    FocusWindowTopAction: "FocusWindowTop",
-    FocusWindowUpAction: "FocusWindowUp",
-    FocusWindowUpOrBottomAction: "FocusWindowUpOrBottom",
-    FocusWindowUpOrColumnLeftAction: "FocusWindowUpOrColumnLeft",
-    FocusWindowUpOrColumnRightAction: "FocusWindowUpOrColumnRight",
-    FocusWorkspaceAction: "FocusWorkspace",
-    FocusWorkspaceDownAction: "FocusWorkspaceDown",
-    FocusWorkspacePreviousAction: "FocusWorkspacePrevious",
-    FocusWorkspaceUpAction: "FocusWorkspaceUp",
-    FullscreenWindowAction: "FullscreenWindow",
-    LoadConfigFileAction: "LoadConfigFile",
-    MaximizeColumnAction: "MaximizeColumn",
-    MaximizeWindowToEdgesAction: "MaximizeWindowToEdges",
-    MoveColumnLeftAction: "MoveColumnLeft",
-    MoveColumnLeftOrToMonitorLeftAction: "MoveColumnLeftOrToMonitorLeft",
-    MoveColumnRightAction: "MoveColumnRight",
-    MoveColumnRightOrToMonitorRightAction: "MoveColumnRightOrToMonitorRight",
-    MoveColumnToFirstAction: "MoveColumnToFirst",
-    MoveColumnToIndexAction: "MoveColumnToIndex",
-    MoveColumnToLastAction: "MoveColumnToLast",
-    MoveColumnToMonitorAction: "MoveColumnToMonitor",
-    MoveColumnToMonitorDownAction: "MoveColumnToMonitorDown",
-    MoveColumnToMonitorLeftAction: "MoveColumnToMonitorLeft",
-    MoveColumnToMonitorNextAction: "MoveColumnToMonitorNext",
-    MoveColumnToMonitorPreviousAction: "MoveColumnToMonitorPrevious",
-    MoveColumnToMonitorRightAction: "MoveColumnToMonitorRight",
-    MoveColumnToMonitorUpAction: "MoveColumnToMonitorUp",
-    MoveColumnToWorkspaceAction: "MoveColumnToWorkspace",
-    MoveColumnToWorkspaceDownAction: "MoveColumnToWorkspaceDown",
-    MoveColumnToWorkspaceUpAction: "MoveColumnToWorkspaceUp",
-    MoveFloatingWindowAction: "MoveFloatingWindow",
-    MoveWindowDownAction: "MoveWindowDown",
-    MoveWindowDownOrToWorkspaceDownAction: "MoveWindowDownOrToWorkspaceDown",
-    MoveWindowToFloatingAction: "MoveWindowToFloating",
-    MoveWindowToMonitorAction: "MoveWindowToMonitor",
-    MoveWindowToMonitorDownAction: "MoveWindowToMonitorDown",
-    MoveWindowToMonitorLeftAction: "MoveWindowToMonitorLeft",
-    MoveWindowToMonitorNextAction: "MoveWindowToMonitorNext",
-    MoveWindowToMonitorPreviousAction: "MoveWindowToMonitorPrevious",
-    MoveWindowToMonitorRightAction: "MoveWindowToMonitorRight",
-    MoveWindowToMonitorUpAction: "MoveWindowToMonitorUp",
-    MoveWindowToTilingAction: "MoveWindowToTiling",
-    MoveWindowToWorkspaceAction: "MoveWindowToWorkspace",
-    MoveWindowToWorkspaceDownAction: "MoveWindowToWorkspaceDown",
-    MoveWindowToWorkspaceUpAction: "MoveWindowToWorkspaceUp",
-    MoveWindowUpAction: "MoveWindowUp",
-    MoveWindowUpOrToWorkspaceUpAction: "MoveWindowUpOrToWorkspaceUp",
-    MoveWorkspaceDownAction: "MoveWorkspaceDown",
-    MoveWorkspaceToIndexAction: "MoveWorkspaceToIndex",
-    MoveWorkspaceToMonitorAction: "MoveWorkspaceToMonitor",
-    MoveWorkspaceToMonitorDownAction: "MoveWorkspaceToMonitorDown",
-    MoveWorkspaceToMonitorLeftAction: "MoveWorkspaceToMonitorLeft",
-    MoveWorkspaceToMonitorNextAction: "MoveWorkspaceToMonitorNext",
-    MoveWorkspaceToMonitorPreviousAction: "MoveWorkspaceToMonitorPrevious",
-    MoveWorkspaceToMonitorRightAction: "MoveWorkspaceToMonitorRight",
-    MoveWorkspaceToMonitorUpAction: "MoveWorkspaceToMonitorUp",
-    MoveWorkspaceUpAction: "MoveWorkspaceUp",
-    OpenOverviewAction: "OpenOverview",
-    PowerOffMonitorsAction: "PowerOffMonitors",
-    PowerOnMonitorsAction: "PowerOnMonitors",
-    QuitAction: "Quit",
-    ResetWindowHeightAction: "ResetWindowHeight",
-    ScreenshotAction: "Screenshot",
-    ScreenshotScreenAction: "ScreenshotScreen",
-    ScreenshotWindowAction: "ScreenshotWindow",
-    SetColumnDisplayAction: "SetColumnDisplay",
-    SetColumnWidthAction: "SetColumnWidth",
-    SetDynamicCastMonitorAction: "SetDynamicCastMonitor",
-    SetDynamicCastWindowAction: "SetDynamicCastWindow",
-    SetWindowHeightAction: "SetWindowHeight",
-    SetWindowUrgentAction: "SetWindowUrgent",
-    SetWindowWidthAction: "SetWindowWidth",
-    SetWorkspaceNameAction: "SetWorkspaceName",
-    ShowHotkeyOverlayAction: "ShowHotkeyOverlay",
-    SpawnAction: "Spawn",
-    SpawnShAction: "SpawnSh",
-    SwapWindowLeftAction: "SwapWindowLeft",
-    SwapWindowRightAction: "SwapWindowRight",
-    SwitchFocusBetweenFloatingAndTilingAction: "SwitchFocusBetweenFloatingAndTiling",
-    SwitchLayoutAction: "SwitchLayout",
-    SwitchPresetColumnWidthAction: "SwitchPresetColumnWidth",
-    SwitchPresetColumnWidthBackAction: "SwitchPresetColumnWidthBack",
-    SwitchPresetWindowHeightAction: "SwitchPresetWindowHeight",
-    SwitchPresetWindowHeightBackAction: "SwitchPresetWindowHeightBack",
-    SwitchPresetWindowWidthAction: "SwitchPresetWindowWidth",
-    SwitchPresetWindowWidthBackAction: "SwitchPresetWindowWidthBack",
-    ToggleColumnTabbedDisplayAction: "ToggleColumnTabbedDisplay",
-    ToggleDebugTintAction: "ToggleDebugTint",
-    ToggleKeyboardShortcutsInhibitAction: "ToggleKeyboardShortcutsInhibit",
-    ToggleOverviewAction: "ToggleOverview",
-    ToggleWindowFloatingAction: "ToggleWindowFloating",
-    ToggleWindowRuleOpacityAction: "ToggleWindowRuleOpacity",
-    ToggleWindowUrgentAction: "ToggleWindowUrgent",
-    ToggleWindowedFullscreenAction: "ToggleWindowedFullscreen",
-    UnsetWindowUrgentAction: "UnsetWindowUrgent",
-    UnsetWorkspaceNameAction: "UnsetWorkspaceName",
-}
-
-class Action(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
-    variant: CenterColumnAction | CenterVisibleColumnsAction | CenterWindowAction | ClearDynamicCastTargetAction | CloseOverviewAction | CloseWindowAction | ConsumeOrExpelWindowLeftAction | ConsumeOrExpelWindowRightAction | ConsumeWindowIntoColumnAction | DebugToggleDamageAction | DebugToggleOpaqueRegionsAction | DoScreenTransitionAction | ExpandColumnToAvailableWidthAction | ExpelWindowFromColumnAction | FocusColumnAction | FocusColumnFirstAction | FocusColumnLastAction | FocusColumnLeftAction | FocusColumnLeftOrLastAction | FocusColumnOrMonitorLeftAction | FocusColumnOrMonitorRightAction | FocusColumnRightAction | FocusColumnRightOrFirstAction | FocusFloatingAction | FocusMonitorAction | FocusMonitorDownAction | FocusMonitorLeftAction | FocusMonitorNextAction | FocusMonitorPreviousAction | FocusMonitorRightAction | FocusMonitorUpAction | FocusTilingAction | FocusWindowAction | FocusWindowBottomAction | FocusWindowDownAction | FocusWindowDownOrColumnLeftAction | FocusWindowDownOrColumnRightAction | FocusWindowDownOrTopAction | FocusWindowInColumnAction | FocusWindowOrMonitorDownAction | FocusWindowOrMonitorUpAction | FocusWindowOrWorkspaceDownAction | FocusWindowOrWorkspaceUpAction | FocusWindowPreviousAction | FocusWindowTopAction | FocusWindowUpAction | FocusWindowUpOrBottomAction | FocusWindowUpOrColumnLeftAction | FocusWindowUpOrColumnRightAction | FocusWorkspaceAction | FocusWorkspaceDownAction | FocusWorkspacePreviousAction | FocusWorkspaceUpAction | FullscreenWindowAction | LoadConfigFileAction | MaximizeColumnAction | MaximizeWindowToEdgesAction | MoveColumnLeftAction | MoveColumnLeftOrToMonitorLeftAction | MoveColumnRightAction | MoveColumnRightOrToMonitorRightAction | MoveColumnToFirstAction | MoveColumnToIndexAction | MoveColumnToLastAction | MoveColumnToMonitorAction | MoveColumnToMonitorDownAction | MoveColumnToMonitorLeftAction | MoveColumnToMonitorNextAction | MoveColumnToMonitorPreviousAction | MoveColumnToMonitorRightAction | MoveColumnToMonitorUpAction | MoveColumnToWorkspaceAction | MoveColumnToWorkspaceDownAction | MoveColumnToWorkspaceUpAction | MoveFloatingWindowAction | MoveWindowDownAction | MoveWindowDownOrToWorkspaceDownAction | MoveWindowToFloatingAction | MoveWindowToMonitorAction | MoveWindowToMonitorDownAction | MoveWindowToMonitorLeftAction | MoveWindowToMonitorNextAction | MoveWindowToMonitorPreviousAction | MoveWindowToMonitorRightAction | MoveWindowToMonitorUpAction | MoveWindowToTilingAction | MoveWindowToWorkspaceAction | MoveWindowToWorkspaceDownAction | MoveWindowToWorkspaceUpAction | MoveWindowUpAction | MoveWindowUpOrToWorkspaceUpAction | MoveWorkspaceDownAction | MoveWorkspaceToIndexAction | MoveWorkspaceToMonitorAction | MoveWorkspaceToMonitorDownAction | MoveWorkspaceToMonitorLeftAction | MoveWorkspaceToMonitorNextAction | MoveWorkspaceToMonitorPreviousAction | MoveWorkspaceToMonitorRightAction | MoveWorkspaceToMonitorUpAction | MoveWorkspaceUpAction | OpenOverviewAction | PowerOffMonitorsAction | PowerOnMonitorsAction | QuitAction | ResetWindowHeightAction | ScreenshotAction | ScreenshotScreenAction | ScreenshotWindowAction | SetColumnDisplayAction | SetColumnWidthAction | SetDynamicCastMonitorAction | SetDynamicCastWindowAction | SetWindowHeightAction | SetWindowUrgentAction | SetWindowWidthAction | SetWorkspaceNameAction | ShowHotkeyOverlayAction | SpawnAction | SpawnShAction | SwapWindowLeftAction | SwapWindowRightAction | SwitchFocusBetweenFloatingAndTilingAction | SwitchLayoutAction | SwitchPresetColumnWidthAction | SwitchPresetColumnWidthBackAction | SwitchPresetWindowHeightAction | SwitchPresetWindowHeightBackAction | SwitchPresetWindowWidthAction | SwitchPresetWindowWidthBackAction | ToggleColumnTabbedDisplayAction | ToggleDebugTintAction | ToggleKeyboardShortcutsInhibitAction | ToggleOverviewAction | ToggleWindowFloatingAction | ToggleWindowRuleOpacityAction | ToggleWindowUrgentAction | ToggleWindowedFullscreenAction | UnsetWindowUrgentAction | UnsetWorkspaceNameAction
-
-    @model_validator(mode="before")
-    @classmethod
-    def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
-        from niri_pypc.types.codec import decode_externally_tagged
-        # If variant is already a decoded model instance, pass through
-        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
-            return data
-        return {"variant": decode_externally_tagged(data, _ACTION_VARIANTS)}
-
-    @model_serializer
-    def _encode_external_tag(self) -> Any:
-        from niri_pypc.types.codec import encode_externally_tagged
-        return encode_externally_tagged(self.variant, _ACTION_VARIANT_NAMES)
+class Action(ExternallyTaggedEnum[ActionValue]):
+    __niri_variants__ = (
+        CenterColumnAction,
+        CenterVisibleColumnsAction,
+        CenterWindowAction,
+        ClearDynamicCastTargetAction,
+        CloseOverviewAction,
+        CloseWindowAction,
+        ConsumeOrExpelWindowLeftAction,
+        ConsumeOrExpelWindowRightAction,
+        ConsumeWindowIntoColumnAction,
+        DebugToggleDamageAction,
+        DebugToggleOpaqueRegionsAction,
+        DoScreenTransitionAction,
+        ExpandColumnToAvailableWidthAction,
+        ExpelWindowFromColumnAction,
+        FocusColumnAction,
+        FocusColumnFirstAction,
+        FocusColumnLastAction,
+        FocusColumnLeftAction,
+        FocusColumnLeftOrLastAction,
+        FocusColumnOrMonitorLeftAction,
+        FocusColumnOrMonitorRightAction,
+        FocusColumnRightAction,
+        FocusColumnRightOrFirstAction,
+        FocusFloatingAction,
+        FocusMonitorAction,
+        FocusMonitorDownAction,
+        FocusMonitorLeftAction,
+        FocusMonitorNextAction,
+        FocusMonitorPreviousAction,
+        FocusMonitorRightAction,
+        FocusMonitorUpAction,
+        FocusTilingAction,
+        FocusWindowAction,
+        FocusWindowBottomAction,
+        FocusWindowDownAction,
+        FocusWindowDownOrColumnLeftAction,
+        FocusWindowDownOrColumnRightAction,
+        FocusWindowDownOrTopAction,
+        FocusWindowInColumnAction,
+        FocusWindowOrMonitorDownAction,
+        FocusWindowOrMonitorUpAction,
+        FocusWindowOrWorkspaceDownAction,
+        FocusWindowOrWorkspaceUpAction,
+        FocusWindowPreviousAction,
+        FocusWindowTopAction,
+        FocusWindowUpAction,
+        FocusWindowUpOrBottomAction,
+        FocusWindowUpOrColumnLeftAction,
+        FocusWindowUpOrColumnRightAction,
+        FocusWorkspaceAction,
+        FocusWorkspaceDownAction,
+        FocusWorkspacePreviousAction,
+        FocusWorkspaceUpAction,
+        FullscreenWindowAction,
+        LoadConfigFileAction,
+        MaximizeColumnAction,
+        MaximizeWindowToEdgesAction,
+        MoveColumnLeftAction,
+        MoveColumnLeftOrToMonitorLeftAction,
+        MoveColumnRightAction,
+        MoveColumnRightOrToMonitorRightAction,
+        MoveColumnToFirstAction,
+        MoveColumnToIndexAction,
+        MoveColumnToLastAction,
+        MoveColumnToMonitorAction,
+        MoveColumnToMonitorDownAction,
+        MoveColumnToMonitorLeftAction,
+        MoveColumnToMonitorNextAction,
+        MoveColumnToMonitorPreviousAction,
+        MoveColumnToMonitorRightAction,
+        MoveColumnToMonitorUpAction,
+        MoveColumnToWorkspaceAction,
+        MoveColumnToWorkspaceDownAction,
+        MoveColumnToWorkspaceUpAction,
+        MoveFloatingWindowAction,
+        MoveWindowDownAction,
+        MoveWindowDownOrToWorkspaceDownAction,
+        MoveWindowToFloatingAction,
+        MoveWindowToMonitorAction,
+        MoveWindowToMonitorDownAction,
+        MoveWindowToMonitorLeftAction,
+        MoveWindowToMonitorNextAction,
+        MoveWindowToMonitorPreviousAction,
+        MoveWindowToMonitorRightAction,
+        MoveWindowToMonitorUpAction,
+        MoveWindowToTilingAction,
+        MoveWindowToWorkspaceAction,
+        MoveWindowToWorkspaceDownAction,
+        MoveWindowToWorkspaceUpAction,
+        MoveWindowUpAction,
+        MoveWindowUpOrToWorkspaceUpAction,
+        MoveWorkspaceDownAction,
+        MoveWorkspaceToIndexAction,
+        MoveWorkspaceToMonitorAction,
+        MoveWorkspaceToMonitorDownAction,
+        MoveWorkspaceToMonitorLeftAction,
+        MoveWorkspaceToMonitorNextAction,
+        MoveWorkspaceToMonitorPreviousAction,
+        MoveWorkspaceToMonitorRightAction,
+        MoveWorkspaceToMonitorUpAction,
+        MoveWorkspaceUpAction,
+        OpenOverviewAction,
+        PowerOffMonitorsAction,
+        PowerOnMonitorsAction,
+        QuitAction,
+        ResetWindowHeightAction,
+        ScreenshotAction,
+        ScreenshotScreenAction,
+        ScreenshotWindowAction,
+        SetColumnDisplayAction,
+        SetColumnWidthAction,
+        SetDynamicCastMonitorAction,
+        SetDynamicCastWindowAction,
+        SetWindowHeightAction,
+        SetWindowUrgentAction,
+        SetWindowWidthAction,
+        SetWorkspaceNameAction,
+        ShowHotkeyOverlayAction,
+        SpawnAction,
+        SpawnShAction,
+        SwapWindowLeftAction,
+        SwapWindowRightAction,
+        SwitchFocusBetweenFloatingAndTilingAction,
+        SwitchLayoutAction,
+        SwitchPresetColumnWidthAction,
+        SwitchPresetColumnWidthBackAction,
+        SwitchPresetWindowHeightAction,
+        SwitchPresetWindowHeightBackAction,
+        SwitchPresetWindowWidthAction,
+        SwitchPresetWindowWidthBackAction,
+        ToggleColumnTabbedDisplayAction,
+        ToggleDebugTintAction,
+        ToggleKeyboardShortcutsInhibitAction,
+        ToggleOverviewAction,
+        ToggleWindowFloatingAction,
+        ToggleWindowRuleOpacityAction,
+        ToggleWindowUrgentAction,
+        ToggleWindowedFullscreenAction,
+        UnsetWindowUrgentAction,
+        UnsetWorkspaceNameAction,
+    )

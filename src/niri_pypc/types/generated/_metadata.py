@@ -5,7 +5,7 @@
 
 UPSTREAM_CRATE: str = "niri-ipc"
 UPSTREAM_VERSION: str = "25.11"
-GENERATOR_VERSION: str = "1"
+GENERATOR_VERSION: str = "2"
 IR_VERSION: str = "1"
 IR_HASH: str = "sha256:c5c2fa404b4969586ff344c3cedaed09c87b7d0bd0c79056426d8585fd91ece6"
 SCHEMA_HASHES: dict[str, str] = {

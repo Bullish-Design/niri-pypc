@@ -5,253 +5,87 @@
 
 from __future__ import annotations
 
-from typing import Any
-from pydantic import BaseModel, ConfigDict, model_validator, model_serializer
+from enum import StrEnum
+from typing import Any, TypeAlias
+
+from niri_pypc.types.base import ExternallyTaggedEnum, ProtocolModel, ProtocolVariant
 
 
-class NormalColumnDisplay(BaseModel):
-    pass
 
-class TabbedColumnDisplay(BaseModel):
-    pass
+class ColumnDisplay(StrEnum):
+    NORMAL = "Normal"
+    TABBED = "Tabbed"
 
-# Wire-name to variant class mapping
-_COLUMNDISPLAY_VARIANTS: dict[str, type[BaseModel]] = {
-    "Normal": NormalColumnDisplay,
-    "Tabbed": TabbedColumnDisplay,
-}
+class HSyncPolarity(StrEnum):
+    NHSYNC = "NHSync"
+    PHSYNC = "PHSync"
 
-# Variant class to wire-name mapping
-_COLUMNDISPLAY_VARIANT_NAMES: dict[type[BaseModel], str] = {
-    NormalColumnDisplay: "Normal",
-    TabbedColumnDisplay: "Tabbed",
-}
+class Layer(StrEnum):
+    BACKGROUND = "Background"
+    BOTTOM = "Bottom"
+    OVERLAY = "Overlay"
+    TOP = "Top"
 
-class ColumnDisplay(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
-    variant: NormalColumnDisplay | TabbedColumnDisplay
+class LayerSurfaceKeyboardInteractivity(StrEnum):
+    EXCLUSIVE = "Exclusive"
+    NONE = "None"
+    ONDEMAND = "OnDemand"
 
-    @model_validator(mode="before")
-    @classmethod
-    def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
-        from niri_pypc.types.codec import decode_externally_tagged
-        # If variant is already a decoded model instance, pass through
-        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
-            return data
-        return {"variant": decode_externally_tagged(data, _COLUMNDISPLAY_VARIANTS)}
-
-    @model_serializer
-    def _encode_external_tag(self) -> Any:
-        from niri_pypc.types.codec import encode_externally_tagged
-        return encode_externally_tagged(self.variant, _COLUMNDISPLAY_VARIANT_NAMES)
-
-class NHSyncHSyncPolarity(BaseModel):
-    pass
-
-class PHSyncHSyncPolarity(BaseModel):
-    pass
-
-# Wire-name to variant class mapping
-_HSYNCPOLARITY_VARIANTS: dict[str, type[BaseModel]] = {
-    "NHSync": NHSyncHSyncPolarity,
-    "PHSync": PHSyncHSyncPolarity,
-}
-
-# Variant class to wire-name mapping
-_HSYNCPOLARITY_VARIANT_NAMES: dict[type[BaseModel], str] = {
-    NHSyncHSyncPolarity: "NHSync",
-    PHSyncHSyncPolarity: "PHSync",
-}
-
-class HSyncPolarity(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
-    variant: NHSyncHSyncPolarity | PHSyncHSyncPolarity
-
-    @model_validator(mode="before")
-    @classmethod
-    def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
-        from niri_pypc.types.codec import decode_externally_tagged
-        # If variant is already a decoded model instance, pass through
-        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
-            return data
-        return {"variant": decode_externally_tagged(data, _HSYNCPOLARITY_VARIANTS)}
-
-    @model_serializer
-    def _encode_external_tag(self) -> Any:
-        from niri_pypc.types.codec import encode_externally_tagged
-        return encode_externally_tagged(self.variant, _HSYNCPOLARITY_VARIANT_NAMES)
-
-class BackgroundLayer(BaseModel):
-    pass
-
-class BottomLayer(BaseModel):
-    pass
-
-class OverlayLayer(BaseModel):
-    pass
-
-class TopLayer(BaseModel):
-    pass
-
-# Wire-name to variant class mapping
-_LAYER_VARIANTS: dict[str, type[BaseModel]] = {
-    "Background": BackgroundLayer,
-    "Bottom": BottomLayer,
-    "Overlay": OverlayLayer,
-    "Top": TopLayer,
-}
-
-# Variant class to wire-name mapping
-_LAYER_VARIANT_NAMES: dict[type[BaseModel], str] = {
-    BackgroundLayer: "Background",
-    BottomLayer: "Bottom",
-    OverlayLayer: "Overlay",
-    TopLayer: "Top",
-}
-
-class Layer(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
-    variant: BackgroundLayer | BottomLayer | OverlayLayer | TopLayer
-
-    @model_validator(mode="before")
-    @classmethod
-    def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
-        from niri_pypc.types.codec import decode_externally_tagged
-        # If variant is already a decoded model instance, pass through
-        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
-            return data
-        return {"variant": decode_externally_tagged(data, _LAYER_VARIANTS)}
-
-    @model_serializer
-    def _encode_external_tag(self) -> Any:
-        from niri_pypc.types.codec import encode_externally_tagged
-        return encode_externally_tagged(self.variant, _LAYER_VARIANT_NAMES)
-
-class ExclusiveLayerSurfaceKeyboardInteractivity(BaseModel):
-    pass
-
-class NoneLayerSurfaceKeyboardInteractivity(BaseModel):
-    pass
-
-class OnDemandLayerSurfaceKeyboardInteractivity(BaseModel):
-    pass
-
-# Wire-name to variant class mapping
-_LAYERSURFACEKEYBOARDINTERACTIVITY_VARIANTS: dict[str, type[BaseModel]] = {
-    "Exclusive": ExclusiveLayerSurfaceKeyboardInteractivity,
-    "None": NoneLayerSurfaceKeyboardInteractivity,
-    "OnDemand": OnDemandLayerSurfaceKeyboardInteractivity,
-}
-
-# Variant class to wire-name mapping
-_LAYERSURFACEKEYBOARDINTERACTIVITY_VARIANT_NAMES: dict[type[BaseModel], str] = {
-    ExclusiveLayerSurfaceKeyboardInteractivity: "Exclusive",
-    NoneLayerSurfaceKeyboardInteractivity: "None",
-    OnDemandLayerSurfaceKeyboardInteractivity: "OnDemand",
-}
-
-class LayerSurfaceKeyboardInteractivity(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
-    variant: ExclusiveLayerSurfaceKeyboardInteractivity | NoneLayerSurfaceKeyboardInteractivity | OnDemandLayerSurfaceKeyboardInteractivity
-
-    @model_validator(mode="before")
-    @classmethod
-    def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
-        from niri_pypc.types.codec import decode_externally_tagged
-        # If variant is already a decoded model instance, pass through
-        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
-            return data
-        return {"variant": decode_externally_tagged(data, _LAYERSURFACEKEYBOARDINTERACTIVITY_VARIANTS)}
-
-    @model_serializer
-    def _encode_external_tag(self) -> Any:
-        from niri_pypc.types.codec import encode_externally_tagged
-        return encode_externally_tagged(self.variant, _LAYERSURFACEKEYBOARDINTERACTIVITY_VARIANT_NAMES)
-
-class IndexLayoutSwitchTarget(BaseModel):
+class IndexLayoutSwitchTarget(ProtocolVariant):
+    __niri_wire_name__ = "Index"
+    __niri_variant_kind__ = "newtype"
     payload: int
 
-class NextLayoutSwitchTarget(BaseModel):
+class NextLayoutSwitchTarget(ProtocolVariant):
+    __niri_wire_name__ = "Next"
+    __niri_variant_kind__ = "unit"
     pass
 
-class PrevLayoutSwitchTarget(BaseModel):
+class PrevLayoutSwitchTarget(ProtocolVariant):
+    __niri_wire_name__ = "Prev"
+    __niri_variant_kind__ = "unit"
     pass
 
-# Wire-name to variant class mapping
-_LAYOUTSWITCHTARGET_VARIANTS: dict[str, type[BaseModel]] = {
-    "Index": IndexLayoutSwitchTarget,
-    "Next": NextLayoutSwitchTarget,
-    "Prev": PrevLayoutSwitchTarget,
-}
+LayoutSwitchTargetValue: TypeAlias = IndexLayoutSwitchTarget | NextLayoutSwitchTarget | PrevLayoutSwitchTarget
 
-# Variant class to wire-name mapping
-_LAYOUTSWITCHTARGET_VARIANT_NAMES: dict[type[BaseModel], str] = {
-    IndexLayoutSwitchTarget: "Index",
-    NextLayoutSwitchTarget: "Next",
-    PrevLayoutSwitchTarget: "Prev",
-}
+class LayoutSwitchTarget(ExternallyTaggedEnum[LayoutSwitchTargetValue]):
+    __niri_variants__ = (
+        IndexLayoutSwitchTarget,
+        NextLayoutSwitchTarget,
+        PrevLayoutSwitchTarget,
+    )
 
-class LayoutSwitchTarget(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
-    variant: IndexLayoutSwitchTarget | NextLayoutSwitchTarget | PrevLayoutSwitchTarget
-
-    @model_validator(mode="before")
-    @classmethod
-    def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
-        from niri_pypc.types.codec import decode_externally_tagged
-        # If variant is already a decoded model instance, pass through
-        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
-            return data
-        return {"variant": decode_externally_tagged(data, _LAYOUTSWITCHTARGET_VARIANTS)}
-
-    @model_serializer
-    def _encode_external_tag(self) -> Any:
-        from niri_pypc.types.codec import encode_externally_tagged
-        return encode_externally_tagged(self.variant, _LAYOUTSWITCHTARGET_VARIANT_NAMES)
-
-class AutomaticModeToSet(BaseModel):
+class AutomaticModeToSet(ProtocolVariant):
+    __niri_wire_name__ = "Automatic"
+    __niri_variant_kind__ = "unit"
     pass
 
-class SpecificModeToSet(BaseModel):
+class SpecificModeToSet(ProtocolVariant):
+    __niri_wire_name__ = "Specific"
+    __niri_variant_kind__ = "newtype"
     payload: ConfiguredMode
 
-# Wire-name to variant class mapping
-_MODETOSET_VARIANTS: dict[str, type[BaseModel]] = {
-    "Automatic": AutomaticModeToSet,
-    "Specific": SpecificModeToSet,
-}
+ModeToSetValue: TypeAlias = AutomaticModeToSet | SpecificModeToSet
 
-# Variant class to wire-name mapping
-_MODETOSET_VARIANT_NAMES: dict[type[BaseModel], str] = {
-    AutomaticModeToSet: "Automatic",
-    SpecificModeToSet: "Specific",
-}
+class ModeToSet(ExternallyTaggedEnum[ModeToSetValue]):
+    __niri_variants__ = (
+        AutomaticModeToSet,
+        SpecificModeToSet,
+    )
 
-class ModeToSet(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
-    variant: AutomaticModeToSet | SpecificModeToSet
-
-    @model_validator(mode="before")
-    @classmethod
-    def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
-        from niri_pypc.types.codec import decode_externally_tagged
-        # If variant is already a decoded model instance, pass through
-        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
-            return data
-        return {"variant": decode_externally_tagged(data, _MODETOSET_VARIANTS)}
-
-    @model_serializer
-    def _encode_external_tag(self) -> Any:
-        from niri_pypc.types.codec import encode_externally_tagged
-        return encode_externally_tagged(self.variant, _MODETOSET_VARIANT_NAMES)
-
-class CustomModeOutputAction(BaseModel):
+class CustomModeOutputAction(ProtocolVariant):
+    __niri_wire_name__ = "CustomMode"
+    __niri_variant_kind__ = "struct"
     mode: ConfiguredMode
 
-class ModeOutputAction(BaseModel):
+class ModeOutputAction(ProtocolVariant):
+    __niri_wire_name__ = "Mode"
+    __niri_variant_kind__ = "struct"
     mode: ModeToSet
 
-class ModelineOutputAction(BaseModel):
+class ModelineOutputAction(ProtocolVariant):
+    __niri_wire_name__ = "Modeline"
+    __niri_variant_kind__ = "struct"
     clock: float
     hdisplay: int
     hsync_end: int
@@ -264,436 +98,209 @@ class ModelineOutputAction(BaseModel):
     vsync_start: int
     vtotal: int
 
-class OffOutputAction(BaseModel):
+class OffOutputAction(ProtocolVariant):
+    __niri_wire_name__ = "Off"
+    __niri_variant_kind__ = "unit"
     pass
 
-class OnOutputAction(BaseModel):
+class OnOutputAction(ProtocolVariant):
+    __niri_wire_name__ = "On"
+    __niri_variant_kind__ = "unit"
     pass
 
-class PositionOutputAction(BaseModel):
+class PositionOutputAction(ProtocolVariant):
+    __niri_wire_name__ = "Position"
+    __niri_variant_kind__ = "struct"
     position: PositionToSet
 
-class ScaleOutputAction(BaseModel):
+class ScaleOutputAction(ProtocolVariant):
+    __niri_wire_name__ = "Scale"
+    __niri_variant_kind__ = "struct"
     scale: ScaleToSet
 
-class TransformOutputAction(BaseModel):
+class TransformOutputAction(ProtocolVariant):
+    __niri_wire_name__ = "Transform"
+    __niri_variant_kind__ = "struct"
     transform: Transform
 
-class VrrOutputAction(BaseModel):
+class VrrOutputAction(ProtocolVariant):
+    __niri_wire_name__ = "Vrr"
+    __niri_variant_kind__ = "struct"
     vrr: VrrToSet
 
-# Wire-name to variant class mapping
-_OUTPUTACTION_VARIANTS: dict[str, type[BaseModel]] = {
-    "CustomMode": CustomModeOutputAction,
-    "Mode": ModeOutputAction,
-    "Modeline": ModelineOutputAction,
-    "Off": OffOutputAction,
-    "On": OnOutputAction,
-    "Position": PositionOutputAction,
-    "Scale": ScaleOutputAction,
-    "Transform": TransformOutputAction,
-    "Vrr": VrrOutputAction,
-}
+OutputActionValue: TypeAlias = CustomModeOutputAction | ModeOutputAction | ModelineOutputAction | OffOutputAction | OnOutputAction | PositionOutputAction | ScaleOutputAction | TransformOutputAction | VrrOutputAction
 
-# Variant class to wire-name mapping
-_OUTPUTACTION_VARIANT_NAMES: dict[type[BaseModel], str] = {
-    CustomModeOutputAction: "CustomMode",
-    ModeOutputAction: "Mode",
-    ModelineOutputAction: "Modeline",
-    OffOutputAction: "Off",
-    OnOutputAction: "On",
-    PositionOutputAction: "Position",
-    ScaleOutputAction: "Scale",
-    TransformOutputAction: "Transform",
-    VrrOutputAction: "Vrr",
-}
+class OutputAction(ExternallyTaggedEnum[OutputActionValue]):
+    __niri_variants__ = (
+        CustomModeOutputAction,
+        ModeOutputAction,
+        ModelineOutputAction,
+        OffOutputAction,
+        OnOutputAction,
+        PositionOutputAction,
+        ScaleOutputAction,
+        TransformOutputAction,
+        VrrOutputAction,
+    )
 
-class OutputAction(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
-    variant: CustomModeOutputAction | ModeOutputAction | ModelineOutputAction | OffOutputAction | OnOutputAction | PositionOutputAction | ScaleOutputAction | TransformOutputAction | VrrOutputAction
+class OutputConfigChanged(StrEnum):
+    APPLIED = "Applied"
+    OUTPUTWASMISSING = "OutputWasMissing"
 
-    @model_validator(mode="before")
-    @classmethod
-    def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
-        from niri_pypc.types.codec import decode_externally_tagged
-        # If variant is already a decoded model instance, pass through
-        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
-            return data
-        return {"variant": decode_externally_tagged(data, _OUTPUTACTION_VARIANTS)}
+class AdjustFixedPositionChange(ProtocolVariant):
+    __niri_wire_name__ = "AdjustFixed"
+    __niri_variant_kind__ = "newtype"
+    payload: float
 
-    @model_serializer
-    def _encode_external_tag(self) -> Any:
-        from niri_pypc.types.codec import encode_externally_tagged
-        return encode_externally_tagged(self.variant, _OUTPUTACTION_VARIANT_NAMES)
+class AdjustProportionPositionChange(ProtocolVariant):
+    __niri_wire_name__ = "AdjustProportion"
+    __niri_variant_kind__ = "newtype"
+    payload: float
 
-class AppliedOutputConfigChanged(BaseModel):
+class SetFixedPositionChange(ProtocolVariant):
+    __niri_wire_name__ = "SetFixed"
+    __niri_variant_kind__ = "newtype"
+    payload: float
+
+class SetProportionPositionChange(ProtocolVariant):
+    __niri_wire_name__ = "SetProportion"
+    __niri_variant_kind__ = "newtype"
+    payload: float
+
+PositionChangeValue: TypeAlias = AdjustFixedPositionChange | AdjustProportionPositionChange | SetFixedPositionChange | SetProportionPositionChange
+
+class PositionChange(ExternallyTaggedEnum[PositionChangeValue]):
+    __niri_variants__ = (
+        AdjustFixedPositionChange,
+        AdjustProportionPositionChange,
+        SetFixedPositionChange,
+        SetProportionPositionChange,
+    )
+
+class AutomaticPositionToSet(ProtocolVariant):
+    __niri_wire_name__ = "Automatic"
+    __niri_variant_kind__ = "unit"
     pass
 
-class OutputWasMissingOutputConfigChanged(BaseModel):
-    pass
-
-# Wire-name to variant class mapping
-_OUTPUTCONFIGCHANGED_VARIANTS: dict[str, type[BaseModel]] = {
-    "Applied": AppliedOutputConfigChanged,
-    "OutputWasMissing": OutputWasMissingOutputConfigChanged,
-}
-
-# Variant class to wire-name mapping
-_OUTPUTCONFIGCHANGED_VARIANT_NAMES: dict[type[BaseModel], str] = {
-    AppliedOutputConfigChanged: "Applied",
-    OutputWasMissingOutputConfigChanged: "OutputWasMissing",
-}
-
-class OutputConfigChanged(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
-    variant: AppliedOutputConfigChanged | OutputWasMissingOutputConfigChanged
-
-    @model_validator(mode="before")
-    @classmethod
-    def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
-        from niri_pypc.types.codec import decode_externally_tagged
-        # If variant is already a decoded model instance, pass through
-        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
-            return data
-        return {"variant": decode_externally_tagged(data, _OUTPUTCONFIGCHANGED_VARIANTS)}
-
-    @model_serializer
-    def _encode_external_tag(self) -> Any:
-        from niri_pypc.types.codec import encode_externally_tagged
-        return encode_externally_tagged(self.variant, _OUTPUTCONFIGCHANGED_VARIANT_NAMES)
-
-class AdjustFixedPositionChange(BaseModel):
-    payload: float
-
-class AdjustProportionPositionChange(BaseModel):
-    payload: float
-
-class SetFixedPositionChange(BaseModel):
-    payload: float
-
-class SetProportionPositionChange(BaseModel):
-    payload: float
-
-# Wire-name to variant class mapping
-_POSITIONCHANGE_VARIANTS: dict[str, type[BaseModel]] = {
-    "AdjustFixed": AdjustFixedPositionChange,
-    "AdjustProportion": AdjustProportionPositionChange,
-    "SetFixed": SetFixedPositionChange,
-    "SetProportion": SetProportionPositionChange,
-}
-
-# Variant class to wire-name mapping
-_POSITIONCHANGE_VARIANT_NAMES: dict[type[BaseModel], str] = {
-    AdjustFixedPositionChange: "AdjustFixed",
-    AdjustProportionPositionChange: "AdjustProportion",
-    SetFixedPositionChange: "SetFixed",
-    SetProportionPositionChange: "SetProportion",
-}
-
-class PositionChange(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
-    variant: AdjustFixedPositionChange | AdjustProportionPositionChange | SetFixedPositionChange | SetProportionPositionChange
-
-    @model_validator(mode="before")
-    @classmethod
-    def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
-        from niri_pypc.types.codec import decode_externally_tagged
-        # If variant is already a decoded model instance, pass through
-        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
-            return data
-        return {"variant": decode_externally_tagged(data, _POSITIONCHANGE_VARIANTS)}
-
-    @model_serializer
-    def _encode_external_tag(self) -> Any:
-        from niri_pypc.types.codec import encode_externally_tagged
-        return encode_externally_tagged(self.variant, _POSITIONCHANGE_VARIANT_NAMES)
-
-class AutomaticPositionToSet(BaseModel):
-    pass
-
-class SpecificPositionToSet(BaseModel):
+class SpecificPositionToSet(ProtocolVariant):
+    __niri_wire_name__ = "Specific"
+    __niri_variant_kind__ = "newtype"
     payload: ConfiguredPosition
 
-# Wire-name to variant class mapping
-_POSITIONTOSET_VARIANTS: dict[str, type[BaseModel]] = {
-    "Automatic": AutomaticPositionToSet,
-    "Specific": SpecificPositionToSet,
-}
+PositionToSetValue: TypeAlias = AutomaticPositionToSet | SpecificPositionToSet
 
-# Variant class to wire-name mapping
-_POSITIONTOSET_VARIANT_NAMES: dict[type[BaseModel], str] = {
-    AutomaticPositionToSet: "Automatic",
-    SpecificPositionToSet: "Specific",
-}
+class PositionToSet(ExternallyTaggedEnum[PositionToSetValue]):
+    __niri_variants__ = (
+        AutomaticPositionToSet,
+        SpecificPositionToSet,
+    )
 
-class PositionToSet(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
-    variant: AutomaticPositionToSet | SpecificPositionToSet
-
-    @model_validator(mode="before")
-    @classmethod
-    def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
-        from niri_pypc.types.codec import decode_externally_tagged
-        # If variant is already a decoded model instance, pass through
-        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
-            return data
-        return {"variant": decode_externally_tagged(data, _POSITIONTOSET_VARIANTS)}
-
-    @model_serializer
-    def _encode_external_tag(self) -> Any:
-        from niri_pypc.types.codec import encode_externally_tagged
-        return encode_externally_tagged(self.variant, _POSITIONTOSET_VARIANT_NAMES)
-
-class AutomaticScaleToSet(BaseModel):
+class AutomaticScaleToSet(ProtocolVariant):
+    __niri_wire_name__ = "Automatic"
+    __niri_variant_kind__ = "unit"
     pass
 
-class SpecificScaleToSet(BaseModel):
+class SpecificScaleToSet(ProtocolVariant):
+    __niri_wire_name__ = "Specific"
+    __niri_variant_kind__ = "newtype"
     payload: float
 
-# Wire-name to variant class mapping
-_SCALETOSET_VARIANTS: dict[str, type[BaseModel]] = {
-    "Automatic": AutomaticScaleToSet,
-    "Specific": SpecificScaleToSet,
-}
+ScaleToSetValue: TypeAlias = AutomaticScaleToSet | SpecificScaleToSet
 
-# Variant class to wire-name mapping
-_SCALETOSET_VARIANT_NAMES: dict[type[BaseModel], str] = {
-    AutomaticScaleToSet: "Automatic",
-    SpecificScaleToSet: "Specific",
-}
+class ScaleToSet(ExternallyTaggedEnum[ScaleToSetValue]):
+    __niri_variants__ = (
+        AutomaticScaleToSet,
+        SpecificScaleToSet,
+    )
 
-class ScaleToSet(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
-    variant: AutomaticScaleToSet | SpecificScaleToSet
-
-    @model_validator(mode="before")
-    @classmethod
-    def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
-        from niri_pypc.types.codec import decode_externally_tagged
-        # If variant is already a decoded model instance, pass through
-        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
-            return data
-        return {"variant": decode_externally_tagged(data, _SCALETOSET_VARIANTS)}
-
-    @model_serializer
-    def _encode_external_tag(self) -> Any:
-        from niri_pypc.types.codec import encode_externally_tagged
-        return encode_externally_tagged(self.variant, _SCALETOSET_VARIANT_NAMES)
-
-class AdjustFixedSizeChange(BaseModel):
+class AdjustFixedSizeChange(ProtocolVariant):
+    __niri_wire_name__ = "AdjustFixed"
+    __niri_variant_kind__ = "newtype"
     payload: int
 
-class AdjustProportionSizeChange(BaseModel):
+class AdjustProportionSizeChange(ProtocolVariant):
+    __niri_wire_name__ = "AdjustProportion"
+    __niri_variant_kind__ = "newtype"
     payload: float
 
-class SetFixedSizeChange(BaseModel):
+class SetFixedSizeChange(ProtocolVariant):
+    __niri_wire_name__ = "SetFixed"
+    __niri_variant_kind__ = "newtype"
     payload: int
 
-class SetProportionSizeChange(BaseModel):
+class SetProportionSizeChange(ProtocolVariant):
+    __niri_wire_name__ = "SetProportion"
+    __niri_variant_kind__ = "newtype"
     payload: float
 
-# Wire-name to variant class mapping
-_SIZECHANGE_VARIANTS: dict[str, type[BaseModel]] = {
-    "AdjustFixed": AdjustFixedSizeChange,
-    "AdjustProportion": AdjustProportionSizeChange,
-    "SetFixed": SetFixedSizeChange,
-    "SetProportion": SetProportionSizeChange,
-}
+SizeChangeValue: TypeAlias = AdjustFixedSizeChange | AdjustProportionSizeChange | SetFixedSizeChange | SetProportionSizeChange
 
-# Variant class to wire-name mapping
-_SIZECHANGE_VARIANT_NAMES: dict[type[BaseModel], str] = {
-    AdjustFixedSizeChange: "AdjustFixed",
-    AdjustProportionSizeChange: "AdjustProportion",
-    SetFixedSizeChange: "SetFixed",
-    SetProportionSizeChange: "SetProportion",
-}
+class SizeChange(ExternallyTaggedEnum[SizeChangeValue]):
+    __niri_variants__ = (
+        AdjustFixedSizeChange,
+        AdjustProportionSizeChange,
+        SetFixedSizeChange,
+        SetProportionSizeChange,
+    )
 
-class SizeChange(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
-    variant: AdjustFixedSizeChange | AdjustProportionSizeChange | SetFixedSizeChange | SetProportionSizeChange
+class Transform(StrEnum):
+    VALUE_180 = "180"
+    VALUE_270 = "270"
+    VALUE_90 = "90"
+    FLIPPED = "Flipped"
+    FLIPPED180 = "Flipped180"
+    FLIPPED270 = "Flipped270"
+    FLIPPED90 = "Flipped90"
+    NORMAL = "Normal"
 
-    @model_validator(mode="before")
-    @classmethod
-    def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
-        from niri_pypc.types.codec import decode_externally_tagged
-        # If variant is already a decoded model instance, pass through
-        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
-            return data
-        return {"variant": decode_externally_tagged(data, _SIZECHANGE_VARIANTS)}
+class VSyncPolarity(StrEnum):
+    NVSYNC = "NVSync"
+    PVSYNC = "PVSync"
 
-    @model_serializer
-    def _encode_external_tag(self) -> Any:
-        from niri_pypc.types.codec import encode_externally_tagged
-        return encode_externally_tagged(self.variant, _SIZECHANGE_VARIANT_NAMES)
-
-class _180Transform(BaseModel):
-    pass
-
-class _270Transform(BaseModel):
-    pass
-
-class _90Transform(BaseModel):
-    pass
-
-class FlippedTransform(BaseModel):
-    pass
-
-class Flipped180Transform(BaseModel):
-    pass
-
-class Flipped270Transform(BaseModel):
-    pass
-
-class Flipped90Transform(BaseModel):
-    pass
-
-class NormalTransform(BaseModel):
-    pass
-
-# Wire-name to variant class mapping
-_TRANSFORM_VARIANTS: dict[str, type[BaseModel]] = {
-    "180": _180Transform,
-    "270": _270Transform,
-    "90": _90Transform,
-    "Flipped": FlippedTransform,
-    "Flipped180": Flipped180Transform,
-    "Flipped270": Flipped270Transform,
-    "Flipped90": Flipped90Transform,
-    "Normal": NormalTransform,
-}
-
-# Variant class to wire-name mapping
-_TRANSFORM_VARIANT_NAMES: dict[type[BaseModel], str] = {
-    _180Transform: "180",
-    _270Transform: "270",
-    _90Transform: "90",
-    FlippedTransform: "Flipped",
-    Flipped180Transform: "Flipped180",
-    Flipped270Transform: "Flipped270",
-    Flipped90Transform: "Flipped90",
-    NormalTransform: "Normal",
-}
-
-class Transform(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
-    variant: _180Transform | _270Transform | _90Transform | FlippedTransform | Flipped180Transform | Flipped270Transform | Flipped90Transform | NormalTransform
-
-    @model_validator(mode="before")
-    @classmethod
-    def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
-        from niri_pypc.types.codec import decode_externally_tagged
-        # If variant is already a decoded model instance, pass through
-        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
-            return data
-        return {"variant": decode_externally_tagged(data, _TRANSFORM_VARIANTS)}
-
-    @model_serializer
-    def _encode_external_tag(self) -> Any:
-        from niri_pypc.types.codec import encode_externally_tagged
-        return encode_externally_tagged(self.variant, _TRANSFORM_VARIANT_NAMES)
-
-class NVSyncVSyncPolarity(BaseModel):
-    pass
-
-class PVSyncVSyncPolarity(BaseModel):
-    pass
-
-# Wire-name to variant class mapping
-_VSYNCPOLARITY_VARIANTS: dict[str, type[BaseModel]] = {
-    "NVSync": NVSyncVSyncPolarity,
-    "PVSync": PVSyncVSyncPolarity,
-}
-
-# Variant class to wire-name mapping
-_VSYNCPOLARITY_VARIANT_NAMES: dict[type[BaseModel], str] = {
-    NVSyncVSyncPolarity: "NVSync",
-    PVSyncVSyncPolarity: "PVSync",
-}
-
-class VSyncPolarity(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
-    variant: NVSyncVSyncPolarity | PVSyncVSyncPolarity
-
-    @model_validator(mode="before")
-    @classmethod
-    def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
-        from niri_pypc.types.codec import decode_externally_tagged
-        # If variant is already a decoded model instance, pass through
-        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
-            return data
-        return {"variant": decode_externally_tagged(data, _VSYNCPOLARITY_VARIANTS)}
-
-    @model_serializer
-    def _encode_external_tag(self) -> Any:
-        from niri_pypc.types.codec import encode_externally_tagged
-        return encode_externally_tagged(self.variant, _VSYNCPOLARITY_VARIANT_NAMES)
-
-class IdWorkspaceReferenceArg(BaseModel):
+class IdWorkspaceReferenceArg(ProtocolVariant):
+    __niri_wire_name__ = "Id"
+    __niri_variant_kind__ = "newtype"
     payload: int
 
-class IndexWorkspaceReferenceArg(BaseModel):
+class IndexWorkspaceReferenceArg(ProtocolVariant):
+    __niri_wire_name__ = "Index"
+    __niri_variant_kind__ = "newtype"
     payload: int
 
-class NameWorkspaceReferenceArg(BaseModel):
+class NameWorkspaceReferenceArg(ProtocolVariant):
+    __niri_wire_name__ = "Name"
+    __niri_variant_kind__ = "newtype"
     payload: str
 
-# Wire-name to variant class mapping
-_WORKSPACEREFERENCEARG_VARIANTS: dict[str, type[BaseModel]] = {
-    "Id": IdWorkspaceReferenceArg,
-    "Index": IndexWorkspaceReferenceArg,
-    "Name": NameWorkspaceReferenceArg,
-}
+WorkspaceReferenceArgValue: TypeAlias = IdWorkspaceReferenceArg | IndexWorkspaceReferenceArg | NameWorkspaceReferenceArg
 
-# Variant class to wire-name mapping
-_WORKSPACEREFERENCEARG_VARIANT_NAMES: dict[type[BaseModel], str] = {
-    IdWorkspaceReferenceArg: "Id",
-    IndexWorkspaceReferenceArg: "Index",
-    NameWorkspaceReferenceArg: "Name",
-}
+class WorkspaceReferenceArg(ExternallyTaggedEnum[WorkspaceReferenceArgValue]):
+    __niri_variants__ = (
+        IdWorkspaceReferenceArg,
+        IndexWorkspaceReferenceArg,
+        NameWorkspaceReferenceArg,
+    )
 
-class WorkspaceReferenceArg(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
-    variant: IdWorkspaceReferenceArg | IndexWorkspaceReferenceArg | NameWorkspaceReferenceArg
-
-    @model_validator(mode="before")
-    @classmethod
-    def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
-        from niri_pypc.types.codec import decode_externally_tagged
-        # If variant is already a decoded model instance, pass through
-        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
-            return data
-        return {"variant": decode_externally_tagged(data, _WORKSPACEREFERENCEARG_VARIANTS)}
-
-    @model_serializer
-    def _encode_external_tag(self) -> Any:
-        from niri_pypc.types.codec import encode_externally_tagged
-        return encode_externally_tagged(self.variant, _WORKSPACEREFERENCEARG_VARIANT_NAMES)
-
-class ConfiguredMode(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
+class ConfiguredMode(ProtocolModel):
     height: int
     refresh: float | None = None
     width: int
 
-class ConfiguredPosition(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
+class ConfiguredPosition(ProtocolModel):
     x: int
     y: int
 
-class KeyboardLayouts(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
+class KeyboardLayouts(ProtocolModel):
     current_idx: int
     names: list[str]
 
-class LayerSurface(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
+class LayerSurface(ProtocolModel):
     keyboard_interactivity: LayerSurfaceKeyboardInteractivity
     layer: Layer
     namespace: str
     output: str
 
-class LogicalOutput(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
+class LogicalOutput(ProtocolModel):
     height: int
     scale: float
     transform: Transform
@@ -701,15 +308,13 @@ class LogicalOutput(BaseModel):
     x: int
     y: int
 
-class Mode(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
+class Mode(ProtocolModel):
     height: int
     is_preferred: bool
     refresh_rate: int
     width: int
 
-class Output(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
+class Output(ProtocolModel):
     current_mode: int | None = None
     is_custom_mode: bool
     logical: LogicalOutput | None = None
@@ -722,26 +327,21 @@ class Output(BaseModel):
     vrr_enabled: bool
     vrr_supported: bool
 
-class Overview(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
+class Overview(ProtocolModel):
     is_open: bool
 
-class PickedColor(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
+class PickedColor(ProtocolModel):
     rgb: list[float]
 
-class Timestamp(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
+class Timestamp(ProtocolModel):
     nanos: int
     secs: int
 
-class VrrToSet(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
+class VrrToSet(ProtocolModel):
     on_demand: bool
     vrr: bool
 
-class Window(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
+class Window(ProtocolModel):
     app_id: str | None = None
     focus_timestamp: Timestamp | None = None
     id: int
@@ -753,16 +353,14 @@ class Window(BaseModel):
     title: str | None = None
     workspace_id: int | None = None
 
-class WindowLayout(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
+class WindowLayout(ProtocolModel):
     pos_in_scrolling_layout: list[int] | None = None
     tile_pos_in_workspace_view: list[float] | None = None
     tile_size: list[float]
     window_offset_in_tile: list[float]
     window_size: list[int]
 
-class Workspace(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
+class Workspace(ProtocolModel):
     active_window_id: int | None = None
     id: int
     idx: int
