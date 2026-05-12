@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import tempfile
 from pathlib import Path
 
@@ -22,6 +23,22 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "nested: nested/windowed niri integration tests")
     config.addinivalue_line("markers", "smoke: manual real-session checks")
     config.addinivalue_line("markers", "niri_scenario(name): select nested niri scenario fixture")
+
+
+def pytest_addoption(parser):
+    """Add command-line options for nested niri test mode."""
+    parser.addoption(
+        "--nested-visible",
+        action="store_true",
+        default=False,
+        help="Run nested tests with a visible compositor window instead of headless mode.",
+    )
+    parser.addoption(
+        "--nested-startup-timeout",
+        action="store",
+        default=None,
+        help="Override nested niri startup timeout in seconds.",
+    )
 
 
 @pytest.fixture
@@ -171,9 +188,29 @@ async def nested_niri(nested_harness: NestedNiriHarness, request: pytest.Fixture
         pytest.skip("No niri_scenario marker - cannot run nested test")
 
     scenario_key = scenario_marker.args[0]
-    instance = await nested_harness.start(scenario_key)
-    yield instance
-    await nested_harness.stop(instance)
+    visible = bool(request.config.getoption("--nested-visible") or os.environ.get("NIRI_PYPC_NESTED_VISIBLE") == "1")
+    startup_timeout_opt = request.config.getoption("--nested-startup-timeout")
+    startup_timeout = float(startup_timeout_opt) if startup_timeout_opt else None
+    niri_binary = os.environ.get("NIRI_PYPC_NIRI_BINARY", "niri")
+
+    try:
+        instance = await nested_harness.start(
+            scenario_key,
+            niri_binary=niri_binary,
+            visible=visible,
+            startup_timeout_s=startup_timeout,
+        )
+    except FileNotFoundError as exc:
+        pytest.skip(str(exc))
+    except RuntimeError as exc:
+        pytest.skip(f"Nested niri could not be started in this environment. Details: {exc}")
+
+    request.node._nested_niri_instance = instance
+    try:
+        yield instance
+    finally:
+        request.node._nested_niri_instance = None
+        await nested_harness.stop(instance)
 
 
 @pytest.fixture

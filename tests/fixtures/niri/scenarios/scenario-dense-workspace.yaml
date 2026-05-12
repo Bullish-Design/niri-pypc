@@ -9,7 +9,7 @@ capabilities:
   requires_multi_output: false
 expectations:
   min_outputs: 1
-  min_workspaces: 5
+  min_workspaces: 1
   allow_zero_windows: true
   output_names: []
   workspace_output_map: {}

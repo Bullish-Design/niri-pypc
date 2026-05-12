@@ -21,8 +21,9 @@ async def test_nested_version_request_round_trip(nested_niri):
     async with NiriClient.connect(config) as client:
         version = await client.request(VersionRequest())
         assert version is not None
-        assert hasattr(version, "payload")
-        print(f"Version response: {version.payload}")
+        assert hasattr(version, "variant")
+        assert hasattr(version.variant, "payload")
+        print(f"Version response: {version.variant.payload}")
 
 
 @pytest.mark.nested

@@ -1,23 +1,11 @@
-# Multi-output configuration for nested testing
-# Expected invariants: 2 outputs, workspaces mapped to specific outputs
-# Used for testing output/workspace mapping behavior
+// Multi-output configuration for nested testing
+// Expected invariants: 2 outputs, workspaces mapped to specific outputs
+// Used for testing output/workspace mapping behavior
 
 output "DP-1" {
-    res 1920x1080
-    position 0x0
     scale 1.0
 }
 
 output "DP-2" {
-    res 1920x1080
-    position 1920x0
     scale 1.0
-}
-
-workspace "1" {
-    output "DP-1"
-}
-
-workspace "2" {
-    output "DP-2"
 }

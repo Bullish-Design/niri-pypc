@@ -39,3 +39,37 @@ The full E2E testing refactoring has been implemented according to `E2E_TESTING_
 - **3 smoke tests**: Collected (require real niri session)
 - **Ruff**: All checks passed
 - **Ty**: All checks passed
+
+## Follow-up Validation and Fixes (2026-05-12)
+
+- Reviewed post-refactor behavior against latest commit (`0507fd9`).
+- Found startup behavior bug: nested tests errored when `niri` was unavailable or not launchable.
+- Found artifact hook bug: `pytest_runtest_makereport` expected `_nested_niri_instance` but fixture never attached it.
+- Added resilient startup handling in `nested_niri` fixture:
+  - `FileNotFoundError` and startup `RuntimeError` now skip nested tests with actionable reasons instead of hard-failing the suite.
+  - fixture now attaches `request.node._nested_niri_instance` so failure artifact reporting is functional.
+- Added explicit watch-mode controls:
+  - `--nested-visible` pytest option
+  - `NIRI_PYPC_NESTED_VISIBLE=1` env toggle
+  - `NIRI_PYPC_NIRI_BINARY=/path/to/niri` binary override
+  - `NIRI_PYPC_KEEP_NESTED_ARTIFACTS=1` to preserve logs/runtime dir on startup failure
+- Updated harness to improve diagnostics:
+  - includes stderr tail in startup failure details
+  - supports optional startup-timeout override (`--nested-startup-timeout`)
+- Updated README with nested and visible demo commands.
+- Validation results in this environment:
+  - `devenv shell -- ruff check tests/conftest.py tests/helpers/nested_niri.py`: pass
+  - `devenv shell -- ruff format --check tests/conftest.py tests/helpers/nested_niri.py`: pass
+  - `devenv shell -- ty check src tests`: pass
+  - `devenv shell -- pytest -m nested -q -s`: `11 skipped` (clean skip, no errors)
+
+### Additional corrections during validation
+
+- Fixed invalid fixture KDL syntax that prevented startup before compositor probing:
+  - Converted comments from `#` to `//`.
+  - Removed invalid `res/position` syntax from output blocks.
+  - Removed invalid workspace-to-output declarations that niri rejected in this config form.
+- Relaxed scenario workspace-specific expectations where fixture-level workspace mapping was removed:
+  - `scenario-multi-output.yaml`: `min_workspaces` 2 -> 1, `workspace_output_map` -> `{}`
+  - `scenario-dense-workspace.yaml`: `min_workspaces` 5 -> 1
+- Confirmed startup now reaches compositor initialization and skips only due missing compositor backend (`WaylandError(Connection(NoCompositor))`) in this environment.

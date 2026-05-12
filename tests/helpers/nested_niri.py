@@ -111,6 +111,8 @@ class NestedNiriHarness:
         self,
         scenario_key: str,
         niri_binary: str = "niri",
+        visible: bool = False,
+        startup_timeout_s: float | None = None,
     ) -> NestedNiriInstance:
         """Start a nested niri instance with the specified scenario.
 
@@ -125,6 +127,7 @@ class NestedNiriHarness:
             RuntimeError: If niri fails to start within timeout
         """
         scenario = self.load_scenario(scenario_key)
+        startup_timeout_s = startup_timeout_s or scenario.runtime.startup_timeout_s
 
         temp_root = Path(tempfile.mkdtemp(prefix="niri_nested_"))
         runtime_dir = temp_root / "runtime"
@@ -138,32 +141,97 @@ class NestedNiriHarness:
         env = os.environ.copy()
         env.pop("NIRI_SOCKET", None)
         env.pop("NIRI_CONFIG", None)
-        env["XDG_RUNTIME_DIR"] = str(runtime_dir)
+        parent_runtime_dir = Path(env.get("XDG_RUNTIME_DIR", ""))
+        wayland_display = env.get("WAYLAND_DISPLAY")
+        socket_scan_dir = runtime_dir
+        if visible:
+            # Visible nested mode: keep the real user runtime dir so this niri
+            # instance can connect to the host compositor reliably.
+            env["XDG_RUNTIME_DIR"] = str(parent_runtime_dir)
+            socket_scan_dir = parent_runtime_dir
+        else:
+            env["XDG_RUNTIME_DIR"] = str(runtime_dir)
+
+        if not visible and wayland_display and parent_runtime_dir:
+            parent_display_socket = parent_runtime_dir / wayland_display
+            if parent_display_socket.exists():
+                # Wayland allows absolute socket paths. Keep isolated runtime
+                # while pointing the nested client at the host compositor.
+                env["WAYLAND_DISPLAY"] = str(parent_display_socket)
+            bridged_display_socket = runtime_dir / wayland_display
+            if parent_display_socket.exists() and not bridged_display_socket.exists():
+                # Bridge the parent compositor socket into the isolated runtime dir
+                # so nested niri can connect while still using an isolated IPC location.
+                bridged_display_socket.symlink_to(parent_display_socket)
+            parent_lock = parent_runtime_dir / f"{wayland_display}.lock"
+            bridged_lock = runtime_dir / f"{wayland_display}.lock"
+            if parent_lock.exists() and not bridged_lock.exists():
+                bridged_lock.symlink_to(parent_lock)
 
         config_path = self.fixtures_root / "niri" / "configs" / scenario.config_fixture
 
         cmd = [niri_binary, "--config", str(config_path)]
 
-        process = subprocess.Popen(
-            cmd,
-            env=env,
-            stdout=open(logs_dir / "stdout.log", "wb"),
-            stderr=open(logs_dir / "stderr.log", "wb"),
-            start_new_session=True,
-        )
+        resolved_binary = shutil.which(niri_binary)
+        if resolved_binary is None:
+            shutil.rmtree(temp_root)
+            raise FileNotFoundError(f"niri binary not found on PATH: {niri_binary}")
 
+        debug_enabled = os.environ.get("NIRI_PYPC_NESTED_DEBUG") == "1"
+        if debug_enabled:
+            bridged_display_exists = (runtime_dir / (wayland_display or "")).exists() if wayland_display else False
+            print(
+                "[nested_niri] launch context:\n"
+                f"  scenario={scenario.key}\n"
+                f"  visible={visible}\n"
+                f"  niri_binary={niri_binary}\n"
+                f"  parent_XDG_RUNTIME_DIR={parent_runtime_dir}\n"
+                f"  child_XDG_RUNTIME_DIR={runtime_dir}\n"
+                f"  socket_scan_dir={socket_scan_dir}\n"
+                f"  WAYLAND_DISPLAY={wayland_display}\n"
+                f"  bridged_display_exists={bridged_display_exists}\n"
+                f"  config={config_path}\n"
+                f"  cmd={' '.join(cmd)}"
+            )
+
+        with open(logs_dir / "stdout.log", "wb") as stdout_log, open(logs_dir / "stderr.log", "wb") as stderr_log:
+            process = subprocess.Popen(
+                cmd,
+                env=env,
+                stdout=stdout_log,
+                stderr=stderr_log,
+                start_new_session=True,
+            )
+
+        existing_sockets = self._list_candidate_sockets(socket_scan_dir)
         start_time = time.time()
 
         socket_path = await self._wait_for_socket(
-            runtime_dir,
-            scenario.runtime.startup_timeout_s,
+            socket_scan_dir,
+            startup_timeout_s,
             scenario.runtime.ready_probe_interval_s,
+            pid=process.pid,
+            existing_sockets=existing_sockets,
         )
 
         if socket_path is None:
             process.terminate()
+            try:
+                process.wait(timeout=2.0)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait()
+
+            stderr_tail = self.get_log_tail_from_dir(logs_dir)
+            if os.environ.get("NIRI_PYPC_KEEP_NESTED_ARTIFACTS") == "1":
+                raise RuntimeError(
+                    f"Nested niri failed to start within {startup_timeout_s}s.\n"
+                    f"Artifacts preserved at: {temp_root}\n"
+                    f"stderr tail:\n{stderr_tail}"
+                )
+
             shutil.rmtree(temp_root)
-            raise RuntimeError(f"Nested niri failed to start within {scenario.runtime.startup_timeout_s}s")
+            raise RuntimeError(f"Nested niri failed to start within {startup_timeout_s}s.\nstderr tail:\n{stderr_tail}")
 
         startup_time = time.time() - start_time
 
@@ -184,6 +252,8 @@ class NestedNiriHarness:
         runtime_dir: Path,
         timeout: float,
         interval: float,
+        pid: int,
+        existing_sockets: set[Path],
     ) -> Path | None:
         """Wait for niri IPC socket to appear.
 
@@ -198,13 +268,26 @@ class NestedNiriHarness:
         deadline = time.time() + timeout
 
         while time.time() < deadline:
-            for f in runtime_dir.iterdir():
-                if f.name.startswith("niri-ipc"):
-                    if f.is_socket():
-                        return f
+            for f in self._list_candidate_sockets(runtime_dir):
+                if f".{pid}.sock" in f.name:
+                    return f
+                if f not in existing_sockets:
+                    return f
             await asyncio.sleep(interval)
 
         return None
+
+    @staticmethod
+    def _list_candidate_sockets(runtime_dir: Path) -> set[Path]:
+        sockets: set[Path] = set()
+        if not runtime_dir.exists():
+            return sockets
+        for f in runtime_dir.iterdir():
+            if not f.is_socket():
+                continue
+            if f.name.startswith("niri-ipc") or (f.name.startswith("niri.") and f.name.endswith(".sock")):
+                sockets.add(f)
+        return sockets
 
     async def stop(self, instance: NestedNiriInstance) -> None:
         """Stop a nested niri instance and cleanup.
@@ -220,7 +303,7 @@ class NestedNiriHarness:
             instance.process.kill()
             instance.process.wait()
 
-        shutil.rmtree(instance.runtime_dir.parent)
+        shutil.rmtree(instance.runtime_dir)
 
     def get_log_tail(self, instance: NestedNiriInstance, lines: int = 50) -> str:
         """Get last N lines of niri logs for failure diagnosis.
@@ -233,6 +316,15 @@ class NestedNiriHarness:
             Log tail as string
         """
         stderr_log = instance.logs_dir / "stderr.log"
+        return self.get_log_tail_from_file(stderr_log, lines=lines)
+
+    def get_log_tail_from_dir(self, logs_dir: Path, lines: int = 50) -> str:
+        """Get last N lines of stderr log from a logs directory."""
+        return self.get_log_tail_from_file(logs_dir / "stderr.log", lines=lines)
+
+    @staticmethod
+    def get_log_tail_from_file(stderr_log: Path, lines: int = 50) -> str:
+        """Get last N lines from a stderr log file path."""
         if stderr_log.exists():
             with open(stderr_log) as f:
                 all_lines = f.readlines()

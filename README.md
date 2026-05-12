@@ -124,3 +124,24 @@ devenv shell -- ruff check .     # Lint
 devenv shell -- ruff format --check .  # Format check
 devenv shell -- ty check .       # Type check
 ```
+
+Nested/windowed e2e tests:
+
+```bash
+devenv shell -- pytest -m nested -s
+```
+
+Visible watch mode for demos (opens nested compositor window when the host session supports it):
+
+```bash
+devenv shell -- pytest -m nested -s --nested-visible
+```
+
+Useful environment toggles:
+
+```bash
+NIRI_PYPC_NESTED_VISIBLE=1              # same as --nested-visible
+NIRI_PYPC_NIRI_BINARY=/path/to/niri     # override niri binary path
+NIRI_PYPC_KEEP_NESTED_ARTIFACTS=1       # keep runtime/log dirs on nested startup failure
+NIRI_PYPC_NESTED_DEBUG=1                # print nested launch env/socket diagnostics
+```
