@@ -5,6 +5,14 @@ description = "Python controls for the Niri compositor."
 readme = "README.md"
 requires-python = ">=3.13"
 license = { text = "MIT" }
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.13",
+  "Operating System :: POSIX :: Linux",
+  "Typing :: Typed",
+]
 
 authors = [
   { name = "niri-pypc maintainers" },
@@ -24,9 +32,10 @@ dev = [
   "PyYAML>=6.0",
 ]
 
-#[project.urls]
-#homepage = "https://github.com/<owner>/niri-pypc"
-#repository = "https://github.com/<owner>/niri-pypc.git"
+[project.urls]
+Homepage = "https://github.com/Bullish-Design/niri-pypc"
+Repository = "https://github.com/Bullish-Design/niri-pypc"
+Issues = "https://github.com/Bullish-Design/niri-pypc/issues"
 
 [build-system]
 requires = ["hatchling>=1.18"]
@@ -35,6 +44,9 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 # Tell hatch which package to ship (your code lives in src/niri_pypc)
 packages = ["src/niri_pypc"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"src/niri_pypc/py.typed" = "niri_pypc/py.typed"
 
 [tool.hatch.build.targets.sdist]
 include = [
@@ -45,6 +57,7 @@ include = [
 #  "docs",
   "tests",
   "pyproject.toml",
+  "src/niri_pypc/py.typed",
 ]
 
 [tool.uv]
