@@ -14,8 +14,6 @@ from dataclasses import dataclass
 from io import BufferedRandom
 from pathlib import Path
 
-from pydantic import BaseModel
-
 from niri_pypc import NiriClient, NiriConfig, NiriConnectionBundle
 from niri_pypc.types.generated.action import (
     Action,
@@ -54,6 +52,7 @@ from niri_pypc.types.generated.request import (
     LayersRequest,
     OutputsRequest,
     OverviewStateRequest,
+    RequestValue,
     VersionRequest,
     WindowsRequest,
     WorkspacesRequest,
@@ -98,11 +97,6 @@ def _acquire_visible_demo_lock() -> BufferedRandom:
     return lock_file
 
 
-async def _request_payload(client: NiriClient, request: BaseModel) -> object:
-    response = await client.request(request)
-    return getattr(response, "payload", None)
-
-
 async def _safe_call[T](
     label: str,
     fn: Callable[[], Awaitable[T]],
@@ -130,7 +124,7 @@ async def _send_action(client: NiriClient, action: Action, state: DemoState | No
 
 async def _request_typed[TResponse](
     client: NiriClient,
-    request: BaseModel,
+    request: RequestValue,
     expected: type[TResponse],
     state: DemoState | None = None,
 ) -> TResponse:
