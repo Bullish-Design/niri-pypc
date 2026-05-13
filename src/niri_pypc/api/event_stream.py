@@ -8,8 +8,6 @@ from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from typing import Any
 
-from pydantic import BaseModel
-
 from niri_pypc.config import BackpressureMode, NiriConfig
 from niri_pypc.errors import (
     DecodeError,
@@ -21,14 +19,14 @@ from niri_pypc.errors import (
 )
 from niri_pypc.runtime.lifecycle import LifecycleManager, LifecycleState
 from niri_pypc.transport.connection import DEFAULT_STREAM_LIMIT, UnixConnection
-from niri_pypc.types.generated.event import Event
+from niri_pypc.types.generated.event import Event, EventValue
 from niri_pypc.types.generated.reply import HandledResponse, Reply
 from niri_pypc.types.generated.request import EventStreamRequest, Request
 
 
 @dataclass(slots=True)
 class _EventItem:
-    event: BaseModel
+    event: EventValue
 
 
 @dataclass(slots=True)
@@ -201,7 +199,7 @@ class NiriEventStream:
         except LifecycleError:
             pass
 
-    async def next(self, *, timeout: float | None = None) -> BaseModel:
+    async def next(self, *, timeout: float | None = None) -> EventValue:
         if self._lifecycle.is_terminal:
             if self._terminal_cause is not None:
                 raise self._terminal_cause
@@ -242,17 +240,17 @@ class NiriEventStream:
             operation="next",
         )
 
-    def __aiter__(self) -> AsyncIterator[BaseModel]:
+    def __aiter__(self) -> AsyncIterator[EventValue]:
         return self._async_iterator()
 
-    async def _async_iterator(self) -> AsyncIterator[BaseModel]:
+    async def _async_iterator(self) -> AsyncIterator[EventValue]:
         while True:
             try:
                 yield await self.next()
             except (LifecycleError, StopAsyncIteration):
                 break
 
-    async def __anext__(self) -> BaseModel:
+    async def __anext__(self) -> EventValue:
         try:
             return await self.next()
         except LifecycleError:
