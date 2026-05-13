@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from pydantic import ValidationError
 
 from niri_pypc.config import BackpressureMode, NiriConfig
 from niri_pypc.errors import ConfigError
@@ -47,7 +48,7 @@ class TestNiriConfig:
 
     def test_config_is_frozen(self):
         cfg = NiriConfig()
-        with pytest.raises(AttributeError):
+        with pytest.raises(ValidationError):
             cfg.socket_path = Path("/tmp/test.sock")  # type: ignore[misc]
 
     def test_custom_timeouts(self):
@@ -71,3 +72,22 @@ class TestNiriConfig:
     def test_max_frame_size(self):
         cfg = NiriConfig(max_frame_size=8192)
         assert cfg.max_frame_size == 8192
+
+    def test_string_socket_path_is_coerced_to_path(self):
+        cfg = NiriConfig(socket_path="/tmp/niri.sock")
+        assert cfg.socket_path == Path("/tmp/niri.sock")
+
+    @pytest.mark.parametrize(
+        ("field_name", "value"),
+        [
+            ("connect_timeout", 0.0),
+            ("connect_timeout", -1.0),
+            ("request_timeout", 0.0),
+            ("event_read_timeout", -2.0),
+            ("max_frame_size", 0),
+            ("event_queue_capacity", 0),
+        ],
+    )
+    def test_invalid_positive_fields_raise_validation_error(self, field_name: str, value: float | int):
+        with pytest.raises(ValidationError):
+            NiriConfig(**{field_name: value})
