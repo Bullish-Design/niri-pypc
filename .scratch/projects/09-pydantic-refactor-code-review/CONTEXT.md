@@ -1,15 +1,17 @@
 # Context
 
-Completed Step 4 on branch `refactor/protocol-base-layer`:
-- Narrowed `NiriEventStream` event types from `BaseModel` to concrete `EventValue` for `next()`, iterator, and queue items.
-- Added request-specific overloads to `NiriClient.request()` mapping each request variant to its response variant.
+Project completed on branch `refactor/protocol-base-layer`.
 
-Validation for Step 4:
-- `devenv shell -- ruff check src/niri_pypc/api/client.py src/niri_pypc/api/event_stream.py` (pass)
-- `devenv shell -- ruff format --check src/niri_pypc/api/client.py src/niri_pypc/api/event_stream.py` (pass)
-- `devenv shell -- pytest -q tests/api/test_client.py tests/api/test_event_stream.py` (pass)
-- `devenv shell -- ty check .` (still fails with the same pre-existing 7 diagnostics in `src/niri_pypc/types/base.py` and `src/niri_pypc/types/codec.py`)
+Step 5 completion details:
+- Added local CI-equivalent script command `ci` in `devenv.nix` to run sync, lint, format check, type check, generated-code verify, tests, and package build.
+- Added `build` to dev dependencies in `pyproject.toml` so CI script can run `python -m build`.
+- Removed dead code module `src/niri_pypc/transport/framing.py`.
 
-Next:
-- Commit and push Step 4.
-- Implement Step 5 (devenv CI script, dead-code cleanup).
+Validation outcomes:
+- `devenv shell -- ruff check .` (pass)
+- `devenv shell -- ruff format --check .` (pass)
+- `devenv shell -- ty check .` (fails with pre-existing diagnostics in `src/niri_pypc/types/base.py` and `src/niri_pypc/types/codec.py`)
+- `devenv shell -- pytest -q tests/transport/test_connection.py` (pass)
+- `devenv shell -- ci` executed and completed through tests/build; it reports ty diagnostics but continues execution.
+
+All planned implementation steps from the review were completed, with GitHub CI implemented as a local devenv script per user instruction.

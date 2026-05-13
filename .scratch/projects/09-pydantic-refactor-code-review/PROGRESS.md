@@ -7,4 +7,4 @@
 - [x] Step 2: Event stream correctness hardening
 - [x] Step 3: Config model hardening + lifecycle docs
 - [x] Step 4: Public typing improvements
-- [ ] Step 5: CI replacement in devenv scripts + dead-code cleanup/docs alignment
+- [x] Step 5: CI replacement in devenv scripts + dead-code cleanup/docs alignment

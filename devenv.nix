@@ -44,6 +44,17 @@
         --ir schema/ir/niri-ipc-ir.json \
         --generated-dir src/niri_pypc/types/generated/
     '';
+    ci.exec = ''
+      uv sync --extra dev
+      ruff check .
+      ruff format --check .
+      ty check .
+      python tools/verify_generated.py \
+        --ir schema/ir/niri-ipc-ir.json \
+        --generated-dir src/niri_pypc/types/generated/
+      pytest -q
+      python -m build
+    '';
     regen-all.exec = ''
       export-schema && normalize-ir && generate-types
     '';
