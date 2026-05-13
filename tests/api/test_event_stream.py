@@ -11,7 +11,7 @@ import pytest
 
 from niri_pypc.api.event_stream import NiriEventStream
 from niri_pypc.config import NiriConfig
-from niri_pypc.errors import LifecycleError
+from niri_pypc.errors import LifecycleError, ProtocolError
 
 pytestmark = pytest.mark.contract
 
@@ -204,3 +204,46 @@ class TestEventStreamEdgeCases:
         await asyncio.sleep(0.02)
         await stream.close()
         await task
+
+    async def test_bootstrap_failure_closes_connection(self):
+        async def handler(reader, writer):
+            await reader.readuntil(b"\n")
+            writer.write(json.dumps({"Ok": {"Version": "25.11"}}).encode() + b"\n")
+            await writer.drain()
+            await asyncio.sleep(0.05)
+            writer.close()
+            await writer.wait_closed()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            socket_path = Path(tmpdir) / "event.sock"
+            server = await asyncio.start_unix_server(handler, path=str(socket_path))
+            try:
+                with pytest.raises(ProtocolError):
+                    await NiriEventStream.connect(NiriConfig(socket_path=socket_path))
+            finally:
+                server.close()
+                await server.wait_closed()
+
+    async def test_oversized_event_preserves_protocol_error(self):
+        async def handler(reader, writer):
+            await reader.readuntil(b"\n")
+            writer.write(json.dumps({"Ok": {"Handled": {}}}).encode() + b"\n")
+            await writer.drain()
+            writer.write(b"x" * 2000 + b"\n")
+            await writer.drain()
+            await asyncio.sleep(0.05)
+            writer.close()
+            await writer.wait_closed()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            socket_path = Path(tmpdir) / "event.sock"
+            server = await asyncio.start_unix_server(handler, path=str(socket_path))
+            try:
+                stream = await NiriEventStream.connect(
+                    NiriConfig(socket_path=socket_path, max_frame_size=100),
+                )
+                with pytest.raises(ProtocolError):
+                    await stream.next(timeout=1.0)
+            finally:
+                server.close()
+                await server.wait_closed()

@@ -4,7 +4,7 @@
 - [x] Read target review document
 - [x] Create project tracking files
 - [x] Step 1: Release hygiene and package typing baseline
-- [ ] Step 2: Event stream correctness hardening
+- [x] Step 2: Event stream correctness hardening
 - [ ] Step 3: Config model hardening + lifecycle docs
 - [ ] Step 4: Public typing improvements
 - [ ] Step 5: CI replacement in devenv scripts + dead-code cleanup/docs alignment

@@ -73,8 +73,13 @@ class NiriEventStream:
             stream_limit=max(config.max_frame_size + 1, DEFAULT_STREAM_LIMIT),
         )
         instance._connection = conn
-
-        await instance._bootstrap(conn)
+        try:
+            await instance._bootstrap(conn)
+        except Exception:
+            await conn.close()
+            instance._connection = None
+            await mgr.transition_to(LifecycleState.CLOSED)
+            raise
 
         instance._queue = asyncio.Queue(maxsize=config.event_queue_capacity)
         instance._reader_task = asyncio.create_task(instance._run_reader())
@@ -129,11 +134,7 @@ class NiriEventStream:
                         max_size=config.max_frame_size,
                         timeout=None,
                     )
-                except TransportError as exc:
-                    self._terminal_cause = exc
-                    self._enqueue_terminal(_ErrorItem(error=exc))
-                    return
-                except NiriTimeoutError as exc:
+                except (TransportError, NiriTimeoutError, ProtocolError) as exc:
                     self._terminal_cause = exc
                     self._enqueue_terminal(_ErrorItem(error=exc))
                     return
@@ -173,6 +174,10 @@ class NiriEventStream:
                         self._terminal_cause = exc
                         self._enqueue_terminal(_ErrorItem(error=exc))
                         return
+        except Exception as exc:
+            self._terminal_cause = exc
+            self._enqueue_terminal(_ErrorItem(error=exc))
+            return
         finally:
             await self._close_reader_resources()
 
