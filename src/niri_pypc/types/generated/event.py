@@ -5,8 +5,8 @@
 
 from __future__ import annotations
 
-from typing import Any
-from pydantic import BaseModel, ConfigDict, model_validator, model_serializer
+from typing import TypeAlias
+from niri_pypc.types.base import ExternallyTaggedEnum, ProtocolVariant, ProtocolModel, UnknownEvent
 from niri_pypc.types.generated.models import (
     KeyboardLayouts,
     Timestamp,
@@ -16,122 +16,111 @@ from niri_pypc.types.generated.models import (
 )
 
 
-class ConfigLoadedEvent(BaseModel):
+class ConfigLoadedEvent(ProtocolVariant):
+    __niri_wire_name__ = "ConfigLoaded"
+    __niri_variant_kind__ = "struct"
     failed: bool
 
-class KeyboardLayoutSwitchedEvent(BaseModel):
+class KeyboardLayoutSwitchedEvent(ProtocolVariant):
+    __niri_wire_name__ = "KeyboardLayoutSwitched"
+    __niri_variant_kind__ = "struct"
     idx: int
 
-class KeyboardLayoutsChangedEvent(BaseModel):
+class KeyboardLayoutsChangedEvent(ProtocolVariant):
+    __niri_wire_name__ = "KeyboardLayoutsChanged"
+    __niri_variant_kind__ = "struct"
     keyboard_layouts: KeyboardLayouts
 
-class OverviewOpenedOrClosedEvent(BaseModel):
+class OverviewOpenedOrClosedEvent(ProtocolVariant):
+    __niri_wire_name__ = "OverviewOpenedOrClosed"
+    __niri_variant_kind__ = "struct"
     is_open: bool
 
-class ScreenshotCapturedEvent(BaseModel):
+class ScreenshotCapturedEvent(ProtocolVariant):
+    __niri_wire_name__ = "ScreenshotCaptured"
+    __niri_variant_kind__ = "struct"
     path: str | None = None
 
-class WindowClosedEvent(BaseModel):
+class WindowClosedEvent(ProtocolVariant):
+    __niri_wire_name__ = "WindowClosed"
+    __niri_variant_kind__ = "struct"
     id: int
 
-class WindowFocusChangedEvent(BaseModel):
+class WindowFocusChangedEvent(ProtocolVariant):
+    __niri_wire_name__ = "WindowFocusChanged"
+    __niri_variant_kind__ = "struct"
     id: int | None = None
 
-class WindowFocusTimestampChangedEvent(BaseModel):
+class WindowFocusTimestampChangedEvent(ProtocolVariant):
+    __niri_wire_name__ = "WindowFocusTimestampChanged"
+    __niri_variant_kind__ = "struct"
     focus_timestamp: Timestamp | None = None
     id: int
 
-class WindowLayoutsChangedEvent(BaseModel):
+class WindowLayoutsChangedEvent(ProtocolVariant):
+    __niri_wire_name__ = "WindowLayoutsChanged"
+    __niri_variant_kind__ = "struct"
     changes: list[tuple[int, WindowLayout]]
 
-class WindowOpenedOrChangedEvent(BaseModel):
+class WindowOpenedOrChangedEvent(ProtocolVariant):
+    __niri_wire_name__ = "WindowOpenedOrChanged"
+    __niri_variant_kind__ = "struct"
     window: Window
 
-class WindowUrgencyChangedEvent(BaseModel):
+class WindowUrgencyChangedEvent(ProtocolVariant):
+    __niri_wire_name__ = "WindowUrgencyChanged"
+    __niri_variant_kind__ = "struct"
     id: int
     urgent: bool
 
-class WindowsChangedEvent(BaseModel):
+class WindowsChangedEvent(ProtocolVariant):
+    __niri_wire_name__ = "WindowsChanged"
+    __niri_variant_kind__ = "struct"
     windows: list[Window]
 
-class WorkspaceActivatedEvent(BaseModel):
+class WorkspaceActivatedEvent(ProtocolVariant):
+    __niri_wire_name__ = "WorkspaceActivated"
+    __niri_variant_kind__ = "struct"
     focused: bool
     id: int
 
-class WorkspaceActiveWindowChangedEvent(BaseModel):
+class WorkspaceActiveWindowChangedEvent(ProtocolVariant):
+    __niri_wire_name__ = "WorkspaceActiveWindowChanged"
+    __niri_variant_kind__ = "struct"
     active_window_id: int | None = None
     workspace_id: int
 
-class WorkspaceUrgencyChangedEvent(BaseModel):
+class WorkspaceUrgencyChangedEvent(ProtocolVariant):
+    __niri_wire_name__ = "WorkspaceUrgencyChanged"
+    __niri_variant_kind__ = "struct"
     id: int
     urgent: bool
 
-class WorkspacesChangedEvent(BaseModel):
+class WorkspacesChangedEvent(ProtocolVariant):
+    __niri_wire_name__ = "WorkspacesChanged"
+    __niri_variant_kind__ = "struct"
     workspaces: list[Workspace]
 
+EventValue: TypeAlias = ConfigLoadedEvent | KeyboardLayoutSwitchedEvent | KeyboardLayoutsChangedEvent | OverviewOpenedOrClosedEvent | ScreenshotCapturedEvent | WindowClosedEvent | WindowFocusChangedEvent | WindowFocusTimestampChangedEvent | WindowLayoutsChangedEvent | WindowOpenedOrChangedEvent | WindowUrgencyChangedEvent | WindowsChangedEvent | WorkspaceActivatedEvent | WorkspaceActiveWindowChangedEvent | WorkspaceUrgencyChangedEvent | WorkspacesChangedEvent | UnknownEvent
 
-class UnknownEvent(BaseModel):
-    variant_name: str
-    raw_payload: Any
-
-
-# Wire-name to variant class mapping
-_EVENT_VARIANTS: dict[str, type[BaseModel]] = {
-    "ConfigLoaded": ConfigLoadedEvent,
-    "KeyboardLayoutSwitched": KeyboardLayoutSwitchedEvent,
-    "KeyboardLayoutsChanged": KeyboardLayoutsChangedEvent,
-    "OverviewOpenedOrClosed": OverviewOpenedOrClosedEvent,
-    "ScreenshotCaptured": ScreenshotCapturedEvent,
-    "WindowClosed": WindowClosedEvent,
-    "WindowFocusChanged": WindowFocusChangedEvent,
-    "WindowFocusTimestampChanged": WindowFocusTimestampChangedEvent,
-    "WindowLayoutsChanged": WindowLayoutsChangedEvent,
-    "WindowOpenedOrChanged": WindowOpenedOrChangedEvent,
-    "WindowUrgencyChanged": WindowUrgencyChangedEvent,
-    "WindowsChanged": WindowsChangedEvent,
-    "WorkspaceActivated": WorkspaceActivatedEvent,
-    "WorkspaceActiveWindowChanged": WorkspaceActiveWindowChangedEvent,
-    "WorkspaceUrgencyChanged": WorkspaceUrgencyChangedEvent,
-    "WorkspacesChanged": WorkspacesChangedEvent,
-}
-
-# Variant class to wire-name mapping
-_EVENT_VARIANT_NAMES: dict[type[BaseModel], str] = {
-    ConfigLoadedEvent: "ConfigLoaded",
-    KeyboardLayoutSwitchedEvent: "KeyboardLayoutSwitched",
-    KeyboardLayoutsChangedEvent: "KeyboardLayoutsChanged",
-    OverviewOpenedOrClosedEvent: "OverviewOpenedOrClosed",
-    ScreenshotCapturedEvent: "ScreenshotCaptured",
-    WindowClosedEvent: "WindowClosed",
-    WindowFocusChangedEvent: "WindowFocusChanged",
-    WindowFocusTimestampChangedEvent: "WindowFocusTimestampChanged",
-    WindowLayoutsChangedEvent: "WindowLayoutsChanged",
-    WindowOpenedOrChangedEvent: "WindowOpenedOrChanged",
-    WindowUrgencyChangedEvent: "WindowUrgencyChanged",
-    WindowsChangedEvent: "WindowsChanged",
-    WorkspaceActivatedEvent: "WorkspaceActivated",
-    WorkspaceActiveWindowChangedEvent: "WorkspaceActiveWindowChanged",
-    WorkspaceUrgencyChangedEvent: "WorkspaceUrgencyChanged",
-    WorkspacesChangedEvent: "WorkspacesChanged",
-}
-
-class Event(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
-    variant: ConfigLoadedEvent | KeyboardLayoutSwitchedEvent | KeyboardLayoutsChangedEvent | OverviewOpenedOrClosedEvent | ScreenshotCapturedEvent | WindowClosedEvent | WindowFocusChangedEvent | WindowFocusTimestampChangedEvent | WindowLayoutsChangedEvent | WindowOpenedOrChangedEvent | WindowUrgencyChangedEvent | WindowsChangedEvent | WorkspaceActivatedEvent | WorkspaceActiveWindowChangedEvent | WorkspaceUrgencyChangedEvent | WorkspacesChangedEvent | UnknownEvent
-
-    @model_validator(mode="before")
-    @classmethod
-    def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
-        from niri_pypc.types.codec import decode_externally_tagged
-        # If variant is already a decoded model instance, pass through
-        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
-            return data
-        return {"variant": decode_externally_tagged(
-            data, _EVENT_VARIANTS,
-            unknown_sentinel=UnknownEvent,
-        )}
-
-    @model_serializer
-    def _encode_external_tag(self) -> Any:
-        from niri_pypc.types.codec import encode_externally_tagged
-        return encode_externally_tagged(self.variant, _EVENT_VARIANT_NAMES)
+class Event(ExternallyTaggedEnum[EventValue]):
+    __niri_variants__ = (
+        ConfigLoadedEvent,
+        KeyboardLayoutSwitchedEvent,
+        KeyboardLayoutsChangedEvent,
+        OverviewOpenedOrClosedEvent,
+        ScreenshotCapturedEvent,
+        WindowClosedEvent,
+        WindowFocusChangedEvent,
+        WindowFocusTimestampChangedEvent,
+        WindowLayoutsChangedEvent,
+        WindowOpenedOrChangedEvent,
+        WindowUrgencyChangedEvent,
+        WindowsChangedEvent,
+        WorkspaceActivatedEvent,
+        WorkspaceActiveWindowChangedEvent,
+        WorkspaceUrgencyChangedEvent,
+        WorkspacesChangedEvent,
+    )
+    __niri_unknown_variant_model__ = UnknownEvent
+Event.model_rebuild()

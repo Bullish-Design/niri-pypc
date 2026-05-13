@@ -29,7 +29,7 @@ _VALID_TRANSITIONS: dict[LifecycleState, set[LifecycleState]] = {
 class LifecycleManager:
     """Manages lifecycle state transitions and enforces invariants.
 
-    Thread-safe: uses asyncio.Lock for state transitions.
+    Task-safe within a single asyncio event loop via `asyncio.Lock`.
     """
 
     def __init__(self) -> None:

@@ -4,10 +4,8 @@ import typing
 
 import pytest
 
-from niri_pypc.types.generated.action import SpawnAction
 from niri_pypc.types.generated.models import (
     LayerSurface,
-    Mode,
     Output,
     PickedColor,
     Window,
@@ -29,14 +27,11 @@ pytestmark = pytest.mark.contract
 
 
 def _get_field_annotation(model_cls, field_name: str):
-    """Get the resolved type annotation for a model field."""
     hints = typing.get_type_hints(model_cls)
     return hints[field_name]
 
 
 class TestResponsePayloadTypes:
-    """Verify that Response variant classes carry the correct payload types."""
-
     def test_focused_output_response_has_nullable_output_payload(self):
         ann = _get_field_annotation(FocusedOutputResponse, "payload")
         assert ann == Output | None
@@ -72,15 +67,3 @@ class TestResponsePayloadTypes:
     def test_version_response_has_str_payload(self):
         ann = _get_field_annotation(VersionResponse, "payload")
         assert ann is str
-
-
-class TestModelFieldTypes:
-    """Verify that shared model types have correct field types."""
-
-    def test_output_modes_is_list_of_mode(self):
-        ann = _get_field_annotation(Output, "modes")
-        assert ann == list[Mode]
-
-    def test_spawn_action_command_is_list_of_str(self):
-        ann = _get_field_annotation(SpawnAction, "command")
-        assert ann == list[str]

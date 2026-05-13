@@ -1,8 +1,4 @@
-"""Long-lived visible nested niri demo for niri-pypc.
-
-This script keeps a single visible nested compositor instance alive and continuously
-exercises command and event APIs until interrupted.
-"""
+"""Long-lived visible nested niri demo for niri-pypc."""
 
 from __future__ import annotations
 
@@ -18,11 +14,10 @@ from dataclasses import dataclass
 from io import BufferedRandom
 from pathlib import Path
 
-from pydantic import BaseModel
-
 from niri_pypc import NiriClient, NiriConfig, NiriConnectionBundle
 from niri_pypc.types.generated.action import (
     Action,
+    CloseOverviewAction,
     FocusWindowDownAction,
     FocusWindowUpAction,
     FocusWorkspaceDownAction,
@@ -33,8 +28,8 @@ from niri_pypc.types.generated.action import (
     MoveWindowToWorkspaceDownAction,
     MoveWindowToWorkspaceUpAction,
     MoveWindowUpAction,
+    OpenOverviewAction,
     SpawnShAction,
-    ToggleOverviewAction,
 )
 from niri_pypc.types.generated.models import KeyboardLayouts, LayerSurface, Output, Overview, Window, Workspace
 from niri_pypc.types.generated.reply import (
@@ -57,6 +52,7 @@ from niri_pypc.types.generated.request import (
     LayersRequest,
     OutputsRequest,
     OverviewStateRequest,
+    RequestValue,
     VersionRequest,
     WindowsRequest,
     WorkspacesRequest,
@@ -101,11 +97,6 @@ def _acquire_visible_demo_lock() -> BufferedRandom:
     return lock_file
 
 
-async def _request_payload(client: NiriClient, request: BaseModel) -> object:
-    response = await client.request(request)
-    return getattr(response.variant, "payload", None)
-
-
 async def _safe_call[T](
     label: str,
     fn: Callable[[], Awaitable[T]],
@@ -125,38 +116,35 @@ async def _send_action(client: NiriClient, action: Action, state: DemoState | No
     request = ActionRequest(payload=action)
     _wire_log(state, "out", "ActionRequest", request.model_dump(mode="json"))
     response = await client.request(request)
-    variant = response.variant
-    _wire_log(state, "in", type(variant).__name__, variant.model_dump(mode="json"))
-    if isinstance(variant, HandledResponse):
+    _wire_log(state, "in", type(response).__name__, response.model_dump(mode="json"))
+    if isinstance(response, HandledResponse):
         return None
-    return getattr(variant, "payload", None)
+    return getattr(response, "payload", None)
 
 
 async def _request_typed[TResponse](
     client: NiriClient,
-    request: BaseModel,
+    request: RequestValue,
     expected: type[TResponse],
     state: DemoState | None = None,
 ) -> TResponse:
     _wire_log(state, "out", type(request).__name__, request.model_dump(mode="json"))
     response = await client.request(request)
-    variant = response.variant
-    _wire_log(state, "in", type(variant).__name__, variant.model_dump(mode="json"))
-    if not isinstance(variant, expected):
-        raise TypeError(f"Expected {expected.__name__}, got {type(variant).__name__}")
-    return variant
+    _wire_log(state, "in", type(response).__name__, response.model_dump(mode="json"))
+    if not isinstance(response, expected):
+        raise TypeError(f"Expected {expected.__name__}, got {type(response).__name__}")
+    return response
 
 
 async def _spawn_demo_window(client: NiriClient, spawn_command: str, state: DemoState | None = None) -> bool:
     windows_before = (await _request_typed(client, WindowsRequest(), WindowsResponse, state)).payload
-    await _send_action(client, Action(variant=SpawnShAction(command=spawn_command)), state)
+    await _send_action(client, Action(root=SpawnShAction(command=spawn_command)), state)
     await asyncio.sleep(0.8)
     windows_after = (await _request_typed(client, WindowsRequest(), WindowsResponse, state)).payload
     return len(windows_after) > len(windows_before)
 
 
 async def _run_action_showcase(client: NiriClient, state: DemoState, spawn_command: str) -> None:
-    # Add window count so focus/move actions have visible targets.
     await _safe_call(
         "Spawn extra window #1",
         lambda: _spawn_demo_window(client, spawn_command, state),
@@ -172,16 +160,16 @@ async def _run_action_showcase(client: NiriClient, state: DemoState, spawn_comma
     await asyncio.sleep(0.4)
 
     actions: list[tuple[str, Action]] = [
-        ("FocusWindowDown", Action(variant=FocusWindowDownAction())),
-        ("FocusWindowUp", Action(variant=FocusWindowUpAction())),
-        ("MoveWindowDown", Action(variant=MoveWindowDownAction())),
-        ("MoveWindowUp", Action(variant=MoveWindowUpAction())),
-        ("MoveWindowToWorkspaceDown", Action(variant=MoveWindowToWorkspaceDownAction(focus=True))),
-        ("FocusWorkspaceDown", Action(variant=FocusWorkspaceDownAction())),
-        ("MoveWindowToWorkspaceUp", Action(variant=MoveWindowToWorkspaceUpAction(focus=False))),
-        ("FocusWorkspaceUp", Action(variant=FocusWorkspaceUpAction())),
-        ("MoveColumnRight", Action(variant=MoveColumnRightAction())),
-        ("MoveColumnLeft", Action(variant=MoveColumnLeftAction())),
+        ("FocusWindowDown", Action(root=FocusWindowDownAction())),
+        ("FocusWindowUp", Action(root=FocusWindowUpAction())),
+        ("MoveWindowDown", Action(root=MoveWindowDownAction())),
+        ("MoveWindowUp", Action(root=MoveWindowUpAction())),
+        ("MoveWindowToWorkspaceDown", Action(root=MoveWindowToWorkspaceDownAction(focus=True))),
+        ("FocusWorkspaceDown", Action(root=FocusWorkspaceDownAction())),
+        ("MoveWindowToWorkspaceUp", Action(root=MoveWindowToWorkspaceUpAction(focus=False))),
+        ("FocusWorkspaceUp", Action(root=FocusWorkspaceUpAction())),
+        ("MoveColumnRight", Action(root=MoveColumnRightAction())),
+        ("MoveColumnLeft", Action(root=MoveColumnLeftAction())),
     ]
     for label, action in actions:
         await _safe_call(label, lambda action=action: _send_action(client, action, state), state, default=None)
@@ -326,15 +314,15 @@ async def _run_demo(args: argparse.Namespace) -> int:
 
             if args.toggle_overview_once:
                 await _safe_call(
-                    "ToggleOverview(on)",
-                    lambda: _send_action(bundle.client, Action(variant=ToggleOverviewAction()), state),
+                    "OpenOverview",
+                    lambda: _send_action(bundle.client, Action(root=OpenOverviewAction()), state),
                     state,
                     default=None,
                 )
                 await asyncio.sleep(0.4)
                 await _safe_call(
-                    "ToggleOverview(off)",
-                    lambda: _send_action(bundle.client, Action(variant=ToggleOverviewAction()), state),
+                    "CloseOverview",
+                    lambda: _send_action(bundle.client, Action(root=CloseOverviewAction()), state),
                     state,
                     default=None,
                 )

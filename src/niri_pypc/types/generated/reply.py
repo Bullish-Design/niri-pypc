@@ -5,8 +5,9 @@
 
 from __future__ import annotations
 
-from typing import Any
-from pydantic import BaseModel, ConfigDict, model_validator, model_serializer
+from typing import TypeAlias
+from niri_pypc.types.base import ExternallyTaggedEnum, ProtocolVariant
+from niri_pypc.errors import DecodeError, RemoteError
 from niri_pypc.types.generated.models import (
     KeyboardLayouts,
     LayerSurface,
@@ -19,138 +20,122 @@ from niri_pypc.types.generated.models import (
 )
 
 
-class ErrReply(BaseModel):
-    payload: str
-
-class OkReply(BaseModel):
-    payload: Response
-
-
-class UnknownReply(BaseModel):
-    variant_name: str
-    raw_payload: Any
-
-
-# Wire-name to variant class mapping
-_REPLY_VARIANTS: dict[str, type[BaseModel]] = {
-    "Err": ErrReply,
-    "Ok": OkReply,
-}
-
-# Variant class to wire-name mapping
-_REPLY_VARIANT_NAMES: dict[type[BaseModel], str] = {
-    ErrReply: "Err",
-    OkReply: "Ok",
-}
-
-class Reply(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
-    variant: ErrReply | OkReply | UnknownReply
-
-    @model_validator(mode="before")
-    @classmethod
-    def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
-        from niri_pypc.types.codec import decode_externally_tagged
-        # If variant is already a decoded model instance, pass through
-        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
-            return data
-        return {"variant": decode_externally_tagged(
-            data, _REPLY_VARIANTS,
-            unknown_sentinel=UnknownReply,
-        )}
-
-    @model_serializer
-    def _encode_external_tag(self) -> Any:
-        from niri_pypc.types.codec import encode_externally_tagged
-        return encode_externally_tagged(self.variant, _REPLY_VARIANT_NAMES)
-
-class FocusedOutputResponse(BaseModel):
+class FocusedOutputResponse(ProtocolVariant):
+    __niri_wire_name__ = "FocusedOutput"
+    __niri_variant_kind__ = "newtype"
     payload: Output | None
 
-class FocusedWindowResponse(BaseModel):
+class FocusedWindowResponse(ProtocolVariant):
+    __niri_wire_name__ = "FocusedWindow"
+    __niri_variant_kind__ = "newtype"
     payload: Window | None
 
-class HandledResponse(BaseModel):
+class HandledResponse(ProtocolVariant):
+    __niri_wire_name__ = "Handled"
+    __niri_variant_kind__ = "unit"
     pass
 
-class KeyboardLayoutsResponse(BaseModel):
+class KeyboardLayoutsResponse(ProtocolVariant):
+    __niri_wire_name__ = "KeyboardLayouts"
+    __niri_variant_kind__ = "newtype"
     payload: KeyboardLayouts
 
-class LayersResponse(BaseModel):
+class LayersResponse(ProtocolVariant):
+    __niri_wire_name__ = "Layers"
+    __niri_variant_kind__ = "newtype"
     payload: list[LayerSurface]
 
-class OutputConfigChangedResponse(BaseModel):
+class OutputConfigChangedResponse(ProtocolVariant):
+    __niri_wire_name__ = "OutputConfigChanged"
+    __niri_variant_kind__ = "newtype"
     payload: OutputConfigChanged
 
-class OutputsResponse(BaseModel):
+class OutputsResponse(ProtocolVariant):
+    __niri_wire_name__ = "Outputs"
+    __niri_variant_kind__ = "newtype"
     payload: dict[str, Output]
 
-class OverviewStateResponse(BaseModel):
+class OverviewStateResponse(ProtocolVariant):
+    __niri_wire_name__ = "OverviewState"
+    __niri_variant_kind__ = "newtype"
     payload: Overview
 
-class PickedColorResponse(BaseModel):
+class PickedColorResponse(ProtocolVariant):
+    __niri_wire_name__ = "PickedColor"
+    __niri_variant_kind__ = "newtype"
     payload: PickedColor | None
 
-class PickedWindowResponse(BaseModel):
+class PickedWindowResponse(ProtocolVariant):
+    __niri_wire_name__ = "PickedWindow"
+    __niri_variant_kind__ = "newtype"
     payload: Window | None
 
-class VersionResponse(BaseModel):
+class VersionResponse(ProtocolVariant):
+    __niri_wire_name__ = "Version"
+    __niri_variant_kind__ = "newtype"
     payload: str
 
-class WindowsResponse(BaseModel):
+class WindowsResponse(ProtocolVariant):
+    __niri_wire_name__ = "Windows"
+    __niri_variant_kind__ = "newtype"
     payload: list[Window]
 
-class WorkspacesResponse(BaseModel):
+class WorkspacesResponse(ProtocolVariant):
+    __niri_wire_name__ = "Workspaces"
+    __niri_variant_kind__ = "newtype"
     payload: list[Workspace]
 
-# Wire-name to variant class mapping
-_RESPONSE_VARIANTS: dict[str, type[BaseModel]] = {
-    "FocusedOutput": FocusedOutputResponse,
-    "FocusedWindow": FocusedWindowResponse,
-    "Handled": HandledResponse,
-    "KeyboardLayouts": KeyboardLayoutsResponse,
-    "Layers": LayersResponse,
-    "OutputConfigChanged": OutputConfigChangedResponse,
-    "Outputs": OutputsResponse,
-    "OverviewState": OverviewStateResponse,
-    "PickedColor": PickedColorResponse,
-    "PickedWindow": PickedWindowResponse,
-    "Version": VersionResponse,
-    "Windows": WindowsResponse,
-    "Workspaces": WorkspacesResponse,
-}
+ResponseValue: TypeAlias = FocusedOutputResponse | FocusedWindowResponse | HandledResponse | KeyboardLayoutsResponse | LayersResponse | OutputConfigChangedResponse | OutputsResponse | OverviewStateResponse | PickedColorResponse | PickedWindowResponse | VersionResponse | WindowsResponse | WorkspacesResponse
 
-# Variant class to wire-name mapping
-_RESPONSE_VARIANT_NAMES: dict[type[BaseModel], str] = {
-    FocusedOutputResponse: "FocusedOutput",
-    FocusedWindowResponse: "FocusedWindow",
-    HandledResponse: "Handled",
-    KeyboardLayoutsResponse: "KeyboardLayouts",
-    LayersResponse: "Layers",
-    OutputConfigChangedResponse: "OutputConfigChanged",
-    OutputsResponse: "Outputs",
-    OverviewStateResponse: "OverviewState",
-    PickedColorResponse: "PickedColor",
-    PickedWindowResponse: "PickedWindow",
-    VersionResponse: "Version",
-    WindowsResponse: "Windows",
-    WorkspacesResponse: "Workspaces",
-}
+class Response(ExternallyTaggedEnum[ResponseValue]):
+    __niri_variants__ = (
+        FocusedOutputResponse,
+        FocusedWindowResponse,
+        HandledResponse,
+        KeyboardLayoutsResponse,
+        LayersResponse,
+        OutputConfigChangedResponse,
+        OutputsResponse,
+        OverviewStateResponse,
+        PickedColorResponse,
+        PickedWindowResponse,
+        VersionResponse,
+        WindowsResponse,
+        WorkspacesResponse,
+    )
 
-class Response(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, strict=False)
-    variant: FocusedOutputResponse | FocusedWindowResponse | HandledResponse | KeyboardLayoutsResponse | LayersResponse | OutputConfigChangedResponse | OutputsResponse | OverviewStateResponse | PickedColorResponse | PickedWindowResponse | VersionResponse | WindowsResponse | WorkspacesResponse
+class ErrReply(ProtocolVariant):
+    __niri_wire_name__ = "Err"
+    __niri_variant_kind__ = "newtype"
+    payload: str
 
-    @model_validator(mode="before")
-    @classmethod
-    def _decode_external_tag(cls, data: Any) -> dict[str, Any]:
-        from niri_pypc.types.codec import decode_externally_tagged
-        # If variant is already a decoded model instance, pass through
-        if isinstance(data, dict) and "variant" in data and isinstance(data["variant"], BaseModel):
-            return data
-        return {"variant": decode_externally_tagged(data, _RESPONSE_VARIANTS)}
+class OkReply(ProtocolVariant):
+    __niri_wire_name__ = "Ok"
+    __niri_variant_kind__ = "newtype"
+    payload: Response
 
-    @model_serializer
-    def _encode_external_tag(self) -> Any:
-        from niri_pypc.types.codec import encode_externally_tagged
-        return encode_externally_tagged(self.variant, _RESPONSE_VARIANT_NAMES)
+ReplyValue: TypeAlias = ErrReply | OkReply
+
+class Reply(ExternallyTaggedEnum[ReplyValue]):
+    __niri_variants__ = (
+        ErrReply,
+        OkReply,
+    )
+    def unwrap(self) -> ResponseValue:
+        if isinstance(self.root, OkReply):
+            return self.root.payload.root
+
+        if isinstance(self.root, ErrReply):
+            raise RemoteError(
+                f"Compositor error: {self.root.payload}",
+                operation="Reply.unwrap",
+                remote_message=self.root.payload,
+            )
+
+        raise DecodeError(
+            f"Unexpected reply variant: {type(self.root).__name__}",
+            operation="Reply.unwrap",
+        )
+
+Response.model_rebuild()
+Reply.model_rebuild()

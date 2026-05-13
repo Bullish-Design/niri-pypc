@@ -14,7 +14,6 @@ pytestmark = pytest.mark.contract
 
 class TestCommandFlow:
     async def test_version_request_flow(self, mock_command_server):
-        """Full command flow: send version request, receive version response."""
         socket_path, ctrl = mock_command_server
         ctrl["response"] = json.dumps({"Ok": {"Version": "0.1.0"}}).encode() + b"\n"
 
@@ -24,10 +23,12 @@ class TestCommandFlow:
         async with NiriClient.connect(config) as client:
             result = await client.request(VersionRequest())
 
-        assert result.variant.payload == "0.1.0"
+        from niri_pypc.types.generated.reply import VersionResponse
+
+        assert isinstance(result, VersionResponse)
+        assert result.payload == "0.1.0"
 
     async def test_multiple_requests_work(self, mock_command_server):
-        """Multiple requests create independent connections."""
         socket_path, ctrl = mock_command_server
         ctrl["response"] = json.dumps({"Ok": {"Version": "0.1.0"}}).encode() + b"\n"
 
@@ -36,15 +37,13 @@ class TestCommandFlow:
 
         async with NiriClient.connect(config) as client:
             r1 = await client.request(VersionRequest())
-            assert r1.variant.payload == "0.1.0"
-            # Second request opens a new connection
+            assert r1.payload == "0.1.0"
             r2 = await client.request(VersionRequest())
-            assert r2.variant.payload == "0.1.0"
+            assert r2.payload == "0.1.0"
 
         assert len(ctrl["received_requests"]) == 2
 
     async def test_err_response_flow(self, mock_command_server):
-        """Err response correctly raises RemoteError."""
         socket_path, ctrl = mock_command_server
         ctrl["response"] = json.dumps({"Err": "command failed"}).encode() + b"\n"
 

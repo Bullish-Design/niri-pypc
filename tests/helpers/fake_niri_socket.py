@@ -10,9 +10,8 @@ from pathlib import Path
 
 @dataclass
 class FakeSocketConfig:
-    """Configuration for fake socket server behavior."""
-
     response: bytes | None = None
+    bootstrap_reply: dict | None = None
     events: list[dict] = field(default_factory=list)
     received_requests: list[bytes] = field(default_factory=list)
     received_request: bytes | None = None
@@ -21,17 +20,9 @@ class FakeSocketConfig:
 async def create_command_server(
     response: bytes | None = None,
 ) -> tuple[Path, FakeSocketConfig]:
-    """Create a mock Unix socket server for command-mode testing.
-
-    Args:
-        response: Bytes to send back as response (or None to close without response)
-
-    Returns:
-        Tuple of (socket_path, control_config)
-    """
     config = FakeSocketConfig(response=response)
 
-    async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
+    async def handler(reader, writer):
         try:
             data = await asyncio.wait_for(reader.readuntil(b"\n"), timeout=10.0)
         except (TimeoutError, asyncio.IncompleteReadError):
@@ -52,24 +43,24 @@ async def create_command_server(
 
 async def create_event_server(
     events: list[dict],
+    bootstrap_reply: dict | None = None,
 ) -> tuple[Path, FakeSocketConfig]:
-    """Create a mock Unix socket server for event-stream testing.
+    config = FakeSocketConfig(events=events, bootstrap_reply=bootstrap_reply)
 
-    Args:
-        events: List of event dicts to send to the client
-
-    Returns:
-        Tuple of (socket_path, control_config)
-    """
-    config = FakeSocketConfig(events=events)
-
-    async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
+    async def handler(reader, writer):
         try:
             data = await asyncio.wait_for(reader.readuntil(b"\n"), timeout=10.0)
         except (TimeoutError, asyncio.IncompleteReadError):
             writer.close()
             return
         config.received_request = data
+
+        # Send bootstrap reply first if configured
+        if config.bootstrap_reply is not None:
+            frame = json.dumps(config.bootstrap_reply).encode() + b"\n"
+            writer.write(frame)
+            await writer.drain()
+
         for evt in config.events:
             frame = json.dumps(evt).encode() + b"\n"
             writer.write(frame)
@@ -88,23 +79,11 @@ async def create_unified_server(
     response: bytes | None = None,
     events: list[dict] | None = None,
 ) -> tuple[Path, FakeSocketConfig, FakeSocketConfig]:
-    """Create a single mock server handling both command and event flows.
-
-    First connection handles EventStream request (event mode).
-    Subsequent connections handle command requests.
-
-    Args:
-        response: Bytes to send back for command requests
-        events: List of event dicts to send for event stream
-
-    Returns:
-        Tuple of (socket_path, cmd_control, evt_control)
-    """
     cmd_config = FakeSocketConfig(response=response)
     evt_config = FakeSocketConfig(events=events or [])
     connection_count = 0
 
-    async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
+    async def handler(reader, writer):
         nonlocal connection_count
         connection_count += 1
 
@@ -116,6 +95,11 @@ async def create_unified_server(
 
         if b"EventStream" in data:
             evt_config.received_request = data
+            # Send bootstrap reply
+            frame = json.dumps({"Ok": {"Handled": {}}}).encode() + b"\n"
+            writer.write(frame)
+            await writer.drain()
+            # Send events
             for evt in evt_config.events:
                 frame = json.dumps(evt).encode() + b"\n"
                 writer.write(frame)
@@ -137,8 +121,6 @@ async def create_unified_server(
 
 
 class MockServer:
-    """Context manager for mock socket server lifecycle."""
-
     def __init__(self, socket_path: Path, server: asyncio.Server):
         self.socket_path = socket_path
         self._server = server

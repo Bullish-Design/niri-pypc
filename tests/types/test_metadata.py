@@ -24,7 +24,7 @@ class TestMetadata:
         assert UPSTREAM_VERSION == "25.11"
 
     def test_generator_version(self):
-        assert GENERATOR_VERSION == "1"
+        assert GENERATOR_VERSION == "2"
 
     def test_ir_version(self):
         assert IR_VERSION == "1"

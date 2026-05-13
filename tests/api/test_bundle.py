@@ -20,7 +20,7 @@ async def unified_server():
     """Create a single mock server that handles both command and event flows.
 
     - First connection: handles a command request (read frame, send response, close).
-    - Second connection: handles an event stream (read EventStream, send events).
+    - Second connection: handles an event stream (read EventStream, send bootstrap, send events).
     """
     cmd_ctrl = {"response": None, "received_requests": []}
     evt_ctrl = {"events": [], "received_request": None}
@@ -36,6 +36,11 @@ async def unified_server():
 
         if is_event_stream:
             evt_ctrl["received_request"] = data
+            # Send bootstrap reply
+            frame = json.dumps({"Ok": {"Handled": {}}}).encode() + b"\n"
+            writer.write(frame)
+            await writer.drain()
+            # Send events
             for evt in evt_ctrl["events"]:
                 frame = json.dumps(evt).encode() + b"\n"
                 writer.write(frame)
@@ -67,10 +72,12 @@ class TestNiriConnectionBundle:
         config = NiriConfig(socket_path=socket_path, connect_timeout=5.0, request_timeout=5.0)
         bundle = await NiriConnectionBundle.open(config)
 
+        from niri_pypc.types.generated.reply import VersionResponse
         from niri_pypc.types.generated.request import VersionRequest
 
         result = await bundle.client.request(VersionRequest())
-        assert result.variant.payload == "0.1.0"
+        assert isinstance(result, VersionResponse)
+        assert result.payload == "0.1.0"
 
         await bundle.close()
 
@@ -83,10 +90,12 @@ class TestNiriConnectionBundle:
         config = NiriConfig(socket_path=socket_path, connect_timeout=5.0, request_timeout=5.0)
         bundle = await NiriConnectionBundle.open(config)
 
+        from niri_pypc.types.generated.reply import VersionResponse
         from niri_pypc.types.generated.request import VersionRequest
 
         result = await bundle.client.request(VersionRequest())
-        assert result.variant.payload == "0.1.0"
+        assert isinstance(result, VersionResponse)
+        assert result.payload == "0.1.0"
 
         await bundle.close()
 
@@ -112,7 +121,7 @@ class TestNiriConnectionBundle:
 
         async with await NiriConnectionBundle.open(config) as bundle:
             result = await bundle.client.request(VersionRequest())
-            assert result.variant.payload == "0.1.0"
+            assert result.payload == "0.1.0"
 
     async def test_client_and_events_properties(self, unified_server):
         """Client and events properties return the correct instances."""

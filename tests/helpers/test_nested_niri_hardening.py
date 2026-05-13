@@ -7,8 +7,14 @@ import socket
 from pathlib import Path
 
 import pytest
+from pydantic import ValidationError
 
-from tests.helpers.nested_niri import NestedNiriHarness
+from tests.helpers.nested_niri import (
+    NestedNiriHarness,
+    NestedNiriScenario,
+    ScenarioExpectations,
+    ScenarioRuntime,
+)
 
 
 @pytest.mark.asyncio
@@ -95,3 +101,51 @@ def test_visible_circuit_opens_on_backend_failure_signature():
     harness._maybe_open_visible_circuit("WaylandError(Connection(NoCompositor))\n")
     assert harness._visible_circuit_open is True
     assert harness._visible_circuit_reason == "WaylandError(Connection(NoCompositor))"
+
+
+class TestStrictManifests:
+    def test_scenario_rejects_extra_keys(self):
+        with pytest.raises(ValidationError, match="extra"):
+            NestedNiriScenario(
+                key="test",
+                config_fixture="test.kdl",
+                nonexistent_field="boom",
+            )
+
+    def test_scenario_runtime_rejects_extra_keys(self):
+        with pytest.raises(ValidationError, match="extra"):
+            ScenarioRuntime(startup_timeout_s=10.0, bogus="nope")
+
+    def test_scenario_expectations_rejects_extra_keys(self):
+        with pytest.raises(ValidationError, match="extra"):
+            ScenarioExpectations(min_outputs=2, unknown_key=True)
+
+    def test_scenario_runtime_is_frozen(self):
+        runtime = ScenarioRuntime()
+        with pytest.raises(ValidationError):
+            runtime.startup_timeout_s = 99.0
+
+    def test_scenario_is_frozen(self):
+        scenario = NestedNiriScenario(key="k", config_fixture="f.kdl")
+        with pytest.raises(ValidationError):
+            scenario.key = "other"
+
+
+class TestProtocolReadiness:
+    @pytest.mark.asyncio
+    async def test_wait_until_protocol_ready_fails_cleanly(self, monkeypatch: pytest.MonkeyPatch):
+        harness = NestedNiriHarness()
+
+        import niri_pypc.api.client as client_mod
+
+        async def always_fail(self, req, **kw):
+            raise ConnectionError("socket does not exist")
+
+        monkeypatch.setattr(client_mod.NiriClient, "request", always_fail)
+
+        with pytest.raises(RuntimeError, match="IPC protocol did not become ready"):
+            await harness._wait_until_protocol_ready(
+                socket_path=Path("/nonexistent/missing.sock"),
+                timeout_s=0.1,
+                interval_s=0.02,
+            )

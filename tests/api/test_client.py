@@ -18,14 +18,9 @@ pytestmark = pytest.mark.contract
 
 @pytest.fixture
 async def mock_server():
-    """Create a mock niri command server.
-
-    Accepts one connection, reads a request frame, sends a canned response,
-    then closes.
-    """
     server_control = {"response": None, "received_requests": []}
 
-    async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
+    async def handler(reader, writer):
         data = await reader.readuntil(b"\n")
         server_control["received_requests"].append(data)
         if server_control["response"] is not None:
@@ -43,9 +38,7 @@ async def mock_server():
 
 class TestNiriClient:
     async def test_request_returns_decoded_reply(self, mock_server):
-        """Client.request() returns the decoded Ok payload."""
         socket_path, ctrl = mock_server
-        # The proper wire format is {"Ok": {"Version": "0.1.0"}}
         ctrl["response"] = json.dumps({"Ok": {"Version": "0.1.0"}}).encode() + b"\n"
 
         config = NiriConfig(socket_path=socket_path, connect_timeout=5.0, request_timeout=5.0)
@@ -54,11 +47,12 @@ class TestNiriClient:
 
             result = await client.request(VersionRequest())
 
-        # Result should be a Response model whose variant is VersionResponse
-        assert result.variant.payload == "0.1.0"
+        from niri_pypc.types.generated.reply import VersionResponse
+
+        assert isinstance(result, VersionResponse)
+        assert result.payload == "0.1.0"
 
     async def test_request_sends_correct_frame(self, mock_server):
-        """Client sends the correct serialized request frame."""
         socket_path, ctrl = mock_server
         ctrl["response"] = json.dumps({"Ok": {"Version": "0.1.0"}}).encode() + b"\n"
 
@@ -69,11 +63,22 @@ class TestNiriClient:
             await client.request(VersionRequest())
 
         assert len(ctrl["received_requests"]) == 1
-        # VersionRequest is a unit variant, should serialize to "Version\n"
         assert ctrl["received_requests"][0] == b'"Version"\n'
 
+    async def test_action_serializes_as_zero_field_struct(self, mock_server):
+        socket_path, ctrl = mock_server
+        ctrl["response"] = json.dumps({"Ok": {"Handled": {}}}).encode() + b"\n"
+
+        config = NiriConfig(socket_path=socket_path, connect_timeout=5.0, request_timeout=5.0)
+        async with NiriClient.connect(config) as client:
+            from niri_pypc.types.generated.action import Action, ToggleOverviewAction
+            from niri_pypc.types.generated.request import ActionRequest
+
+            await client.request(ActionRequest(payload=Action(root=ToggleOverviewAction())))
+
+        assert ctrl["received_requests"][0] == b'{"Action":{"ToggleOverview":{}}}\n'
+
     async def test_request_handles_err_response(self, mock_server):
-        """Err response raises RemoteError."""
         socket_path, ctrl = mock_server
         ctrl["response"] = json.dumps({"Err": "Something went wrong"}).encode() + b"\n"
 
@@ -85,7 +90,6 @@ class TestNiriClient:
                 await client.request(VersionRequest())
 
     async def test_close_client_rejects_requests(self, mock_server):
-        """After close, requests raise LifecycleError."""
         socket_path, ctrl = mock_server
         config = NiriConfig(socket_path=socket_path)
 
@@ -98,10 +102,7 @@ class TestNiriClient:
             await client.request(VersionRequest())
 
     async def test_request_timeout_on_no_response(self, mock_server):
-        """If server doesn't respond, request times out."""
         socket_path, ctrl = mock_server
-        # Don't set a response - the server will close without responding
-        # This will cause a read error/EOF rather than a timeout
         ctrl["response"] = None
 
         config = NiriConfig(socket_path=socket_path, connect_timeout=5.0, request_timeout=0.1)
@@ -112,7 +113,6 @@ class TestNiriClient:
                 await client.request(VersionRequest())
 
     async def test_async_context_manager(self, mock_server):
-        """Async context manager works correctly."""
         socket_path, ctrl = mock_server
         ctrl["response"] = json.dumps({"Ok": {"Version": "0.1.0"}}).encode() + b"\n"
 
@@ -121,12 +121,10 @@ class TestNiriClient:
 
         async with NiriClient.connect(config) as client:
             result = await client.request(VersionRequest())
-            assert result.variant.payload == "0.1.0"
-        # After context manager exit, client should be closed
+            assert result.payload == "0.1.0"
         assert client.is_closed
 
     async def test_request_accepts_large_frame_within_max_size(self, mock_server):
-        """Large frames above asyncio defaults are accepted when under max_frame_size."""
         socket_path, ctrl = mock_server
         payload = "x" * 70000
         ctrl["response"] = json.dumps({"Ok": {"Version": payload}}).encode() + b"\n"
@@ -142,10 +140,9 @@ class TestNiriClient:
 
             result = await client.request(VersionRequest())
 
-        assert result.variant.payload == payload
+        assert result.payload == payload
 
     async def test_request_rejects_large_frame_over_max_size(self, mock_server):
-        """Frames over configured max_frame_size raise ProtocolError."""
         socket_path, ctrl = mock_server
         payload = "x" * 70000
         ctrl["response"] = json.dumps({"Ok": {"Version": payload}}).encode() + b"\n"

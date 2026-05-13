@@ -1,124 +1,141 @@
-"""Externally-tagged enum encode/decode primitives."""
+"""Externally-tagged enum encode/decode primitives - metadata-driven."""
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import Any
 
 from pydantic import BaseModel
 
-from niri_pypc.errors import DecodeError, EncodeError, RemoteError
+from niri_pypc.errors import DecodeError, EncodeError
+from niri_pypc.types.base import ProtocolModel, ProtocolVariant, UnknownEvent
+
+
+def _dump_value(value: Any) -> Any:
+    if isinstance(value, BaseModel):
+        return value.model_dump(mode="json")
+    return value
 
 
 def decode_externally_tagged(
     data: Any,
-    variants: dict[str, type[BaseModel]],
+    variants: dict[str, type[ProtocolVariant]],
     *,
-    unknown_sentinel: type[BaseModel] | None = None,
-) -> BaseModel:
-    """Decode an externally-tagged serde enum value."""
+    unknown_variant_model: type[ProtocolModel] | None = None,
+) -> ProtocolModel:
+    """Decode an externally-tagged serde enum value.
+
+    Uses explicit variant metadata (__niri_wire_name__, __niri_variant_kind__)
+    rather than field-shape heuristics.
+    """
     if isinstance(data, str):
-        cls = variants.get(data)
-        if cls is not None:
-            return cls()
-        if unknown_sentinel is not None:
-            return unknown_sentinel(variant_name=data, raw_payload=data)
+        variant_cls = variants.get(data)
+        if variant_cls is None:
+            if unknown_variant_model is not None:
+                return unknown_variant_model(variant_name=data, raw_payload=data)
+            raise DecodeError(
+                f"Unknown unit variant: {data}",
+                operation="decode_externally_tagged",
+                raw_payload=str(data),
+            )
+
+        if variant_cls.__niri_variant_kind__ != "unit":
+            raise DecodeError(
+                f"Variant {data} requires object payload, got string unit form",
+                operation="decode_externally_tagged",
+                raw_payload=str(data),
+            )
+
+        return variant_cls()
+
+    if not isinstance(data, dict):
         raise DecodeError(
-            f"Unknown unit variant: {data}",
+            f"Expected externally-tagged string or dict, got {type(data).__name__}",
             operation="decode_externally_tagged",
-            raw_payload=data,
+            raw_payload=str(data),
         )
 
-    if isinstance(data, dict):
-        if len(data) != 1:
+    if len(data) != 1:
+        raise DecodeError(
+            f"Expected exactly one externally-tagged key, got {len(data)}",
+            operation="decode_externally_tagged",
+            raw_payload=str(data),
+        )
+
+    variant_name, payload = next(iter(data.items()))
+    if not isinstance(variant_name, str):
+        raise DecodeError(
+            f"Expected string variant name, got {type(variant_name).__name__}",
+            operation="decode_externally_tagged",
+            raw_payload=str(data),
+        )
+
+    variant_cls = variants.get(variant_name)
+    if variant_cls is None:
+        if unknown_variant_model is not None:
+            return unknown_variant_model(variant_name=variant_name, raw_payload=payload)
+        raise DecodeError(
+            f"Unknown variant: {variant_name}",
+            operation="decode_externally_tagged",
+            raw_payload=str(data),
+        )
+
+    kind = variant_cls.__niri_variant_kind__
+
+    if kind == "unit":
+        if payload != {}:
             raise DecodeError(
-                f"Expected exactly one key in externally-tagged dict, got {len(data)}",
+                f"Unit variant {variant_name} must use string form, not payload form",
                 operation="decode_externally_tagged",
                 raw_payload=str(data),
             )
+        return variant_cls()
 
-        variant_name = next(iter(data.keys()))
-        if not isinstance(variant_name, str):
+    if kind == "newtype":
+        return variant_cls(payload=payload)
+
+    if kind == "struct":
+        if not isinstance(payload, dict):
             raise DecodeError(
-                f"Expected string key in externally-tagged dict, got {type(variant_name).__name__}",
+                f"Struct variant {variant_name} requires object payload, got {type(payload).__name__}",
                 operation="decode_externally_tagged",
                 raw_payload=str(data),
             )
-
-        payload = data[variant_name]
-        cls = variants.get(variant_name)
-
-        if cls is None:
-            if unknown_sentinel is not None:
-                return unknown_sentinel(variant_name=variant_name, raw_payload=payload)
-            raise DecodeError(
-                f"Unknown variant: {variant_name}",
-                operation="decode_externally_tagged",
-                raw_payload=str(data),
-            )
-
-        fields = cls.model_fields
-        if not fields:
-            return cls()
-        if list(fields.keys()) == ["payload"]:
-            return cls(payload=payload)
-        return cls.model_validate(payload)
+        return variant_cls.model_validate(payload)
 
     raise DecodeError(
-        f"Expected string or dict, got {type(data).__name__}",
+        f"Unsupported variant kind: {kind}",
         operation="decode_externally_tagged",
         raw_payload=str(data),
     )
 
 
-def encode_externally_tagged(
-    variant: BaseModel,
-    variant_names: dict[type[BaseModel], str],
-) -> Any:
-    """Encode a variant model instance into externally-tagged wire format."""
-    cls = type(variant)
-    wire_name = variant_names.get(cls)
+def encode_externally_tagged(value: ProtocolModel) -> Any:
+    """Encode a variant model instance into externally-tagged wire format.
 
-    if wire_name is None:
+    Uses explicit variant metadata rather than field-shape heuristics.
+    """
+    if isinstance(value, UnknownEvent):
+        return {value.variant_name: value.raw_payload}
+
+    if not isinstance(value, ProtocolVariant):
         raise EncodeError(
-            f"Unknown variant class: {cls.__name__}",
+            f"Cannot externally-tag non-variant type: {type(value).__name__}",
             operation="encode_externally_tagged",
         )
 
-    model_fields = cls.model_fields
-    if not model_fields:
+    wire_name = value.__niri_wire_name__
+    kind = value.__niri_variant_kind__
+
+    if kind == "unit":
         return wire_name
 
-    if list(model_fields.keys()) == ["payload"]:
-        payload = cast(Any, variant).payload
-        if isinstance(payload, BaseModel):
-            return {wire_name: payload.model_dump(mode="json", by_alias=True)}
-        return {wire_name: payload}
+    if kind == "newtype":
+        return {wire_name: _dump_value(value.payload)}
 
-    return {wire_name: variant.model_dump(mode="json", by_alias=True)}
+    if kind == "struct":
+        return {wire_name: value.model_dump(mode="json")}
 
-
-def unwrap_reply(reply: BaseModel) -> Any:
-    """Unwrap a niri Reply envelope."""
-    variant = getattr(reply, "variant", None)
-    if variant is None:
-        raise DecodeError(
-            "Reply missing variant field",
-            operation="unwrap_reply",
-        )
-
-    from niri_pypc.types.generated.reply import ErrReply, OkReply
-
-    if isinstance(variant, OkReply):
-        return getattr(variant, "payload", variant)
-    if isinstance(variant, ErrReply):
-        msg = getattr(variant, "payload", str(variant))
-        raise RemoteError(
-            f"Compositor error: {msg}",
-            operation="unwrap_reply",
-            remote_message=str(msg),
-        )
-
-    raise DecodeError(
-        f"Unexpected reply variant: {type(variant).__name__}",
-        operation="unwrap_reply",
+    raise EncodeError(
+        f"Unsupported variant kind: {kind}",
+        operation="encode_externally_tagged",
     )

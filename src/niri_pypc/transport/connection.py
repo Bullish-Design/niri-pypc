@@ -126,7 +126,7 @@ class UnixConnection:
                 operation="read_frame",
                 socket_path=str(self._socket_path),
                 cause=exc,
-                ) from exc
+            ) from exc
         except asyncio.LimitOverrunError as exc:
             self._closed = True
             raise ProtocolError(

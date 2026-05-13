@@ -8,8 +8,6 @@ from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from typing import Any
 
-from pydantic import BaseModel
-
 from niri_pypc.config import BackpressureMode, NiriConfig
 from niri_pypc.errors import (
     DecodeError,
@@ -21,35 +19,30 @@ from niri_pypc.errors import (
 )
 from niri_pypc.runtime.lifecycle import LifecycleManager, LifecycleState
 from niri_pypc.transport.connection import DEFAULT_STREAM_LIMIT, UnixConnection
-from niri_pypc.transport.framing import decode_frame, encode_frame
-from niri_pypc.types.generated.event import Event
+from niri_pypc.types.generated.event import Event, EventValue
+from niri_pypc.types.generated.reply import HandledResponse, Reply
+from niri_pypc.types.generated.request import EventStreamRequest, Request
 
 
 @dataclass(slots=True)
 class _EventItem:
-    """A successfully decoded event."""
-
-    event: BaseModel
+    event: EventValue
 
 
 @dataclass(slots=True)
 class _ErrorItem:
-    """A terminal failure (transport or decode)."""
-
     error: Exception
 
 
 @dataclass(slots=True)
 class _ClosedItem:
-    """Stream was closed deliberately."""
+    pass
 
 
 _QueueItem = _EventItem | _ErrorItem | _ClosedItem
 
 
 class NiriEventStream:
-    """Event stream client for niri IPC."""
-
     def __init__(self, config: NiriConfig) -> None:
         self._config = config
         self._lifecycle = LifecycleManager()
@@ -63,7 +56,6 @@ class NiriEventStream:
         cls,
         config: NiriConfig | None = None,
     ) -> NiriEventStream:
-        """Connect to the niri event socket."""
         if config is None:
             config = NiriConfig()
 
@@ -79,14 +71,13 @@ class NiriEventStream:
             stream_limit=max(config.max_frame_size + 1, DEFAULT_STREAM_LIMIT),
         )
         instance._connection = conn
-
-        from niri_pypc.types.generated.request import EventStreamRequest
-        from niri_pypc.types.generated.request import Request as RequestModel
-
-        request_root = RequestModel(variant=EventStreamRequest())
-        payload = request_root.model_dump(mode="json")
-        frame = encode_frame(payload)
-        await conn.write_frame(frame)
+        try:
+            await instance._bootstrap(conn)
+        except Exception:
+            await conn.close()
+            instance._connection = None
+            await mgr.transition_to(LifecycleState.CLOSED)
+            raise
 
         instance._queue = asyncio.Queue(maxsize=config.event_queue_capacity)
         instance._reader_task = asyncio.create_task(instance._run_reader())
@@ -94,8 +85,25 @@ class NiriEventStream:
         await mgr.transition_to(LifecycleState.READY)
         return instance
 
+    async def _bootstrap(self, conn: UnixConnection) -> None:
+        """Explicit bootstrap handshake: send EventStream, validate reply."""
+        outbound = Request(root=EventStreamRequest()).model_dump_json().encode("utf-8") + b"\n"
+        await conn.write_frame(outbound)
+
+        raw = await conn.read_frame(
+            max_size=self._config.max_frame_size,
+            timeout=self._config.request_timeout,
+        )
+        reply = Reply.model_validate_json(raw)
+        response = reply.unwrap()
+
+        if not isinstance(response, HandledResponse):
+            raise ProtocolError(
+                f"EventStream bootstrap expected HandledResponse, got {type(response).__name__}",
+                operation="event_stream_bootstrap",
+            )
+
     def _enqueue_terminal(self, item: _ErrorItem | _ClosedItem) -> None:
-        """Enqueue a terminal item, displacing a stale event if full."""
         if self._queue is None:
             return
         try:
@@ -111,7 +119,6 @@ class NiriEventStream:
                 pass
 
     async def _run_reader(self) -> None:
-        """Background task: read frames, decode Events, push to queue."""
         conn = self._connection
         queue = self._queue
         config = self._config
@@ -125,18 +132,13 @@ class NiriEventStream:
                         max_size=config.max_frame_size,
                         timeout=None,
                     )
-                except TransportError as exc:
-                    self._terminal_cause = exc
-                    self._enqueue_terminal(_ErrorItem(error=exc))
-                    return
-                except NiriTimeoutError as exc:
+                except (TransportError, NiriTimeoutError, ProtocolError) as exc:
                     self._terminal_cause = exc
                     self._enqueue_terminal(_ErrorItem(error=exc))
                     return
 
                 try:
-                    decoded = decode_frame(raw)
-                    event = Event.model_validate(decoded)
+                    event = Event.model_validate_json(raw)
                 except Exception as exc:
                     terminal = DecodeError(
                         f"Failed to decode event: {exc}",
@@ -148,7 +150,7 @@ class NiriEventStream:
                     self._enqueue_terminal(_ErrorItem(error=terminal))
                     return
 
-                item = _EventItem(event=event.variant)
+                item = _EventItem(event=event.root)
                 if config.backpressure_mode == BackpressureMode.DROP_OLDEST:
                     try:
                         queue.put_nowait(item)
@@ -170,11 +172,14 @@ class NiriEventStream:
                         self._terminal_cause = exc
                         self._enqueue_terminal(_ErrorItem(error=exc))
                         return
+        except Exception as exc:
+            self._terminal_cause = exc
+            self._enqueue_terminal(_ErrorItem(error=exc))
+            return
         finally:
             await self._close_reader_resources()
 
     async def _close_reader_resources(self) -> None:
-        """Clean up resources when the reader task exits."""
         if self._lifecycle.is_terminal:
             return
         try:
@@ -194,8 +199,7 @@ class NiriEventStream:
         except LifecycleError:
             pass
 
-    async def next(self, *, timeout: float | None = None) -> BaseModel:
-        """Read the next event from the stream."""
+    async def next(self, *, timeout: float | None = None) -> EventValue:
         if self._lifecycle.is_terminal:
             if self._terminal_cause is not None:
                 raise self._terminal_cause
@@ -236,24 +240,23 @@ class NiriEventStream:
             operation="next",
         )
 
-    def __aiter__(self) -> AsyncIterator[BaseModel]:
+    def __aiter__(self) -> AsyncIterator[EventValue]:
         return self._async_iterator()
 
-    async def _async_iterator(self) -> AsyncIterator[BaseModel]:
+    async def _async_iterator(self) -> AsyncIterator[EventValue]:
         while True:
             try:
                 yield await self.next()
             except (LifecycleError, StopAsyncIteration):
                 break
 
-    async def __anext__(self) -> BaseModel:
+    async def __anext__(self) -> EventValue:
         try:
             return await self.next()
         except LifecycleError:
             raise StopAsyncIteration from None
 
     async def close(self) -> None:
-        """Close the event stream. Idempotent."""
         if self._lifecycle.is_terminal:
             return
         try:
