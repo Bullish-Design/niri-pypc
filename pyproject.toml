@@ -77,12 +77,13 @@ select = [
 ignore = []
 
 [tool.ruff.lint.per-file-ignores]
-"src/niri_pypc/types/generated/*.py" = ["E501", "I001"]
+"src/niri_pypc/types/generated/*.py" = ["ALL"]
 
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
 line-ending = "lf"
+exclude = ["src/niri_pypc/types/generated/*.py"]
 
 [tool.ty.environment]
 python-version = "3.13"
