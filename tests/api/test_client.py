@@ -168,3 +168,12 @@ class TestNiriClient:
 
             with pytest.raises(ProtocolError, match="Frame exceeds maximum"):
                 await client.request(VersionRequest())
+
+    async def test_request_reports_connect_failure_with_operation_context(self):
+        config = NiriConfig(socket_path=Path("/tmp/does-not-exist-niri.sock"), connect_timeout=0.1)
+        client = NiriClient.create(config)
+        from niri_pypc.types.generated.request import VersionRequest
+
+        with pytest.raises(TransportError) as exc_info:
+            await client.request(VersionRequest())
+        assert exc_info.value.operation == "connect"

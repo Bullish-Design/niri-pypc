@@ -10,6 +10,8 @@ from pathlib import Path
 import pytest
 
 from niri_pypc.api.bundle import NiriConnectionBundle
+from niri_pypc.api.client import NiriClient
+from niri_pypc.api.event_stream import NiriEventStream
 from niri_pypc.config import NiriConfig
 
 pytestmark = pytest.mark.contract
@@ -139,3 +141,34 @@ class TestNiriConnectionBundle:
         assert isinstance(bundle.events, NiriEventStream)
 
         await bundle.close()
+
+    async def test_open_closes_client_when_event_stream_connect_fails(self, monkeypatch):
+        closed = {"called": False}
+
+        class DummyClient:
+            async def close(self):
+                closed["called"] = True
+
+        monkeypatch.setattr(NiriClient, "create", lambda config: DummyClient())
+
+        async def fail_connect(config):
+            raise RuntimeError("event stream init failed")
+
+        monkeypatch.setattr(NiriEventStream, "connect", fail_connect)
+
+        with pytest.raises(RuntimeError, match="event stream init failed"):
+            await NiriConnectionBundle.open(NiriConfig(socket_path=Path("/tmp/fake.sock")))
+        assert closed["called"] is True
+
+    async def test_close_preserves_first_error_when_both_closers_fail(self, monkeypatch):
+        class DummyClient:
+            async def close(self):
+                raise RuntimeError("client close failed")
+
+        class DummyEvents:
+            async def close(self):
+                raise RuntimeError("events close failed")
+
+        bundle = NiriConnectionBundle(DummyClient(), DummyEvents())  # type: ignore[arg-type]
+        with pytest.raises(RuntimeError, match="client close failed"):
+            await bundle.close()

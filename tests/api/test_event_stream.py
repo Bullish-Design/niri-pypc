@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 
 from niri_pypc.api.event_stream import NiriEventStream
-from niri_pypc.config import NiriConfig
+from niri_pypc.config import BackpressureMode, NiriConfig
 from niri_pypc.errors import DecodeError, LifecycleError, ProtocolError, TransportError
 
 pytestmark = pytest.mark.contract
@@ -178,6 +178,20 @@ class TestNiriEventStream:
 
 
 class TestEventStreamEdgeCases:
+    async def test_fail_fast_queue_pressure_raises_protocol_error(self, event_server):
+        socket_path, ctrl = event_server
+        ctrl["events"] = [{"WorkspaceActivated": {"id": i, "focused": i % 2 == 0}} for i in range(1, 200)]
+        config = NiriConfig(
+            socket_path=socket_path,
+            event_queue_capacity=1,
+            backpressure_mode=BackpressureMode.FAIL_FAST,
+        )
+        stream = await NiriEventStream.connect(config)
+        await asyncio.sleep(0.05)
+        with pytest.raises(ProtocolError, match="Event queue full \\(FAIL_FAST mode\\)"):
+            await stream.next(timeout=1.0)
+        await stream.close()
+
     async def test_close_with_full_queue_does_not_raise(self, event_server):
         socket_path, ctrl = event_server
         ctrl["events"] = [{"WorkspaceActivated": {"id": i, "focused": i % 2 == 0}} for i in range(1, 50)]

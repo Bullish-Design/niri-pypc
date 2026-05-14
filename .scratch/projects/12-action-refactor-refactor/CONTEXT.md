@@ -1,13 +1,16 @@
 # CONTEXT
 
-- Phase 3 complete: `NiriClient.create()` is now canonical; `connect()` preserved as deprecated compatibility alias.
-- Migrated call sites to `NiriClient.create()` across:
-  - runtime API bundle
-  - tests (api/integration/live/helpers)
-  - README usage snippets
-- Added compatibility test ensuring `NiriClient.create()` and `NiriClient.connect()` both construct equivalent clients.
+- Phase 4 complete: failure-path coverage expanded for event stream, bundle lifecycle, and client API boundaries.
+- Added event-stream tests for:
+  - FAIL_FAST queue pressure (`ProtocolError: Event queue full (FAIL_FAST mode)`).
+  - malformed JSON decode surfaced via `next()`.
+  - terminal signaling observable even when terminal enqueue path is dropped.
+  - `anext(stream)` close semantics.
+- Added bundle tests for:
+  - partial open failure ensures `client.close()` is invoked.
+  - close error ordering preserves first failure when both closers fail.
+- Added client test for connect failure mapping:
+  - request from non-existent socket surfaces `TransportError` with `operation == "connect"`.
 - Validation:
-  - `devenv shell -- pytest tests/api/test_client.py tests/api/test_bundle.py -q` ✅
-  - `devenv shell -- ruff check src/niri_pypc/api/client.py src/niri_pypc/api/bundle.py tests/api/test_client.py README.md` ✅
-  - `devenv shell -- ruff format --check src/niri_pypc/api/client.py src/niri_pypc/api/bundle.py tests/api/test_client.py` ✅
-- Next: Phase 4 failure-path coverage expansion.
+  - `devenv shell -- pytest tests/api/test_event_stream.py tests/api/test_bundle.py tests/api/test_client.py -q` ✅
+- Next: Phase 5 type/schema fidelity and generator updates.
