@@ -1,6 +1,6 @@
 [project]
 name = "niri-pypc"
-version = "0.3.1"
+version = "0.4.0"
 description = "Python controls for the Niri compositor."
 readme = "README.md"
 requires-python = ">=3.13"
