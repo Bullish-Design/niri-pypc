@@ -123,6 +123,7 @@ Opens a new `UnixConnection` per `request()` call — no persistent connection, 
 6. Closes the connection
 
 Typed overloads provide precise return types for each request variant (e.g. `VersionRequest` -> `VersionResponse`).
+Use `NiriClient.create(...)` as the canonical constructor; `NiriClient.connect(...)` remains a compatibility alias.
 
 ### Event stream (NiriEventStream)
 
@@ -137,6 +138,7 @@ Persistent connection with a background reader task and a bounded `asyncio.Queue
 5. Unknown event variants are captured as `UnknownEvent` sentinels rather than raising
 
 Lifecycle is managed via `LifecycleManager` (see below).
+Use `next()` for explicit terminal/error handling; `async for` treats stream closure as iteration termination.
 
 ### Bundle (NiriConnectionBundle)
 
@@ -160,7 +162,7 @@ Socket resolution order: `socket_path` field > `$NIRI_SOCKET` env var > `ConfigE
 
 ### Transport (UnixConnection)
 
-Wraps `asyncio.open_unix_connection` for Unix domain sockets. Frame protocol is **newline-delimited JSON** — `write_frame()` sends raw bytes; `read_frame()` reads until `b"\n"`. Error mapping:
+Wraps `asyncio.open_unix_connection` for Unix domain sockets. Frame protocol is **newline-delimited JSON** — `write_frame()` enforces exactly one trailing newline; `read_frame()` reads until `b"\n"`. Error mapping:
 
 - `asyncio.TimeoutError` -> `NiriTimeoutError`
 - `OSError` -> `TransportError`
@@ -252,13 +254,13 @@ Under the hood:
 
 ```bash
 devenv shell -- uv sync --extra dev
-devenv shell -- pytest           # Run tests
+NIRI_PYPC_NESTED_VISIBLE=0 devenv shell -- pytest -m "not nested and not visible_demo and not smoke"  # Safe default tests
 devenv shell -- ruff check .     # Lint
 devenv shell -- ruff format --check .  # Format check
 devenv shell -- ty check .       # Type check
 ```
 
-Nested/windowed e2e tests:
+Nested/windowed e2e tests (opt-in):
 
 ```bash
 devenv shell -- pytest -m nested -s
@@ -269,6 +271,10 @@ Visible watch mode for demos (opens nested compositor window when the host sessi
 ```bash
 NIRI_PYPC_ALLOW_VISIBLE_NESTED=1 devenv shell -- pytest -m visible_demo -s --nested-visible
 ```
+
+Action helper safety:
+- `spawn_sh(command)` uses shell interpretation and must not receive untrusted input.
+- Prefer `spawn([...])` when arguments originate from untrusted sources.
 
 Useful environment toggles:
 

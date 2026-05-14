@@ -1,16 +1,22 @@
 # CONTEXT
 
-- Phase 5 complete: type/schema fidelity and generation updates applied.
-- Implemented:
-  - Recorded T-4 tuple strategy decision in `.scratch/projects/11-action-refactor-review/DECISIONS.md`.
-  - `tools/normalize_ir.py`: `prefixItems` now always normalize to tuple IR for non-empty fixed-length arrays.
-  - Regenerated IR and generated type outputs.
-  - `src/niri_pypc/types/base.py`: hardened newtype serializer branch to require payload attribute presence.
-  - `tools/generate_types.py`: removed dead overwritten assignment in `gen_all_unit_str_enum_code`.
-  - Type tests updated for tuple fidelity (`physical_size`, `WindowLayout` tuple fields) and tuple-length validation.
-  - Added base runtime guard coverage for missing-payload newtype serialization path.
-- Validation:
+- Phase 6 complete:
+  - `actions.py` import sorting resolved with Ruff.
+  - Added `spawn_sh` shell-injection warning in action docstring.
+  - Added module-level rationale that debug-only actions are intentionally excluded from ergonomic builders.
+  - Added matching test note near debug-skip constants.
+- Phase 7 complete:
+  - README updated for `NiriClient.create()` canonical usage and `connect()` compatibility alias.
+  - README transport note updated: `write_frame()` enforces newline framing.
+  - README event semantics updated: `next()` vs `async for` behavior.
+  - README development section updated with strict safe default test command and nested/visible opt-in guidance.
+  - README includes action-helper safety guidance for `spawn_sh` vs `spawn([...])`.
+- Phase 8 validation:
+  - `devenv shell -- ruff check .` ✅
+  - `devenv shell -- ruff format --check .` ✅
+  - `devenv shell -- pytest tests/transport/test_connection.py -q` ✅
+  - `devenv shell -- pytest tests/api/test_event_stream.py tests/api/test_bundle.py tests/api/test_client.py -q` ✅
   - `devenv shell -- pytest tests/types -q` ✅
-  - `devenv shell -- verify-generated` ✅
-  - `devenv shell -- ty check .` ❌ pre-existing unrelated diagnostics in `src/niri_pypc/types/codec.py`.
-- Next: Phase 6 actions module lint/safety documentation cleanup.
+  - `devenv shell -- pytest tests/test_actions.py -q` ✅
+  - `NIRI_PYPC_NESTED_VISIBLE=0 devenv shell -- pytest -m "not nested and not visible_demo and not smoke"` ✅
+  - `devenv shell -- ty check .` ❌ (pre-existing diagnostics in `src/niri_pypc/types/codec.py`)

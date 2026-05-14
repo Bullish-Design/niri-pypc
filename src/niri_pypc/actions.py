@@ -1,6 +1,9 @@
 """Ergonomic builder functions for niri IPC actions.
 
 Each function returns an ``ActionRequest`` ready for ``NiriClient.request()``.
+
+Debug-only niri actions are intentionally excluded from this ergonomic API.
+They are unstable/tuning-oriented and should remain explicit at lower layers.
 """
 
 from __future__ import annotations
@@ -8,20 +11,6 @@ from __future__ import annotations
 from niri_pypc.types.generated.action import (
     Action,
     ActionValue,
-    # -- Tier 1 (nested enum params) --
-    FocusWorkspaceAction,
-    MoveColumnToWorkspaceAction,
-    MoveFloatingWindowAction,
-    MoveWindowToWorkspaceAction,
-    MoveWorkspaceToIndexAction,
-    MoveWorkspaceToMonitorAction,
-    SetColumnDisplayAction,
-    SetColumnWidthAction,
-    SetWindowHeightAction,
-    SetWindowWidthAction,
-    SetWorkspaceNameAction,
-    SwitchLayoutAction,
-    UnsetWorkspaceNameAction,
     # -- Tier 2 (all remaining non-debug) --
     CenterColumnAction,
     CenterVisibleColumnsAction,
@@ -70,6 +59,8 @@ from niri_pypc.types.generated.action import (
     FocusWindowUpOrBottomAction,
     FocusWindowUpOrColumnLeftAction,
     FocusWindowUpOrColumnRightAction,
+    # -- Tier 1 (nested enum params) --
+    FocusWorkspaceAction,
     FocusWorkspaceDownAction,
     FocusWorkspacePreviousAction,
     FocusWorkspaceUpAction,
@@ -91,8 +82,10 @@ from niri_pypc.types.generated.action import (
     MoveColumnToMonitorPreviousAction,
     MoveColumnToMonitorRightAction,
     MoveColumnToMonitorUpAction,
+    MoveColumnToWorkspaceAction,
     MoveColumnToWorkspaceDownAction,
     MoveColumnToWorkspaceUpAction,
+    MoveFloatingWindowAction,
     MoveWindowDownAction,
     MoveWindowDownOrToWorkspaceDownAction,
     MoveWindowToFloatingAction,
@@ -104,11 +97,14 @@ from niri_pypc.types.generated.action import (
     MoveWindowToMonitorRightAction,
     MoveWindowToMonitorUpAction,
     MoveWindowToTilingAction,
+    MoveWindowToWorkspaceAction,
     MoveWindowToWorkspaceDownAction,
     MoveWindowToWorkspaceUpAction,
     MoveWindowUpAction,
     MoveWindowUpOrToWorkspaceUpAction,
     MoveWorkspaceDownAction,
+    MoveWorkspaceToIndexAction,
+    MoveWorkspaceToMonitorAction,
     MoveWorkspaceToMonitorDownAction,
     MoveWorkspaceToMonitorLeftAction,
     MoveWorkspaceToMonitorNextAction,
@@ -124,15 +120,21 @@ from niri_pypc.types.generated.action import (
     ScreenshotAction,
     ScreenshotScreenAction,
     ScreenshotWindowAction,
+    SetColumnDisplayAction,
+    SetColumnWidthAction,
     SetDynamicCastMonitorAction,
     SetDynamicCastWindowAction,
+    SetWindowHeightAction,
     SetWindowUrgentAction,
+    SetWindowWidthAction,
+    SetWorkspaceNameAction,
     ShowHotkeyOverlayAction,
     SpawnAction,
     SpawnShAction,
     SwapWindowLeftAction,
     SwapWindowRightAction,
     SwitchFocusBetweenFloatingAndTilingAction,
+    SwitchLayoutAction,
     SwitchPresetColumnWidthAction,
     SwitchPresetColumnWidthBackAction,
     SwitchPresetWindowHeightAction,
@@ -142,11 +144,12 @@ from niri_pypc.types.generated.action import (
     ToggleColumnTabbedDisplayAction,
     ToggleKeyboardShortcutsInhibitAction,
     ToggleOverviewAction,
+    ToggleWindowedFullscreenAction,
     ToggleWindowFloatingAction,
     ToggleWindowRuleOpacityAction,
     ToggleWindowUrgentAction,
-    ToggleWindowedFullscreenAction,
     UnsetWindowUrgentAction,
+    UnsetWorkspaceNameAction,
 )
 from niri_pypc.types.generated.models import (
     AdjustFixedPositionChange,
@@ -353,6 +356,7 @@ __all__ = [
 # Internal helpers
 # ---------------------------------------------------------------------------
 
+
 def _wrap(variant: ActionValue) -> ActionRequest:
     """Wrap an action variant into a ready-to-send ActionRequest."""
     return ActionRequest(payload=Action(variant))
@@ -373,9 +377,7 @@ def _coerce_workspace_ref(
         return WorkspaceReferenceArg(IdWorkspaceReferenceArg(payload=ref))
     if isinstance(ref, str):
         return WorkspaceReferenceArg(NameWorkspaceReferenceArg(payload=ref))
-    raise TypeError(
-        f"Expected int, str, or WorkspaceReferenceArg, got {type(ref).__name__}"
-    )
+    raise TypeError(f"Expected int, str, or WorkspaceReferenceArg, got {type(ref).__name__}")
 
 
 def _coerce_optional_workspace_ref(
@@ -390,6 +392,7 @@ def _coerce_optional_workspace_ref(
 # ---------------------------------------------------------------------------
 # Nested enum helpers — WorkspaceReferenceArg
 # ---------------------------------------------------------------------------
+
 
 def workspace_by_id(id: int) -> WorkspaceReferenceArg:
     """Create a workspace reference by workspace ID."""
@@ -409,6 +412,7 @@ def workspace_by_name(name: str) -> WorkspaceReferenceArg:
 # ---------------------------------------------------------------------------
 # Nested enum helpers — SizeChange
 # ---------------------------------------------------------------------------
+
 
 def size_set_fixed(value: int) -> SizeChange:
     """Set size to an exact pixel value."""
@@ -434,6 +438,7 @@ def size_adjust_proportion(delta: float) -> SizeChange:
 # Nested enum helpers — PositionChange
 # ---------------------------------------------------------------------------
 
+
 def pos_set_fixed(value: float) -> PositionChange:
     """Set position to an exact pixel value."""
     return PositionChange(SetFixedPositionChange(payload=value))
@@ -458,6 +463,7 @@ def pos_adjust_proportion(delta: float) -> PositionChange:
 # Nested enum helpers — LayoutSwitchTarget
 # ---------------------------------------------------------------------------
 
+
 def layout_next() -> LayoutSwitchTarget:
     """Target the next keyboard layout."""
     return LayoutSwitchTarget(NextLayoutSwitchTarget())
@@ -477,19 +483,25 @@ def layout_index(index: int) -> LayoutSwitchTarget:
 # Builders: Spawn
 # ---------------------------------------------------------------------------
 
+
 def spawn(command: list[str]) -> ActionRequest:
     """Spawn a process with an explicit argument list."""
     return _wrap(SpawnAction(command=command))
 
 
 def spawn_sh(command: str) -> ActionRequest:
-    """Spawn a process via shell interpretation."""
+    """Spawn a process via shell interpretation.
+
+    WARNING: Do not pass untrusted input. Prefer `spawn([...])` for
+    argument-safe process launching with untrusted values.
+    """
     return _wrap(SpawnShAction(command=command))
 
 
 # ---------------------------------------------------------------------------
 # Builders: Focus — Column
 # ---------------------------------------------------------------------------
+
 
 def focus_column(index: int) -> ActionRequest:
     return _wrap(FocusColumnAction(index=index))
@@ -530,6 +542,7 @@ def focus_column_or_monitor_right() -> ActionRequest:
 # ---------------------------------------------------------------------------
 # Builders: Focus — Window
 # ---------------------------------------------------------------------------
+
 
 def focus_window(id: int) -> ActionRequest:
     return _wrap(FocusWindowAction(id=id))
@@ -603,6 +616,7 @@ def focus_window_up_or_column_right() -> ActionRequest:
 # Builders: Focus — Monitor
 # ---------------------------------------------------------------------------
 
+
 def focus_monitor(output: str) -> ActionRequest:
     return _wrap(FocusMonitorAction(output=output))
 
@@ -635,6 +649,7 @@ def focus_monitor_up() -> ActionRequest:
 # Builders: Focus — Workspace
 # ---------------------------------------------------------------------------
 
+
 def focus_workspace(reference: int | str | WorkspaceReferenceArg) -> ActionRequest:
     """Focus a workspace by ID (int), name (str), or explicit reference."""
     return _wrap(FocusWorkspaceAction(reference=_coerce_workspace_ref(reference)))
@@ -656,6 +671,7 @@ def focus_workspace_up() -> ActionRequest:
 # Builders: Focus — Layer
 # ---------------------------------------------------------------------------
 
+
 def focus_floating() -> ActionRequest:
     return _wrap(FocusFloatingAction())
 
@@ -671,6 +687,7 @@ def switch_focus_between_floating_and_tiling() -> ActionRequest:
 # ---------------------------------------------------------------------------
 # Builders: Window Management
 # ---------------------------------------------------------------------------
+
 
 def center_window(id: int | None = None) -> ActionRequest:
     return _wrap(CenterWindowAction(id=id))
@@ -720,6 +737,7 @@ def unset_window_urgent(id: int) -> ActionRequest:
 # Builders: Window Sizing
 # ---------------------------------------------------------------------------
 
+
 def set_window_height(change: SizeChange, id: int | None = None) -> ActionRequest:
     return _wrap(SetWindowHeightAction(change=change, id=id))
 
@@ -747,6 +765,7 @@ def switch_preset_window_width_back(id: int | None = None) -> ActionRequest:
 # ---------------------------------------------------------------------------
 # Builders: Window Movement
 # ---------------------------------------------------------------------------
+
 
 def move_window_down() -> ActionRequest:
     return _wrap(MoveWindowDownAction())
@@ -798,11 +817,13 @@ def move_window_to_workspace(
     window_id: int | None = None,
 ) -> ActionRequest:
     """Move a window to a workspace. Follows focus by default."""
-    return _wrap(MoveWindowToWorkspaceAction(
-        reference=_coerce_workspace_ref(reference),
-        focus=focus,
-        window_id=window_id,
-    ))
+    return _wrap(
+        MoveWindowToWorkspaceAction(
+            reference=_coerce_workspace_ref(reference),
+            focus=focus,
+            window_id=window_id,
+        )
+    )
 
 
 def move_window_to_workspace_down(focus: bool = True) -> ActionRequest:
@@ -832,6 +853,7 @@ def move_floating_window(
 # ---------------------------------------------------------------------------
 # Builders: Column Management
 # ---------------------------------------------------------------------------
+
 
 def center_column() -> ActionRequest:
     return _wrap(CenterColumnAction())
@@ -897,6 +919,7 @@ def swap_window_right() -> ActionRequest:
 # Builders: Column Movement
 # ---------------------------------------------------------------------------
 
+
 def move_column_left() -> ActionRequest:
     return _wrap(MoveColumnLeftAction())
 
@@ -958,10 +981,12 @@ def move_column_to_workspace(
     focus: bool = True,
 ) -> ActionRequest:
     """Move the focused column to a workspace. Follows focus by default."""
-    return _wrap(MoveColumnToWorkspaceAction(
-        reference=_coerce_workspace_ref(reference),
-        focus=focus,
-    ))
+    return _wrap(
+        MoveColumnToWorkspaceAction(
+            reference=_coerce_workspace_ref(reference),
+            focus=focus,
+        )
+    )
 
 
 def move_column_to_workspace_down(focus: bool = True) -> ActionRequest:
@@ -976,24 +1001,29 @@ def move_column_to_workspace_up(focus: bool = True) -> ActionRequest:
 # Builders: Workspace Management
 # ---------------------------------------------------------------------------
 
+
 def set_workspace_name(
     name: str,
     workspace: int | str | WorkspaceReferenceArg | None = None,
 ) -> ActionRequest:
     """Set a workspace name. Targets the focused workspace if reference is None."""
-    return _wrap(SetWorkspaceNameAction(
-        name=name,
-        workspace=_coerce_optional_workspace_ref(workspace),
-    ))
+    return _wrap(
+        SetWorkspaceNameAction(
+            name=name,
+            workspace=_coerce_optional_workspace_ref(workspace),
+        )
+    )
 
 
 def unset_workspace_name(
     reference: int | str | WorkspaceReferenceArg | None = None,
 ) -> ActionRequest:
     """Unset a workspace name. Targets the focused workspace if reference is None."""
-    return _wrap(UnsetWorkspaceNameAction(
-        reference=_coerce_optional_workspace_ref(reference),
-    ))
+    return _wrap(
+        UnsetWorkspaceNameAction(
+            reference=_coerce_optional_workspace_ref(reference),
+        )
+    )
 
 
 def move_workspace_down() -> ActionRequest:
@@ -1004,20 +1034,24 @@ def move_workspace_to_index(
     index: int,
     reference: int | str | WorkspaceReferenceArg | None = None,
 ) -> ActionRequest:
-    return _wrap(MoveWorkspaceToIndexAction(
-        index=index,
-        reference=_coerce_optional_workspace_ref(reference),
-    ))
+    return _wrap(
+        MoveWorkspaceToIndexAction(
+            index=index,
+            reference=_coerce_optional_workspace_ref(reference),
+        )
+    )
 
 
 def move_workspace_to_monitor(
     output: str,
     reference: int | str | WorkspaceReferenceArg | None = None,
 ) -> ActionRequest:
-    return _wrap(MoveWorkspaceToMonitorAction(
-        output=output,
-        reference=_coerce_optional_workspace_ref(reference),
-    ))
+    return _wrap(
+        MoveWorkspaceToMonitorAction(
+            output=output,
+            reference=_coerce_optional_workspace_ref(reference),
+        )
+    )
 
 
 def move_workspace_to_monitor_down() -> ActionRequest:
@@ -1052,6 +1086,7 @@ def move_workspace_up() -> ActionRequest:
 # Builders: Layout
 # ---------------------------------------------------------------------------
 
+
 def switch_layout(layout: LayoutSwitchTarget) -> ActionRequest:
     return _wrap(SwitchLayoutAction(layout=layout))
 
@@ -1059,6 +1094,7 @@ def switch_layout(layout: LayoutSwitchTarget) -> ActionRequest:
 # ---------------------------------------------------------------------------
 # Builders: Overview
 # ---------------------------------------------------------------------------
+
 
 def close_overview() -> ActionRequest:
     return _wrap(CloseOverviewAction())
@@ -1076,6 +1112,7 @@ def toggle_overview() -> ActionRequest:
 # Builders: Screenshot
 # ---------------------------------------------------------------------------
 
+
 def screenshot(
     show_pointer: bool = False,
     path: str | None = None,
@@ -1088,11 +1125,13 @@ def screenshot_screen(
     write_to_disk: bool = True,
     path: str | None = None,
 ) -> ActionRequest:
-    return _wrap(ScreenshotScreenAction(
-        show_pointer=show_pointer,
-        write_to_disk=write_to_disk,
-        path=path,
-    ))
+    return _wrap(
+        ScreenshotScreenAction(
+            show_pointer=show_pointer,
+            write_to_disk=write_to_disk,
+            path=path,
+        )
+    )
 
 
 def screenshot_window(
@@ -1100,16 +1139,19 @@ def screenshot_window(
     id: int | None = None,
     path: str | None = None,
 ) -> ActionRequest:
-    return _wrap(ScreenshotWindowAction(
-        write_to_disk=write_to_disk,
-        id=id,
-        path=path,
-    ))
+    return _wrap(
+        ScreenshotWindowAction(
+            write_to_disk=write_to_disk,
+            id=id,
+            path=path,
+        )
+    )
 
 
 # ---------------------------------------------------------------------------
 # Builders: Monitor Power
 # ---------------------------------------------------------------------------
+
 
 def power_off_monitors() -> ActionRequest:
     return _wrap(PowerOffMonitorsAction())
@@ -1122,6 +1164,7 @@ def power_on_monitors() -> ActionRequest:
 # ---------------------------------------------------------------------------
 # Builders: Screencast / Dynamic Cast
 # ---------------------------------------------------------------------------
+
 
 def clear_dynamic_cast_target() -> ActionRequest:
     return _wrap(ClearDynamicCastTargetAction())
@@ -1142,6 +1185,7 @@ def do_screen_transition(delay_ms: int | None = None) -> ActionRequest:
 # ---------------------------------------------------------------------------
 # Builders: System
 # ---------------------------------------------------------------------------
+
 
 def load_config_file() -> ActionRequest:
     return _wrap(LoadConfigFileAction())
