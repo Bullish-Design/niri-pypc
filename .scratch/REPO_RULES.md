@@ -40,6 +40,15 @@ devenv shell -- ty check .
 devenv shell -- pytest -q
 ```
 
+Safe default test command (non-visual, non-nested, non-smoke):
+```bash
+NIRI_PYPC_NESTED_VISIBLE=0 devenv shell -- pytest -m "not nested and not visible_demo and not smoke"
+```
+
+Never run visible nested tests unless explicitly requested by the user. Visible runs require both:
+- `--nested-visible`
+- `NIRI_PYPC_ALLOW_VISIBLE_NESTED=1`
+
 ## Protocol and Architecture Rules
 
 - Treat the Atuin-facing protocol as the stable external boundary.
