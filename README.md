@@ -123,7 +123,6 @@ Opens a new `UnixConnection` per `request()` call — no persistent connection, 
 6. Closes the connection
 
 Typed overloads provide precise return types for each request variant (e.g. `VersionRequest` -> `VersionResponse`).
-Use `NiriClient.create(...)` as the canonical constructor; `NiriClient.connect(...)` remains a compatibility alias.
 
 ### Event stream (NiriEventStream)
 

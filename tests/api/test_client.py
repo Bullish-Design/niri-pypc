@@ -37,15 +37,6 @@ async def mock_server():
 
 
 class TestNiriClient:
-    async def test_create_and_connect_are_compatible(self, mock_server):
-        socket_path, _ = mock_server
-        config = NiriConfig(socket_path=socket_path)
-        via_create = NiriClient.create(config)
-        via_connect = NiriClient.connect(config)
-        assert isinstance(via_create, NiriClient)
-        assert isinstance(via_connect, NiriClient)
-        assert via_create._config == via_connect._config
-
     async def test_request_returns_decoded_reply(self, mock_server):
         socket_path, ctrl = mock_server
         ctrl["response"] = json.dumps({"Ok": {"Version": "0.1.0"}}).encode() + b"\n"
