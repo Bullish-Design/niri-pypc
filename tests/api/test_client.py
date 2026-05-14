@@ -64,6 +64,7 @@ class TestNiriClient:
 
         assert len(ctrl["received_requests"]) == 1
         assert ctrl["received_requests"][0] == b'"Version"\n'
+        assert not ctrl["received_requests"][0].endswith(b"\n\n")
 
     async def test_action_serializes_as_zero_field_struct(self, mock_server):
         socket_path, ctrl = mock_server

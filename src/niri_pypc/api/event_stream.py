@@ -87,7 +87,7 @@ class NiriEventStream:
 
     async def _bootstrap(self, conn: UnixConnection) -> None:
         """Explicit bootstrap handshake: send EventStream, validate reply."""
-        outbound = Request(root=EventStreamRequest()).model_dump_json().encode("utf-8") + b"\n"
+        outbound = Request(root=EventStreamRequest()).model_dump_json().encode("utf-8")
         await conn.write_frame(outbound)
 
         raw = await conn.read_frame(

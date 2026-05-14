@@ -74,7 +74,8 @@ class UnixConnection:
                 socket_path=str(self._socket_path),
             )
         try:
-            self._writer.write(data)
+            framed = data if data.endswith(b"\n") else data + b"\n"
+            self._writer.write(framed)
             await self._writer.drain()
         except OSError as exc:
             self._closed = True
@@ -105,6 +106,8 @@ class UnixConnection:
                 timeout=timeout,
             )
         except TimeoutError as exc:
+            # Treat post-timeout stream state as indeterminate and poison connection.
+            self._closed = True
             raise NiriTimeoutError(
                 "Read timed out",
                 operation="read_frame",

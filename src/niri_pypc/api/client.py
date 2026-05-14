@@ -109,7 +109,7 @@ class NiriClient:
             stream_limit=max(self._config.max_frame_size + 1, DEFAULT_STREAM_LIMIT),
         )
         try:
-            outbound = Request(root=req).model_dump_json().encode("utf-8") + b"\n"
+            outbound = Request(root=req).model_dump_json().encode("utf-8")
             await conn.write_frame(outbound)
 
             raw = await conn.read_frame(

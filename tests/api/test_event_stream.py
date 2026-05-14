@@ -82,7 +82,8 @@ class TestNiriEventStream:
         await stream.close()
 
         assert ctrl["received_request"] is not None
-        assert b"EventStream" in ctrl["received_request"]
+        assert ctrl["received_request"] == b'"EventStream"\n'
+        assert not ctrl["received_request"].endswith(b"\n\n")
 
     async def test_close_is_idempotent(self, event_server):
         socket_path, ctrl = event_server
