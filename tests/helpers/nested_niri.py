@@ -269,7 +269,7 @@ class NestedNiriHarness:
                     connect_timeout=interval_s,
                     request_timeout=interval_s,
                 )
-                async with NiriClient.connect(config) as client:
+                async with NiriClient.create(config) as client:
                     response = await client.request(VersionRequest())
                     if response.payload:
                         return

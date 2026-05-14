@@ -35,7 +35,7 @@ from niri_pypc.types import VersionRequest
 
 async def main():
     config = NiriConfig()  # or NiriConfig(socket_path=Path("/run/user/1000/niri.sock"))
-    async with NiriClient.connect(config) as client:
+    async with NiriClient.create(config) as client:
         result = await client.request(VersionRequest())
         print(result.variant.payload)  # e.g., "25.11"
 

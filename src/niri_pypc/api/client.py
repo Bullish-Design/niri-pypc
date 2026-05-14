@@ -51,7 +51,7 @@ class NiriClient:
         self._closed = False
 
     @classmethod
-    def connect(
+    def create(
         cls,
         config: NiriConfig | None = None,
     ) -> NiriClient:
@@ -59,6 +59,14 @@ class NiriClient:
             config = NiriConfig()
         config.resolve_socket_path()
         return cls(config)
+
+    @classmethod
+    def connect(
+        cls,
+        config: NiriConfig | None = None,
+    ) -> NiriClient:
+        """Deprecated alias for `create()`; kept for compatibility."""
+        return cls.create(config)
 
     @overload
     async def request(self, req: ActionRequest, *, timeout: float | None = None) -> HandledResponse: ...

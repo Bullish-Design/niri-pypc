@@ -115,7 +115,7 @@ async def test_nested_multi_output_event_mapping(nested_niri):
     """Test output/workspace mapping in event stream for multi-output."""
     config = NiriConfig(socket_path=str(nested_niri.socket_path))
 
-    async with NiriClient.connect(config) as client:
+    async with NiriClient.create(config) as client:
         outputs_response = await client.request(OutputsRequest())
         outputs = outputs_response.payload
 

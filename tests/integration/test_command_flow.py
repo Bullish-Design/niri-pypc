@@ -20,7 +20,7 @@ class TestCommandFlow:
         config = NiriConfig(socket_path=socket_path, connect_timeout=5.0, request_timeout=5.0)
         from niri_pypc.types.generated.request import VersionRequest
 
-        async with NiriClient.connect(config) as client:
+        async with NiriClient.create(config) as client:
             result = await client.request(VersionRequest())
 
         from niri_pypc.types.generated.reply import VersionResponse
@@ -35,7 +35,7 @@ class TestCommandFlow:
         config = NiriConfig(socket_path=socket_path, connect_timeout=5.0, request_timeout=5.0)
         from niri_pypc.types.generated.request import VersionRequest
 
-        async with NiriClient.connect(config) as client:
+        async with NiriClient.create(config) as client:
             r1 = await client.request(VersionRequest())
             assert r1.payload == "0.1.0"
             r2 = await client.request(VersionRequest())
@@ -51,6 +51,6 @@ class TestCommandFlow:
         from niri_pypc.errors import RemoteError
         from niri_pypc.types.generated.request import VersionRequest
 
-        async with NiriClient.connect(config) as client:
+        async with NiriClient.create(config) as client:
             with pytest.raises(RemoteError, match="command failed"):
                 await client.request(VersionRequest())

@@ -26,7 +26,7 @@ class NiriConnectionBundle:
         if config is None:
             config = NiriConfig()
 
-        client = NiriClient.connect(config)
+        client = NiriClient.create(config)
         try:
             events = await NiriEventStream.connect(config)
         except Exception:

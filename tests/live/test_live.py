@@ -25,7 +25,7 @@ pytestmark = [
 class TestLiveNiri:
     async def test_version_request(self):
         config = NiriConfig()
-        async with NiriClient.connect(config) as client:
+        async with NiriClient.create(config) as client:
             from niri_pypc.types.generated.request import VersionRequest
 
             result = await client.request(VersionRequest())
@@ -36,7 +36,7 @@ class TestLiveNiri:
 
     async def test_outputs_request(self):
         config = NiriConfig()
-        async with NiriClient.connect(config) as client:
+        async with NiriClient.create(config) as client:
             from niri_pypc.types.generated.request import FocusedOutputRequest
 
             result = await client.request(FocusedOutputRequest())

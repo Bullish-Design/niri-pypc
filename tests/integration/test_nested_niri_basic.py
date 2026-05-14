@@ -18,7 +18,7 @@ from niri_pypc.types.generated.request import (
 @pytest.mark.niri_scenario("minimal")
 async def test_nested_version_request_round_trip(nested_niri):
     config = NiriConfig(socket_path=str(nested_niri.socket_path))
-    async with NiriClient.connect(config) as client:
+    async with NiriClient.create(config) as client:
         version = await client.request(VersionRequest())
         assert version is not None
         assert hasattr(version, "payload")
@@ -29,7 +29,7 @@ async def test_nested_version_request_round_trip(nested_niri):
 @pytest.mark.niri_scenario("minimal")
 async def test_nested_outputs_snapshot_matches_manifest(nested_niri, scenario_expectations):
     config = NiriConfig(socket_path=str(nested_niri.socket_path))
-    async with NiriClient.connect(config) as client:
+    async with NiriClient.create(config) as client:
         outputs_response = await client.request(OutputsRequest())
         assert outputs_response is not None
         outputs = outputs_response.payload
@@ -46,7 +46,7 @@ async def test_nested_outputs_snapshot_matches_manifest(nested_niri, scenario_ex
 @pytest.mark.niri_scenario("minimal")
 async def test_nested_workspaces_snapshot_matches_manifest(nested_niri, scenario_expectations):
     config = NiriConfig(socket_path=str(nested_niri.socket_path))
-    async with NiriClient.connect(config) as client:
+    async with NiriClient.create(config) as client:
         workspaces_response = await client.request(WorkspacesRequest())
         assert workspaces_response is not None
         workspaces = workspaces_response.payload
@@ -64,7 +64,7 @@ async def test_nested_workspaces_snapshot_matches_manifest(nested_niri, scenario
 @pytest.mark.niri_scenario("minimal")
 async def test_nested_windows_request_decodes_on_nested_socket(nested_niri, scenario_expectations):
     config = NiriConfig(socket_path=str(nested_niri.socket_path))
-    async with NiriClient.connect(config) as client:
+    async with NiriClient.create(config) as client:
         windows_response = await client.request(WindowsRequest())
         assert windows_response is not None
         windows = windows_response.payload
@@ -77,7 +77,7 @@ async def test_nested_windows_request_decodes_on_nested_socket(nested_niri, scen
 @pytest.mark.niri_scenario("multi-output")
 async def test_nested_multi_output_scenario(nested_niri):
     config = NiriConfig(socket_path=str(nested_niri.socket_path))
-    async with NiriClient.connect(config) as client:
+    async with NiriClient.create(config) as client:
         outputs_response = await client.request(OutputsRequest())
         outputs = outputs_response.payload
         if nested_niri.scenario.capabilities.requires_multi_output:
@@ -95,7 +95,7 @@ async def test_nested_multi_output_scenario(nested_niri):
 @pytest.mark.niri_scenario("dense-workspace")
 async def test_nested_dense_workspace_payload(nested_niri, scenario_expectations):
     config = NiriConfig(socket_path=str(nested_niri.socket_path))
-    async with NiriClient.connect(config) as client:
+    async with NiriClient.create(config) as client:
         workspaces_response = await client.request(WorkspacesRequest())
         assert workspaces_response is not None
         workspaces = workspaces_response.payload
