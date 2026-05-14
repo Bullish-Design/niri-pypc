@@ -10,6 +10,15 @@ Operational reminders:
 - Before the first test run in each session, sync dependencies:
   - `devenv shell -- uv sync --extra dev`
 
+Test execution policy:
+- Default test runs must exclude visual/demo and manual live smoke tests:
+  - `devenv shell -- pytest -m "not visible_demo and not smoke"`
+- Visible nested/visual tests are strict opt-in only.
+- Do not run with `--nested-visible` unless the user explicitly requests visual testing.
+- Do not set `NIRI_PYPC_ALLOW_VISIBLE_NESTED=1` unless the user explicitly requests visual testing.
+- When explicitly requested, run visual tests with:
+  - `NIRI_PYPC_ALLOW_VISIBLE_NESTED=1 devenv shell -- pytest -m visible_demo -s --nested-visible`
+
 Available local skills:
 - `.scratch/skills/python-linting-ruff/SKILL.md`
 - `.scratch/skills/python-typecheck-ty/SKILL.md`
