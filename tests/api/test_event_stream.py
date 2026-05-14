@@ -11,7 +11,7 @@ import pytest
 
 from niri_pypc.api.event_stream import NiriEventStream
 from niri_pypc.config import NiriConfig
-from niri_pypc.errors import LifecycleError, ProtocolError
+from niri_pypc.errors import DecodeError, LifecycleError, ProtocolError, TransportError
 
 pytestmark = pytest.mark.contract
 
@@ -206,6 +206,46 @@ class TestEventStreamEdgeCases:
         await stream.close()
         await task
 
+    async def test_anext_after_close_stops_iteration(self, event_server):
+        socket_path, ctrl = event_server
+        ctrl["events"] = []
+        stream = await NiriEventStream.connect(NiriConfig(socket_path=socket_path))
+        await stream.close()
+        with pytest.raises(StopAsyncIteration):
+            await anext(stream)
+
+    async def test_terminal_event_unblocks_next_when_terminal_enqueue_is_dropped(self, event_server):
+        socket_path, ctrl = event_server
+        ctrl["events"] = []
+        stream = await NiriEventStream.connect(NiriConfig(socket_path=socket_path))
+        stream._enqueue_terminal = lambda item: None  # type: ignore[method-assign]
+        terminal = ProtocolError("forced terminal", operation="test")
+        stream._signal_terminal(terminal)
+        with pytest.raises(ProtocolError, match="forced terminal"):
+            await stream.next(timeout=0.1)
+        await stream.close()
+
+    async def test_direct_next_surfaces_decode_error(self):
+        async def handler(reader, writer):
+            await reader.readuntil(b"\n")
+            writer.write(json.dumps({"Ok": {"Handled": {}}}).encode() + b"\n")
+            await writer.drain()
+            writer.write(b"{not-json}\n")
+            await writer.drain()
+            writer.close()
+            await writer.wait_closed()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            socket_path = Path(tmpdir) / "event.sock"
+            server = await asyncio.start_unix_server(handler, path=str(socket_path))
+            try:
+                stream = await NiriEventStream.connect(NiriConfig(socket_path=socket_path))
+                with pytest.raises(DecodeError, match="Failed to decode event"):
+                    await stream.next(timeout=1.0)
+            finally:
+                server.close()
+                await server.wait_closed()
+
     async def test_bootstrap_failure_closes_connection(self):
         async def handler(reader, writer):
             await reader.readuntil(b"\n")
@@ -221,6 +261,25 @@ class TestEventStreamEdgeCases:
             try:
                 with pytest.raises(ProtocolError):
                     await NiriEventStream.connect(NiriConfig(socket_path=socket_path))
+            finally:
+                server.close()
+                await server.wait_closed()
+
+    async def test_connect_handles_immediate_post_bootstrap_close(self):
+        async def handler(reader, writer):
+            await reader.readuntil(b"\n")
+            writer.write(json.dumps({"Ok": {"Handled": {}}}).encode() + b"\n")
+            await writer.drain()
+            writer.close()
+            await writer.wait_closed()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            socket_path = Path(tmpdir) / "event.sock"
+            server = await asyncio.start_unix_server(handler, path=str(socket_path))
+            try:
+                stream = await NiriEventStream.connect(NiriConfig(socket_path=socket_path))
+                with pytest.raises(TransportError):
+                    await stream.next(timeout=1.0)
             finally:
                 server.close()
                 await server.wait_closed()
