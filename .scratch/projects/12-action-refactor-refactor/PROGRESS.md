@@ -1,6 +1,6 @@
 # PROGRESS
 
-- [ ] Phase 0: branch/setup/baseline
+- [x] Phase 0: branch/setup/baseline
 - [ ] Phase 1: transport framing invariant + timeout poisoning
 - [ ] Phase 2: event stream robustness + lifecycle race fixes
 - [ ] Phase 3: client create/connect transition
