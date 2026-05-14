@@ -172,8 +172,6 @@ def gen_variant_code(variant: dict, enum_name: str) -> str:
 
 def gen_all_unit_str_enum_code(ir_type: dict) -> str:
     """Generate a StrEnum for all-unit enums like Transform, Layer, etc."""
-    lines = ["class StrEnum(str, enum.Enum):", "    pass", ""]
-    # We need to generate the actual StrEnum subclass
     lines = [f"class {ir_type['name']}(StrEnum):"]
     for v in ir_type["variants"]:
         member_name = safe_enum_member_name(v["name"])

@@ -5,7 +5,7 @@
 - [x] Phase 2: event stream robustness + lifecycle race fixes
 - [x] Phase 3: client create/connect transition
 - [x] Phase 4: failure-path coverage expansion
-- [ ] Phase 5: type/schema/codegen updates + regen
+- [x] Phase 5: type/schema/codegen updates + regen
 - [ ] Phase 6: actions lint/safety docs
 - [ ] Phase 7: README/integration prereq docs
 - [ ] Phase 8: final validation

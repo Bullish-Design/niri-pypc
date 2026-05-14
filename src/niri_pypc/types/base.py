@@ -87,6 +87,10 @@ class ExternallyTaggedEnum[RootT: ProtocolModel](RootModel[RootT]):
         if kind == "unit":
             return wire_name
         if kind == "newtype":
+            if not hasattr(root, "payload"):
+                raise TypeError(
+                    f"Newtype variant {type(root).__name__} is missing required payload field",
+                )
             return {wire_name: root.payload}
         if kind == "struct":
             return {wire_name: root.model_dump(mode="json")}

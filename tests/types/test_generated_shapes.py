@@ -9,6 +9,7 @@ from niri_pypc.types.generated.models import (
     Output,
     PickedColor,
     Window,
+    WindowLayout,
     Workspace,
 )
 from niri_pypc.types.generated.reply import (
@@ -67,3 +68,12 @@ class TestResponsePayloadTypes:
     def test_version_response_has_str_payload(self):
         ann = _get_field_annotation(VersionResponse, "payload")
         assert ann is str
+
+    def test_output_physical_size_is_fixed_tuple(self):
+        ann = _get_field_annotation(Output, "physical_size")
+        assert ann == tuple[int, int] | None
+
+    def test_window_layout_fixed_size_fields_are_tuples(self):
+        assert _get_field_annotation(WindowLayout, "tile_size") == tuple[float, float]
+        assert _get_field_annotation(WindowLayout, "window_offset_in_tile") == tuple[float, float]
+        assert _get_field_annotation(WindowLayout, "window_size") == tuple[int, int]

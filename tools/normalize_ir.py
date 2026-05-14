@@ -114,8 +114,8 @@ def canonical_type(schema: dict, defs: dict) -> str:
 def _normalize_prefix_items(schema: dict, defs: dict) -> str:
     """Normalize a fixed-length prefixItems array.
 
-    If all elements have the same type, emit array<T>.
-    Otherwise, emit tuple<T1,T2,...>.
+    Always emit tuple<T1,T2,...> for non-empty fixed-length arrays to
+    preserve positional and length semantics from JSON Schema prefixItems.
     """
     prefix = schema["prefixItems"]
     element_types = [canonical_type(item, defs) for item in prefix]
@@ -123,11 +123,6 @@ def _normalize_prefix_items(schema: dict, defs: dict) -> str:
     if not element_types:
         return "array<ref:Unknown>"
 
-    # If all elements are the same type, use array<T>
-    if len(set(element_types)) == 1:
-        return f"array<{element_types[0]}>"
-
-    # Heterogeneous: use tuple notation
     return f"tuple<{','.join(element_types)}>"
 
 

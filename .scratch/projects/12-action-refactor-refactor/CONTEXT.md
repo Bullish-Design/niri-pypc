@@ -1,16 +1,16 @@
 # CONTEXT
 
-- Phase 4 complete: failure-path coverage expanded for event stream, bundle lifecycle, and client API boundaries.
-- Added event-stream tests for:
-  - FAIL_FAST queue pressure (`ProtocolError: Event queue full (FAIL_FAST mode)`).
-  - malformed JSON decode surfaced via `next()`.
-  - terminal signaling observable even when terminal enqueue path is dropped.
-  - `anext(stream)` close semantics.
-- Added bundle tests for:
-  - partial open failure ensures `client.close()` is invoked.
-  - close error ordering preserves first failure when both closers fail.
-- Added client test for connect failure mapping:
-  - request from non-existent socket surfaces `TransportError` with `operation == "connect"`.
+- Phase 5 complete: type/schema fidelity and generation updates applied.
+- Implemented:
+  - Recorded T-4 tuple strategy decision in `.scratch/projects/11-action-refactor-review/DECISIONS.md`.
+  - `tools/normalize_ir.py`: `prefixItems` now always normalize to tuple IR for non-empty fixed-length arrays.
+  - Regenerated IR and generated type outputs.
+  - `src/niri_pypc/types/base.py`: hardened newtype serializer branch to require payload attribute presence.
+  - `tools/generate_types.py`: removed dead overwritten assignment in `gen_all_unit_str_enum_code`.
+  - Type tests updated for tuple fidelity (`physical_size`, `WindowLayout` tuple fields) and tuple-length validation.
+  - Added base runtime guard coverage for missing-payload newtype serialization path.
 - Validation:
-  - `devenv shell -- pytest tests/api/test_event_stream.py tests/api/test_bundle.py tests/api/test_client.py -q` ✅
-- Next: Phase 5 type/schema fidelity and generator updates.
+  - `devenv shell -- pytest tests/types -q` ✅
+  - `devenv shell -- verify-generated` ✅
+  - `devenv shell -- ty check .` ❌ pre-existing unrelated diagnostics in `src/niri_pypc/types/codec.py`.
+- Next: Phase 6 actions module lint/safety documentation cleanup.

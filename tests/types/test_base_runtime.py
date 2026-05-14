@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import pytest
+
+from pydantic_core import PydanticSerializationError
+
 from niri_pypc.types.base import ExternallyTaggedEnum, ProtocolVariant
 
 
@@ -69,3 +73,14 @@ class TestBaseRuntime:
         assert Ping.__niri_wire_name__ == "Ping"
         assert Echo.__niri_wire_name__ == "Echo"
         assert Full.__niri_wire_name__ == "Full"
+
+    def test_newtype_without_payload_field_raises_type_error(self):
+        class BrokenNewtype(ProtocolVariant):
+            __niri_wire_name__ = "Broken"
+            __niri_variant_kind__ = "newtype"
+
+        class BrokenEnum(ExternallyTaggedEnum[BrokenNewtype]):
+            __niri_variants__ = (BrokenNewtype,)
+
+        with pytest.raises(PydanticSerializationError, match="missing required payload"):
+            BrokenEnum(root=BrokenNewtype()).model_dump(mode="json")
