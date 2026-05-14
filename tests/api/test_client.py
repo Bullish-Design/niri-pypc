@@ -42,7 +42,7 @@ class TestNiriClient:
         ctrl["response"] = json.dumps({"Ok": {"Version": "0.1.0"}}).encode() + b"\n"
 
         config = NiriConfig(socket_path=socket_path, connect_timeout=5.0, request_timeout=5.0)
-        async with NiriClient.connect(config) as client:
+        async with NiriClient.create(config) as client:
             from niri_pypc.types.generated.request import VersionRequest
 
             result = await client.request(VersionRequest())
@@ -57,20 +57,21 @@ class TestNiriClient:
         ctrl["response"] = json.dumps({"Ok": {"Version": "0.1.0"}}).encode() + b"\n"
 
         config = NiriConfig(socket_path=socket_path, connect_timeout=5.0, request_timeout=5.0)
-        async with NiriClient.connect(config) as client:
+        async with NiriClient.create(config) as client:
             from niri_pypc.types.generated.request import VersionRequest
 
             await client.request(VersionRequest())
 
         assert len(ctrl["received_requests"]) == 1
         assert ctrl["received_requests"][0] == b'"Version"\n'
+        assert not ctrl["received_requests"][0].endswith(b"\n\n")
 
     async def test_action_serializes_as_zero_field_struct(self, mock_server):
         socket_path, ctrl = mock_server
         ctrl["response"] = json.dumps({"Ok": {"Handled": {}}}).encode() + b"\n"
 
         config = NiriConfig(socket_path=socket_path, connect_timeout=5.0, request_timeout=5.0)
-        async with NiriClient.connect(config) as client:
+        async with NiriClient.create(config) as client:
             from niri_pypc.types.generated.action import Action, ToggleOverviewAction
             from niri_pypc.types.generated.request import ActionRequest
 
@@ -83,7 +84,7 @@ class TestNiriClient:
         ctrl["response"] = json.dumps({"Err": "Something went wrong"}).encode() + b"\n"
 
         config = NiriConfig(socket_path=socket_path, connect_timeout=5.0, request_timeout=5.0)
-        async with NiriClient.connect(config) as client:
+        async with NiriClient.create(config) as client:
             from niri_pypc.types.generated.request import VersionRequest
 
             with pytest.raises(RemoteError, match="Compositor error"):
@@ -93,7 +94,7 @@ class TestNiriClient:
         socket_path, ctrl = mock_server
         config = NiriConfig(socket_path=socket_path)
 
-        client = NiriClient.connect(config)
+        client = NiriClient.create(config)
         await client.close()
         from niri_pypc.errors import LifecycleError
         from niri_pypc.types.generated.request import VersionRequest
@@ -106,7 +107,7 @@ class TestNiriClient:
         ctrl["response"] = None
 
         config = NiriConfig(socket_path=socket_path, connect_timeout=5.0, request_timeout=0.1)
-        async with NiriClient.connect(config) as client:
+        async with NiriClient.create(config) as client:
             from niri_pypc.types.generated.request import VersionRequest
 
             with pytest.raises(TransportError):
@@ -119,7 +120,7 @@ class TestNiriClient:
         config = NiriConfig(socket_path=socket_path, connect_timeout=5.0, request_timeout=5.0)
         from niri_pypc.types.generated.request import VersionRequest
 
-        async with NiriClient.connect(config) as client:
+        async with NiriClient.create(config) as client:
             result = await client.request(VersionRequest())
             assert result.payload == "0.1.0"
         assert client.is_closed
@@ -135,7 +136,7 @@ class TestNiriClient:
             request_timeout=5.0,
             max_frame_size=200000,
         )
-        async with NiriClient.connect(config) as client:
+        async with NiriClient.create(config) as client:
             from niri_pypc.types.generated.request import VersionRequest
 
             result = await client.request(VersionRequest())
@@ -153,8 +154,17 @@ class TestNiriClient:
             request_timeout=5.0,
             max_frame_size=1024,
         )
-        async with NiriClient.connect(config) as client:
+        async with NiriClient.create(config) as client:
             from niri_pypc.types.generated.request import VersionRequest
 
             with pytest.raises(ProtocolError, match="Frame exceeds maximum"):
                 await client.request(VersionRequest())
+
+    async def test_request_reports_connect_failure_with_operation_context(self):
+        config = NiriConfig(socket_path=Path("/tmp/does-not-exist-niri.sock"), connect_timeout=0.1)
+        client = NiriClient.create(config)
+        from niri_pypc.types.generated.request import VersionRequest
+
+        with pytest.raises(TransportError) as exc_info:
+            await client.request(VersionRequest())
+        assert exc_info.value.operation == "connect"

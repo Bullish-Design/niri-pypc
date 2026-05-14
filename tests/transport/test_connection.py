@@ -85,6 +85,22 @@ class TestUnixConnectionWriteRead:
             await conn.read_frame(timeout=0.05)
         await conn.close()
 
+    async def test_write_frame_appends_newline_when_missing(self, mock_server):
+        sp, queue = mock_server
+        conn = await UnixConnection.connect(sp, timeout=5.0)
+        await conn.write_frame(b'"ping"')
+        received = await asyncio.wait_for(queue.get(), timeout=1.0)
+        assert received == b'"ping"\n'
+        await conn.close()
+
+    async def test_write_frame_preserves_single_newline(self, mock_server):
+        sp, queue = mock_server
+        conn = await UnixConnection.connect(sp, timeout=5.0)
+        await conn.write_frame(b'"ping"\n')
+        received = await asyncio.wait_for(queue.get(), timeout=1.0)
+        assert received == b'"ping"\n'
+        await conn.close()
+
     async def test_oversize_frame_rejected(self, socket_path):
         """Frames exceeding max_size raise ProtocolError."""
 
@@ -157,3 +173,21 @@ class TestUnixConnectionClose:
         await conn.close()
         with pytest.raises(TransportError, match="Cannot read from closed"):
             await conn.read_frame(timeout=1.0)
+
+    async def test_read_timeout_poisons_connection(self, socket_path):
+        async def handler(reader, writer):
+            await asyncio.sleep(1.0)
+            writer.close()
+
+        server = await asyncio.start_unix_server(handler, path=str(socket_path))
+        conn = await UnixConnection.connect(socket_path, timeout=5.0)
+        with pytest.raises(NiriTimeoutError, match="Read timed out"):
+            await conn.read_frame(timeout=0.01)
+
+        with pytest.raises(TransportError, match="Cannot read from closed"):
+            await conn.read_frame(timeout=0.1)
+        with pytest.raises(TransportError, match="Cannot write to closed"):
+            await conn.write_frame(b"data")
+
+        server.close()
+        await server.wait_closed()

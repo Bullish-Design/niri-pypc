@@ -2096,7 +2096,7 @@
         },
         {
           "name": "physical_size",
-          "type": "option<array<integer>>",
+          "type": "option<tuple<integer,integer>>",
           "required": false
         },
         {
@@ -2232,27 +2232,27 @@
       "fields": [
         {
           "name": "pos_in_scrolling_layout",
-          "type": "option<array<integer>>",
+          "type": "option<tuple<integer,integer>>",
           "required": false
         },
         {
           "name": "tile_pos_in_workspace_view",
-          "type": "option<array<float>>",
+          "type": "option<tuple<float,float>>",
           "required": false
         },
         {
           "name": "tile_size",
-          "type": "array<float>",
+          "type": "tuple<float,float>",
           "required": true
         },
         {
           "name": "window_offset_in_tile",
-          "type": "array<float>",
+          "type": "tuple<float,float>",
           "required": true
         },
         {
           "name": "window_size",
-          "type": "array<integer>",
+          "type": "tuple<integer,integer>",
           "required": true
         }
       ]

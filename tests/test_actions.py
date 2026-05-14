@@ -4,119 +4,210 @@ from __future__ import annotations
 
 import pytest
 
+import niri_pypc.actions as actions_module
 from niri_pypc.actions import (
+    _coerce_optional_workspace_ref,
     # Internals (import for testing)
     _coerce_workspace_ref,
-    _coerce_optional_workspace_ref,
-    # Nested enum helpers
-    workspace_by_id, workspace_by_index, workspace_by_name,
-    size_set_fixed, size_set_proportion, size_adjust_fixed, size_adjust_proportion,
-    pos_set_fixed, pos_set_proportion, pos_adjust_fixed, pos_adjust_proportion,
-    layout_next, layout_prev, layout_index,
-    # Builders: Spawn
-    spawn, spawn_sh,
-    # Builders: Focus — Column
-    focus_column, focus_column_first, focus_column_last,
-    focus_column_left, focus_column_left_or_last,
-    focus_column_right, focus_column_right_or_first,
-    focus_column_or_monitor_left, focus_column_or_monitor_right,
-    # Builders: Focus — Window
-    focus_window, focus_window_bottom, focus_window_down,
-    focus_window_down_or_column_left, focus_window_down_or_column_right,
-    focus_window_down_or_top, focus_window_in_column,
-    focus_window_or_monitor_down, focus_window_or_monitor_up,
-    focus_window_or_workspace_down, focus_window_or_workspace_up,
-    focus_window_previous, focus_window_top, focus_window_up,
-    focus_window_up_or_bottom, focus_window_up_or_column_left,
-    focus_window_up_or_column_right,
-    # Builders: Focus — Monitor
-    focus_monitor, focus_monitor_down, focus_monitor_left,
-    focus_monitor_next, focus_monitor_previous,
-    focus_monitor_right, focus_monitor_up,
-    # Builders: Focus — Workspace
-    focus_workspace, focus_workspace_down, focus_workspace_previous, focus_workspace_up,
-    # Builders: Focus — Layer
-    focus_floating, focus_tiling, switch_focus_between_floating_and_tiling,
-    # Builders: Window Management
-    center_window, close_window, fullscreen_window,
-    maximize_window_to_edges, reset_window_height,
-    toggle_window_floating, toggle_window_rule_opacity,
-    toggle_windowed_fullscreen, set_window_urgent,
-    toggle_window_urgent, unset_window_urgent,
-    # Builders: Window Sizing
-    set_window_height, set_window_width,
-    switch_preset_window_height, switch_preset_window_height_back,
-    switch_preset_window_width, switch_preset_window_width_back,
-    # Builders: Window Movement
-    move_window_down, move_window_down_or_to_workspace_down,
-    move_window_to_floating, move_window_to_monitor,
-    move_window_to_monitor_down, move_window_to_monitor_left,
-    move_window_to_monitor_next, move_window_to_monitor_previous,
-    move_window_to_monitor_right, move_window_to_monitor_up,
-    move_window_to_tiling, move_window_to_workspace,
-    move_window_to_workspace_down, move_window_to_workspace_up,
-    move_window_up, move_window_up_or_to_workspace_up,
-    move_floating_window,
     # Builders: Column Management
-    center_column, center_visible_columns,
-    consume_or_expel_window_left, consume_or_expel_window_right,
-    consume_window_into_column, expand_column_to_available_width,
-    expel_window_from_column, maximize_column,
-    set_column_display, set_column_width,
-    switch_preset_column_width, switch_preset_column_width_back,
-    toggle_column_tabbed_display, swap_window_left, swap_window_right,
+    center_column,
+    center_visible_columns,
+    # Builders: Window Management
+    center_window,
+    # Builders: Screencast / Dynamic Cast
+    clear_dynamic_cast_target,
+    # Builders: Overview
+    close_overview,
+    close_window,
+    consume_or_expel_window_left,
+    consume_or_expel_window_right,
+    consume_window_into_column,
+    do_screen_transition,
+    expand_column_to_available_width,
+    expel_window_from_column,
+    # Builders: Focus — Column
+    focus_column,
+    focus_column_first,
+    focus_column_last,
+    focus_column_left,
+    focus_column_left_or_last,
+    focus_column_or_monitor_left,
+    focus_column_or_monitor_right,
+    focus_column_right,
+    focus_column_right_or_first,
+    # Builders: Focus — Layer
+    focus_floating,
+    # Builders: Focus — Monitor
+    focus_monitor,
+    focus_monitor_down,
+    focus_monitor_left,
+    focus_monitor_next,
+    focus_monitor_previous,
+    focus_monitor_right,
+    focus_monitor_up,
+    focus_tiling,
+    # Builders: Focus — Window
+    focus_window,
+    focus_window_bottom,
+    focus_window_down,
+    focus_window_down_or_column_left,
+    focus_window_down_or_column_right,
+    focus_window_down_or_top,
+    focus_window_in_column,
+    focus_window_or_monitor_down,
+    focus_window_or_monitor_up,
+    focus_window_or_workspace_down,
+    focus_window_or_workspace_up,
+    focus_window_previous,
+    focus_window_top,
+    focus_window_up,
+    focus_window_up_or_bottom,
+    focus_window_up_or_column_left,
+    focus_window_up_or_column_right,
+    # Builders: Focus — Workspace
+    focus_workspace,
+    focus_workspace_down,
+    focus_workspace_previous,
+    focus_workspace_up,
+    fullscreen_window,
+    layout_index,
+    layout_next,
+    layout_prev,
+    # Builders: System
+    load_config_file,
+    maximize_column,
+    maximize_window_to_edges,
     # Builders: Column Movement
-    move_column_left, move_column_left_or_to_monitor_left,
-    move_column_right, move_column_right_or_to_monitor_right,
-    move_column_to_first, move_column_to_index, move_column_to_last,
-    move_column_to_monitor, move_column_to_monitor_down,
-    move_column_to_monitor_left, move_column_to_monitor_next,
-    move_column_to_monitor_previous, move_column_to_monitor_right,
-    move_column_to_monitor_up, move_column_to_workspace,
-    move_column_to_workspace_down, move_column_to_workspace_up,
-    # Builders: Workspace Management
-    set_workspace_name, unset_workspace_name,
-    move_workspace_down, move_workspace_to_index, move_workspace_to_monitor,
-    move_workspace_to_monitor_down, move_workspace_to_monitor_left,
-    move_workspace_to_monitor_next, move_workspace_to_monitor_previous,
-    move_workspace_to_monitor_right, move_workspace_to_monitor_up,
+    move_column_left,
+    move_column_left_or_to_monitor_left,
+    move_column_right,
+    move_column_right_or_to_monitor_right,
+    move_column_to_first,
+    move_column_to_index,
+    move_column_to_last,
+    move_column_to_monitor,
+    move_column_to_monitor_down,
+    move_column_to_monitor_left,
+    move_column_to_monitor_next,
+    move_column_to_monitor_previous,
+    move_column_to_monitor_right,
+    move_column_to_monitor_up,
+    move_column_to_workspace,
+    move_column_to_workspace_down,
+    move_column_to_workspace_up,
+    move_floating_window,
+    # Builders: Window Movement
+    move_window_down,
+    move_window_down_or_to_workspace_down,
+    move_window_to_floating,
+    move_window_to_monitor,
+    move_window_to_monitor_down,
+    move_window_to_monitor_left,
+    move_window_to_monitor_next,
+    move_window_to_monitor_previous,
+    move_window_to_monitor_right,
+    move_window_to_monitor_up,
+    move_window_to_tiling,
+    move_window_to_workspace,
+    move_window_to_workspace_down,
+    move_window_to_workspace_up,
+    move_window_up,
+    move_window_up_or_to_workspace_up,
+    move_workspace_down,
+    move_workspace_to_index,
+    move_workspace_to_monitor,
+    move_workspace_to_monitor_down,
+    move_workspace_to_monitor_left,
+    move_workspace_to_monitor_next,
+    move_workspace_to_monitor_previous,
+    move_workspace_to_monitor_right,
+    move_workspace_to_monitor_up,
     move_workspace_up,
+    open_overview,
+    pos_adjust_fixed,
+    pos_adjust_proportion,
+    pos_set_fixed,
+    pos_set_proportion,
+    # Builders: Monitor Power
+    power_off_monitors,
+    power_on_monitors,
+    quit,
+    reset_window_height,
+    # Builders: Screenshot
+    screenshot,
+    screenshot_screen,
+    screenshot_window,
+    set_column_display,
+    set_column_width,
+    set_dynamic_cast_monitor,
+    set_dynamic_cast_window,
+    # Builders: Window Sizing
+    set_window_height,
+    set_window_urgent,
+    set_window_width,
+    # Builders: Workspace Management
+    set_workspace_name,
+    show_hotkey_overlay,
+    size_adjust_fixed,
+    size_adjust_proportion,
+    size_set_fixed,
+    size_set_proportion,
+    # Builders: Spawn
+    spawn,
+    spawn_sh,
+    swap_window_left,
+    swap_window_right,
+    switch_focus_between_floating_and_tiling,
     # Builders: Layout
     switch_layout,
-    # Builders: Overview
-    close_overview, open_overview, toggle_overview,
-    # Builders: Screenshot
-    screenshot, screenshot_screen, screenshot_window,
-    # Builders: Monitor Power
-    power_off_monitors, power_on_monitors,
-    # Builders: Screencast / Dynamic Cast
-    clear_dynamic_cast_target, set_dynamic_cast_monitor,
-    set_dynamic_cast_window, do_screen_transition,
-    # Builders: System
-    load_config_file, quit, show_hotkey_overlay,
+    switch_preset_column_width,
+    switch_preset_column_width_back,
+    switch_preset_window_height,
+    switch_preset_window_height_back,
+    switch_preset_window_width,
+    switch_preset_window_width_back,
+    toggle_column_tabbed_display,
     toggle_keyboard_shortcuts_inhibit,
+    toggle_overview,
+    toggle_window_floating,
+    toggle_window_rule_opacity,
+    toggle_window_urgent,
+    toggle_windowed_fullscreen,
+    unset_window_urgent,
+    unset_workspace_name,
+    # Nested enum helpers
+    workspace_by_id,
+    workspace_by_index,
+    workspace_by_name,
 )
-import niri_pypc.actions as actions_module
 from niri_pypc.types.generated.action import Action
 from niri_pypc.types.generated.models import (
+    AdjustFixedPositionChange,
+    AdjustFixedSizeChange,
+    AdjustProportionPositionChange,
+    AdjustProportionSizeChange,
     ColumnDisplay,
     IdWorkspaceReferenceArg,
-    IndexWorkspaceReferenceArg,
-    NameWorkspaceReferenceArg,
-    WorkspaceReferenceArg,
-    SizeChange, SetFixedSizeChange, SetProportionSizeChange,
-    AdjustFixedSizeChange, AdjustProportionSizeChange,
-    PositionChange, SetFixedPositionChange, SetProportionPositionChange,
-    AdjustFixedPositionChange, AdjustProportionPositionChange,
-    LayoutSwitchTarget, NextLayoutSwitchTarget, PrevLayoutSwitchTarget,
     IndexLayoutSwitchTarget,
+    IndexWorkspaceReferenceArg,
+    LayoutSwitchTarget,
+    NameWorkspaceReferenceArg,
+    NextLayoutSwitchTarget,
+    PositionChange,
+    PrevLayoutSwitchTarget,
+    SetFixedPositionChange,
+    SetFixedSizeChange,
+    SetProportionPositionChange,
+    SetProportionSizeChange,
+    SizeChange,
+    WorkspaceReferenceArg,
 )
 from niri_pypc.types.generated.request import ActionRequest, Request
-
 
 # ---------------------------------------------------------------------------
 # Test category 1: Nested enum helpers
 # ---------------------------------------------------------------------------
+
 
 class TestWorkspaceHelpers:
     def test_workspace_by_id(self):
@@ -211,6 +302,7 @@ class TestLayoutSwitchTargetHelpers:
 # ---------------------------------------------------------------------------
 # Test category 2: Workspace coercion
 # ---------------------------------------------------------------------------
+
 
 class TestCoerceWorkspaceRef:
     def test_int_becomes_id(self):
@@ -418,6 +510,7 @@ def test_returns_action_request(fn, args):
 # Test category 4: Wire-format round-trip
 # ---------------------------------------------------------------------------
 
+
 class TestWireFormat:
     """Verify builder output serializes to expected niri JSON wire format."""
 
@@ -500,6 +593,7 @@ class TestWireFormat:
 # Test category 5: Default value assertions
 # ---------------------------------------------------------------------------
 
+
 class TestDefaults:
     def test_quit_default_no_skip(self):
         req = quit()
@@ -539,14 +633,13 @@ class TestDefaults:
 # ---------------------------------------------------------------------------
 
 SKIP_DEBUG = {"DebugToggleDamage", "DebugToggleOpaqueRegions", "ToggleDebugTint"}
+# Debug-only actions are intentionally not included in ergonomic builders.
 
 
 def test_all_non_debug_actions_have_builders():
     """Every non-debug action variant should be constructible via a builder."""
     variant_wire_names = {
-        v.__niri_wire_name__
-        for v in Action.__niri_variants__
-        if v.__niri_wire_name__ not in SKIP_DEBUG
+        v.__niri_wire_name__ for v in Action.__niri_variants__ if v.__niri_wire_name__ not in SKIP_DEBUG
     }
     # ALL_BUILDERS should cover exactly 137 functions (one per non-debug variant)
     assert len(ALL_BUILDERS) == len(variant_wire_names) == 137

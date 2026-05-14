@@ -1,6 +1,7 @@
 """Regression test for reply round-trip fidelity."""
 
 import pytest
+from pydantic import ValidationError
 
 from niri_pypc.types.generated.reply import Reply
 
@@ -135,3 +136,24 @@ class TestReplyRoundTrip:
         layers = dumped["Ok"]["Layers"]
         assert len(layers) == 1
         assert layers[0]["namespace"] == "waybar"
+
+    def test_window_layout_tuple_fields_reject_wrong_lengths(self):
+        raw = {
+            "Ok": {
+                "FocusedWindow": {
+                    "id": 42,
+                    "title": "test",
+                    "app_id": "test-app",
+                    "is_focused": True,
+                    "is_floating": False,
+                    "is_urgent": False,
+                    "layout": {
+                        "tile_size": [100.0],  # must be length 2
+                        "window_offset_in_tile": [0.0, 0.0],
+                        "window_size": [100, 50],
+                    },
+                }
+            }
+        }
+        with pytest.raises(ValidationError):
+            Reply.model_validate(raw)

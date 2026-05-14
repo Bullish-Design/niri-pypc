@@ -1,0 +1,22 @@
+# CONTEXT
+
+- Phase 6 complete:
+  - `actions.py` import sorting resolved with Ruff.
+  - Added `spawn_sh` shell-injection warning in action docstring.
+  - Added module-level rationale that debug-only actions are intentionally excluded from ergonomic builders.
+  - Added matching test note near debug-skip constants.
+- Phase 7 complete:
+  - README updated for `NiriClient.create()` canonical usage and `connect()` compatibility alias.
+  - README transport note updated: `write_frame()` enforces newline framing.
+  - README event semantics updated: `next()` vs `async for` behavior.
+  - README development section updated with strict safe default test command and nested/visible opt-in guidance.
+  - README includes action-helper safety guidance for `spawn_sh` vs `spawn([...])`.
+- Phase 8 validation:
+  - `devenv shell -- ruff check .` ✅
+  - `devenv shell -- ruff format --check .` ✅
+  - `devenv shell -- pytest tests/transport/test_connection.py -q` ✅
+  - `devenv shell -- pytest tests/api/test_event_stream.py tests/api/test_bundle.py tests/api/test_client.py -q` ✅
+  - `devenv shell -- pytest tests/types -q` ✅
+  - `devenv shell -- pytest tests/test_actions.py -q` ✅
+  - `NIRI_PYPC_NESTED_VISIBLE=0 devenv shell -- pytest -m "not nested and not visible_demo and not smoke"` ✅
+  - `devenv shell -- ty check .` ❌ (pre-existing diagnostics in `src/niri_pypc/types/codec.py`)

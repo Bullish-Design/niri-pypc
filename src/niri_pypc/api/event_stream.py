@@ -50,6 +50,7 @@ class NiriEventStream:
         self._reader_task: asyncio.Task[None] | None = None
         self._connection: UnixConnection | None = None
         self._terminal_cause: Exception | None = None
+        self._terminal_event = asyncio.Event()
 
     @classmethod
     async def connect(
@@ -80,14 +81,13 @@ class NiriEventStream:
             raise
 
         instance._queue = asyncio.Queue(maxsize=config.event_queue_capacity)
-        instance._reader_task = asyncio.create_task(instance._run_reader())
-
         await mgr.transition_to(LifecycleState.READY)
+        instance._reader_task = asyncio.create_task(instance._run_reader())
         return instance
 
     async def _bootstrap(self, conn: UnixConnection) -> None:
         """Explicit bootstrap handshake: send EventStream, validate reply."""
-        outbound = Request(root=EventStreamRequest()).model_dump_json().encode("utf-8") + b"\n"
+        outbound = Request(root=EventStreamRequest()).model_dump_json().encode("utf-8")
         await conn.write_frame(outbound)
 
         raw = await conn.read_frame(
@@ -118,6 +118,11 @@ class NiriEventStream:
             except asyncio.QueueFull:
                 pass
 
+    def _signal_terminal(self, cause: Exception | None) -> None:
+        if cause is not None and self._terminal_cause is None:
+            self._terminal_cause = cause
+        self._terminal_event.set()
+
     async def _run_reader(self) -> None:
         conn = self._connection
         queue = self._queue
@@ -133,7 +138,7 @@ class NiriEventStream:
                         timeout=None,
                     )
                 except (TransportError, NiriTimeoutError, ProtocolError) as exc:
-                    self._terminal_cause = exc
+                    self._signal_terminal(exc)
                     self._enqueue_terminal(_ErrorItem(error=exc))
                     return
 
@@ -146,7 +151,7 @@ class NiriEventStream:
                         raw_payload=raw.decode("utf-8", errors="replace") if isinstance(raw, bytes) else str(raw),
                         cause=exc,
                     )
-                    self._terminal_cause = terminal
+                    self._signal_terminal(terminal)
                     self._enqueue_terminal(_ErrorItem(error=terminal))
                     return
 
@@ -169,29 +174,31 @@ class NiriEventStream:
                             "Event queue full (FAIL_FAST mode)",
                             operation="event_stream_reader",
                         )
-                        self._terminal_cause = exc
+                        self._signal_terminal(exc)
                         self._enqueue_terminal(_ErrorItem(error=exc))
                         return
         except Exception as exc:
-            self._terminal_cause = exc
+            self._signal_terminal(exc)
             self._enqueue_terminal(_ErrorItem(error=exc))
             return
         finally:
             await self._close_reader_resources()
 
     async def _close_reader_resources(self) -> None:
-        if self._lifecycle.is_terminal:
+        if self._lifecycle.state == LifecycleState.CLOSED:
             return
         try:
             await self._lifecycle.transition_to(LifecycleState.CLOSING)
         except LifecycleError:
-            return
+            if self._lifecycle.state != LifecycleState.CLOSING:
+                return
 
         if self._connection is not None and not self._connection.is_closed:
             await self._connection.close()
         self._connection = None
 
         if self._terminal_cause is None:
+            self._signal_terminal(None)
             self._enqueue_terminal(_ClosedItem())
 
         try:
@@ -200,7 +207,12 @@ class NiriEventStream:
             pass
 
     async def next(self, *, timeout: float | None = None) -> EventValue:
-        if self._lifecycle.is_terminal:
+        if self._queue is None:
+            raise InternalError(
+                "Event stream not connected",
+                operation="next",
+            )
+        if self._terminal_event.is_set() and self._queue.empty():
             if self._terminal_cause is not None:
                 raise self._terminal_cause
             raise LifecycleError(
@@ -208,10 +220,13 @@ class NiriEventStream:
                 operation="next",
                 state=self._lifecycle.state.value,
             )
-        if self._queue is None:
-            raise InternalError(
-                "Event stream not connected",
+        if self._lifecycle.is_terminal:
+            if self._terminal_cause is not None:
+                raise self._terminal_cause
+            raise LifecycleError(
+                "Event stream is closed",
                 operation="next",
+                state=self._lifecycle.state.value,
             )
 
         read_timeout = timeout if timeout is not None else self._config.event_read_timeout
@@ -241,14 +256,7 @@ class NiriEventStream:
         )
 
     def __aiter__(self) -> AsyncIterator[EventValue]:
-        return self._async_iterator()
-
-    async def _async_iterator(self) -> AsyncIterator[EventValue]:
-        while True:
-            try:
-                yield await self.next()
-            except (LifecycleError, StopAsyncIteration):
-                break
+        return self
 
     async def __anext__(self) -> EventValue:
         try:
@@ -257,12 +265,15 @@ class NiriEventStream:
             raise StopAsyncIteration from None
 
     async def close(self) -> None:
-        if self._lifecycle.is_terminal:
+        if self._lifecycle.state == LifecycleState.CLOSED:
             return
         try:
             await self._lifecycle.transition_to(LifecycleState.CLOSING)
         except LifecycleError:
-            return
+            if self._lifecycle.state == LifecycleState.CLOSED:
+                return
+            if self._lifecycle.state != LifecycleState.CLOSING:
+                return
 
         if self._reader_task is not None and not self._reader_task.done():
             self._reader_task.cancel()
@@ -275,9 +286,11 @@ class NiriEventStream:
             await self._connection.close()
         self._connection = None
 
+        self._signal_terminal(None)
         self._enqueue_terminal(_ClosedItem())
 
-        await self._lifecycle.transition_to(LifecycleState.CLOSED)
+        if self._lifecycle.state != LifecycleState.CLOSED:
+            await self._lifecycle.transition_to(LifecycleState.CLOSED)
 
     async def __aenter__(self) -> NiriEventStream:
         return self
