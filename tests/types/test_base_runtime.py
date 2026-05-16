@@ -8,6 +8,13 @@ from pydantic_core import PydanticSerializationError
 from niri_pypc.types.base import ExternallyTaggedEnum, ProtocolVariant
 
 
+class Payload(ProtocolVariant):
+    __niri_wire_name__ = "Payload"
+    __niri_variant_kind__ = "struct"
+
+    value: str
+
+
 class Ping(ProtocolVariant):
     __niri_wire_name__ = "Ping"
     __niri_variant_kind__ = "unit"
@@ -20,6 +27,13 @@ class Echo(ProtocolVariant):
     payload: str
 
 
+class EchoPayload(ProtocolVariant):
+    __niri_wire_name__ = "EchoPayload"
+    __niri_variant_kind__ = "newtype"
+
+    payload: Payload
+
+
 class Full(ProtocolVariant):
     __niri_wire_name__ = "Full"
     __niri_variant_kind__ = "struct"
@@ -28,11 +42,11 @@ class Full(ProtocolVariant):
     count: int
 
 
-PingOrEchoOrFull = Ping | Echo | Full
+PingOrEchoOrFull = Ping | Echo | EchoPayload | Full
 
 
 class Sample(ExternallyTaggedEnum[PingOrEchoOrFull]):
-    __niri_variants__ = (Ping, Echo, Full)
+    __niri_variants__ = (Ping, Echo, EchoPayload, Full)
 
 
 class TestBaseRuntime:
@@ -43,6 +57,10 @@ class TestBaseRuntime:
     def test_root_model_round_trip_newtype(self):
         value = Sample(root=Echo(payload="hi"))
         assert value.model_dump(mode="json") == {"Echo": "hi"}
+
+    def test_root_model_round_trip_newtype_model_payload(self):
+        value = Sample(root=EchoPayload(payload=Payload(value="hi")))
+        assert value.model_dump(mode="json") == {"EchoPayload": {"value": "hi"}}
 
     def test_root_model_round_trip_struct(self):
         value = Sample(root=Full(name="test", count=42))
@@ -81,5 +99,5 @@ class TestBaseRuntime:
         class BrokenEnum(ExternallyTaggedEnum[BrokenNewtype]):
             __niri_variants__ = (BrokenNewtype,)
 
-        with pytest.raises(PydanticSerializationError, match="missing required payload"):
+        with pytest.raises(PydanticSerializationError, match="has no attribute 'payload'"):
             BrokenEnum(root=BrokenNewtype()).model_dump(mode="json")

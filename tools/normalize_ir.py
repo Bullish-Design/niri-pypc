@@ -108,7 +108,7 @@ def canonical_type(schema: dict, defs: dict) -> str:
     if schema.get("properties") is not None and schema["properties"] == {}:
         return "object"
 
-    return "string"
+    raise ValueError(f"Cannot determine canonical type for schema: {schema!r}")
 
 
 def _normalize_prefix_items(schema: dict, defs: dict) -> str:

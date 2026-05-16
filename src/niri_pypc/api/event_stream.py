@@ -8,6 +8,7 @@ from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from typing import Any
 
+from niri_pypc.api.lifecycle import LifecycleManager, LifecycleState
 from niri_pypc.config import BackpressureMode, NiriConfig
 from niri_pypc.errors import (
     DecodeError,
@@ -17,7 +18,6 @@ from niri_pypc.errors import (
     ProtocolError,
     TransportError,
 )
-from niri_pypc.runtime.lifecycle import LifecycleManager, LifecycleState
 from niri_pypc.transport.connection import DEFAULT_STREAM_LIMIT, UnixConnection
 from niri_pypc.types.generated.event import Event, EventValue
 from niri_pypc.types.generated.reply import HandledResponse, Reply

@@ -43,6 +43,10 @@ class NiriConnectionBundle:
     def events(self) -> NiriEventStream:
         return self._events
 
+    @property
+    def is_closed(self) -> bool:
+        return self._closed
+
     async def close(self) -> None:
         """Close both connections. Idempotent."""
         if self._closed:

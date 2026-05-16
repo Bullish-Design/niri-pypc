@@ -321,3 +321,73 @@ class TestEventStreamEdgeCases:
             finally:
                 server.close()
                 await server.wait_closed()
+
+
+class TestEventStreamConcurrency:
+    async def test_concurrent_next_calls_receive_distinct_events(self, event_server):
+        socket_path, ctrl = event_server
+        ctrl["events"] = [
+            {"WorkspaceActivated": {"id": 1, "focused": True}},
+            {"WorkspaceActivated": {"id": 2, "focused": False}},
+        ]
+
+        stream = await NiriEventStream.connect(NiriConfig(socket_path=socket_path))
+        first_task = asyncio.create_task(stream.next(timeout=1.0))
+        second_task = asyncio.create_task(stream.next(timeout=1.0))
+
+        first, second = await asyncio.gather(first_task, second_task)
+        assert {first.id, second.id} == {1, 2}
+        await stream.close()
+
+    async def test_close_unblocks_waiting_next(self):
+        async def handler(reader, writer):
+            await reader.readuntil(b"\n")
+            writer.write(json.dumps({"Ok": {"Handled": {}}}).encode() + b"\n")
+            await writer.drain()
+            await asyncio.sleep(0.5)
+            writer.close()
+            await writer.wait_closed()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            socket_path = Path(tmpdir) / "event.sock"
+            server = await asyncio.start_unix_server(handler, path=str(socket_path))
+            try:
+                stream = await NiriEventStream.connect(NiriConfig(socket_path=socket_path))
+                waiter = asyncio.create_task(stream.next(timeout=5.0))
+                await asyncio.sleep(0.05)
+                await stream.close()
+                with pytest.raises(LifecycleError, match="closed"):
+                    await waiter
+            finally:
+                server.close()
+                await server.wait_closed()
+
+    async def test_reader_decode_error_unblocks_waiting_next(self):
+        async def handler(reader, writer):
+            await reader.readuntil(b"\n")
+            writer.write(json.dumps({"Ok": {"Handled": {}}}).encode() + b"\n")
+            await writer.drain()
+            await asyncio.sleep(0.05)
+            writer.write(b"{bad-json}\n")
+            await writer.drain()
+            writer.close()
+            await writer.wait_closed()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            socket_path = Path(tmpdir) / "event.sock"
+            server = await asyncio.start_unix_server(handler, path=str(socket_path))
+            try:
+                stream = await NiriEventStream.connect(NiriConfig(socket_path=socket_path))
+                waiter = asyncio.create_task(stream.next(timeout=1.0))
+                with pytest.raises(DecodeError, match="Failed to decode event"):
+                    await waiter
+            finally:
+                server.close()
+                await server.wait_closed()
+
+    async def test_rapid_connect_close_cycles(self, event_server):
+        socket_path, _ctrl = event_server
+        config = NiriConfig(socket_path=socket_path)
+        for _ in range(10):
+            stream = await NiriEventStream.connect(config)
+            await stream.close()

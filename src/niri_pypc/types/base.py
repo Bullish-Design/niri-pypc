@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import cache
-from typing import Any, ClassVar, Literal, TypeVar
+from typing import Any, ClassVar, Literal
 
 from pydantic import BaseModel, ConfigDict, RootModel, model_serializer, model_validator
 
@@ -33,9 +33,6 @@ class UnknownEvent(ProtocolModel):
 
     variant_name: str
     raw_payload: Any
-
-
-RootT = TypeVar("RootT", bound=ProtocolModel)
 
 
 class ExternallyTaggedEnum[RootT: ProtocolModel](RootModel[RootT]):
@@ -74,28 +71,9 @@ class ExternallyTaggedEnum[RootT: ProtocolModel](RootModel[RootT]):
 
     @model_serializer(mode="plain")
     def _encode_root(self) -> Any:
-        root = self.root
-        if isinstance(root, UnknownEvent):
-            return {root.variant_name: root.raw_payload}
+        from niri_pypc.types.codec import encode_externally_tagged
 
-        if not isinstance(root, ProtocolVariant):
-            raise TypeError(f"Cannot encode non-variant: {type(root).__name__}")
-
-        wire_name = root.__niri_wire_name__
-        kind = root.__niri_variant_kind__
-
-        if kind == "unit":
-            return wire_name
-        if kind == "newtype":
-            if not hasattr(root, "payload"):
-                raise TypeError(
-                    f"Newtype variant {type(root).__name__} is missing required payload field",
-                )
-            return {wire_name: root.payload}
-        if kind == "struct":
-            return {wire_name: root.model_dump(mode="json")}
-
-        raise ValueError(f"Unknown variant kind: {kind}")
+        return encode_externally_tagged(self.root)
 
     @classmethod
     @cache

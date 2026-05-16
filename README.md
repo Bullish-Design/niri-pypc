@@ -37,7 +37,7 @@ async def main():
     config = NiriConfig()  # or NiriConfig(socket_path=Path("/run/user/1000/niri.sock"))
     async with NiriClient.create(config) as client:
         result = await client.request(VersionRequest())
-        print(result.variant.payload)  # e.g., "25.11"
+        print(result.payload)  # e.g., "25.11"
 
 
 asyncio.run(main())
@@ -72,7 +72,7 @@ async def main():
     config = NiriConfig()
     async with await NiriConnectionBundle.open(config) as bundle:
         version = await bundle.client.request(VersionRequest())
-        print(f"Version: {version.variant.payload}")
+        print(f"Version: {version.payload}")
 
 
 asyncio.run(main())
@@ -96,7 +96,7 @@ src/niri_pypc/
     bundle.py        # NiriConnectionBundle — convenience wrapper for both
   transport/
     connection.py    # UnixConnection — asyncio StreamReader/Writer wrapper
-  runtime/
+  api/
     lifecycle.py     # LifecycleManager state machine
   types/
     base.py          # ProtocolModel, ProtocolVariant, ExternallyTaggedEnum,

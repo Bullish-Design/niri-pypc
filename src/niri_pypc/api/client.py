@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, overload
 
 from niri_pypc.config import NiriConfig
@@ -48,6 +49,7 @@ from niri_pypc.types.generated.request import (
 class NiriClient:
     def __init__(self, config: NiriConfig) -> None:
         self._config = config
+        self._socket_path: Path = config.resolve_socket_path()
         self._closed = False
 
     @classmethod
@@ -57,7 +59,6 @@ class NiriClient:
     ) -> NiriClient:
         if config is None:
             config = NiriConfig()
-        config.resolve_socket_path()
         return cls(config)
 
     @overload
@@ -100,11 +101,10 @@ class NiriClient:
                 state="closed",
             )
 
-        socket_path = self._config.resolve_socket_path()
         read_timeout = timeout if timeout is not None else self._config.request_timeout
 
         conn = await UnixConnection.connect(
-            socket_path,
+            self._socket_path,
             timeout=self._config.connect_timeout,
             stream_limit=max(self._config.max_frame_size + 1, DEFAULT_STREAM_LIMIT),
         )

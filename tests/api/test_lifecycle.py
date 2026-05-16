@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
+from niri_pypc.api.lifecycle import LifecycleManager, LifecycleState
 from niri_pypc.errors import LifecycleError
-from niri_pypc.runtime.lifecycle import LifecycleManager, LifecycleState
 
 pytestmark = pytest.mark.contract
 
